@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${juego.nombre} + ' - Reiunio'">Detalles de Juego - Reiunio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Reiunio</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/juegos">Juegos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/partidas">Partidas</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'USUARIO_EXTENDIDO')">
+                        <a class="nav-link" href="/prestamos">Préstamos</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/usuarios">Usuarios</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/historial">Historial</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <div sec:authorize="isAuthenticated()">
+                        <span class="navbar-text me-3" sec:authentication="name"></span>
+                        <a class="btn btn-outline-light btn-sm" href="/usuarios/perfil">Mi Perfil</a>
+                        <form class="d-inline" th:action="@{/logout}" method="post">
+                            <button class="btn btn-outline-light btn-sm ms-2" type="submit">Cerrar Sesión</button>
+                        </form>
+                    </div>
+                    <div sec:authorize="!isAuthenticated()">
+                        <a class="btn btn-outline-light btn-sm" href="/login">Iniciar Sesión</a>
+                        <a class="btn btn-outline-light btn-sm ms-2" href="/usuarios/registro">Registrarse</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="/juegos" class="text-decoration-none">Juegos</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${juego.nombre}">Detalles del Juego</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <!-- Placeholder para una imagen del juego -->
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center p-5 mb-3" style="height: 300px;">
+                            <i class="bi bi-controller" style="font-size: 5rem;"></i>
+                        </div>
+                        <div class="d-grid gap-2 mt-3">
+                            <div sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/juegos/{id}/editar(id=${juego.id})}" class="btn btn-warning">
+                                    <i class="bi bi-pencil"></i> Editar Juego
+                                </a>
+                                <button type="button" class="btn btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#modalEliminar">
+                                    <i class="bi bi-trash"></i> Eliminar Juego
+                                </button>
+                            </div>
+                            <div sec:authorize="hasAnyRole('ADMIN', 'USUARIO_EXTENDIDO')" class="mt-3">
+                                <a th:if="${juego.disponible}" th:href="@{/prestamos/nuevo?juegoId={id}(id=${juego.id})}" class="btn btn-success">
+                                    <i class="bi bi-box-arrow-right"></i> Realizar Préstamo
+                                </a>
+                                <button th:unless="${juego.disponible}" class="btn btn-secondary" disabled>
+                                    <i class="bi bi-x-circle"></i> No Disponible
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h1 class="card-title mb-0" th:text="${juego.nombre}">Nombre del Juego</h1>
+                            <span class="badge" th:text="${juego.disponible ? 'Disponible' : 'No disponible'}"
+                                  th:classappend="${juego.disponible ? 'bg-success' : 'bg-danger'}">
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <strong><i class="bi bi-tag"></i> Categoría:</strong>
+                                        <span th:text="${juego.categoria}">Categoría</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong><i class="bi bi-people"></i> Jugadores:</strong>
+                                        <span th:text="${juego.minJugadores} + '-' + ${juego.maxJugadores}">2-4</span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong><i class="bi bi-clock"></i> Duración:</strong>
+                                        <span th:text="${juego.duracionMinutos} + ' minutos'">60 minutos</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <strong><i class="bi bi-star"></i> Estado:</strong>
+                                        <span class="badge" th:text="${juego.estado}"
+                                              th:classappend="${juego.estado.name() == 'NUEVO' ? 'bg-success' : 
+                                                              juego.estado.name() == 'BUENO' ? 'bg-info' : 
+                                                              juego.estado.name() == 'ACEPTABLE' ? 'bg-warning' : 'bg-danger'}">
+                                        </span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong><i class="bi bi-calendar-check"></i> Fecha de adquisición:</strong>
+                                        <span th:text="${#temporals.format(juego.fechaAdquisicion, 'dd/MM/yyyy')}">01/01/2025</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h5><i class="bi bi-info-circle"></i> Descripción</h5>
+                            <p class="card-text" th:text="${juego.descripcion}">Descripción del juego...</p>
+                        </div>
+                        
+                        <!-- Historial de préstamos (solo para admin) -->
+                        <div sec:authorize="hasRole('ADMIN')" class="mt-4" th:if="${juego.prestamos != null and !juego.prestamos.empty}">
+                            <h5><i class="bi bi-clock-history"></i> Historial de Préstamos</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Usuario</th>
+                                            <th>Fecha préstamo</th>
+                                            <th>Fecha devolución</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="prestamo : ${juego.prestamos}">
+                                            <td th:text="${prestamo.usuario.username}"></td>
+                                            <td th:text="${#temporals.format(prestamo.fechaPrestamo, 'dd/MM/yyyy')}"></td>
+                                            <td th:text="${prestamo.fechaDevolucionReal != null ? #temporals.format(prestamo.fechaDevolucionReal, 'dd/MM/yyyy') : 'Pendiente'}"></td>
+                                            <td>
+                                                <span class="badge" th:text="${prestamo.estado}"
+                                                      th:classappend="${prestamo.estado.name() == 'ACTIVO' ? 'bg-primary' : 
+                                                                      prestamo.estado.name() == 'DEVUELTO' ? 'bg-success' : 'bg-danger'}">
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Partidas relacionadas -->
+                        <div class="mt-4" th:if="${juego.partidas != null and !juego.partidas.empty}">
+                            <h5><i class="bi bi-calendar-event"></i> Próximas Partidas</h5>
+                            <div class="list-group">
+                                <a th:each="partida : ${juego.partidas}" 
+                                   th:if="${partida.estado.name() == 'PROGRAMADA' and partida.fecha >= T(java.time.LocalDate).now()}"
+                                   th:href="@{/partidas/{id}(id=${partida.id})}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1" th:text="${partida.titulo}">Título de la partida</h6>
+                                        <small th:text="${#temporals.format(partida.fecha, 'dd/MM/yyyy')}">Fecha</small>
+                                    </div>
+                                    <small th:text="'Creada por: ' + ${partida.creador.username}"></small>
+                                    <br>
+                                    <small>
+                                        <span th:text="'Jugadores: ' + ${partida.jugadores.size()} + '/' + ${partida.maxJugadores}"></span>
+                                    </small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmación para eliminar -->
+        <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="modalEliminarLabel">Confirmar eliminación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Estás seguro de que deseas eliminar el juego <strong th:text="${juego.nombre}"></strong>?</p>
+                        <p class="text-danger">Esta acción no se puede deshacer.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form th:action="@{/juegos/{id}/eliminar(id=${juego.id})}" method="post">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Reiunio</h5>
+                    <p>Aplicación para gestión de ludotecas y juegos de mesa.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Reiunio. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

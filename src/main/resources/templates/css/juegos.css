@@ -1,0 +1,148 @@
+/* Estilos específicos para la sección de juegos */
+
+/* Tarjetas de juegos */
+.juego-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.juego-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.juego-card-header {
+    background-color: rgba(13, 110, 253, 0.1);
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.juego-badge {
+    padding: 6px 10px;
+    border-radius: 50px;
+    font-weight: normal;
+    font-size: 0.75rem;
+}
+
+/* Estilos para estados de juegos */
+.estado-nuevo {
+    background-color: #198754;
+    color: white;
+}
+
+.estado-bueno {
+    background-color: #0dcaf0;
+    color: white;
+}
+
+.estado-aceptable {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.estado-deteriorado {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Tabla de juegos */
+.table-juegos th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table-juegos td {
+    vertical-align: middle;
+}
+
+/* Detalles de juego */
+.juego-detail-header {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.juego-info-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.juego-info-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.juego-info-list li:last-child {
+    border-bottom: none;
+}
+
+.juego-description {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+/* Formulario de juegos */
+.juego-form-section {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.form-label.required::after {
+    content: "*";
+    color: #dc3545;
+    margin-left: 4px;
+}
+
+/* Estilos para disponibilidad */
+.disponible {
+    background-color: #198754;
+    color: white;
+}
+
+.no-disponible {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Estilos para contadores */
+.counter-box {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.counter-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.counter-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.counter-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Animación para cambios de disponibilidad */
+@keyframes availability-change {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.availability-change {
+    animation: availability-change 0.5s ease;
+}
