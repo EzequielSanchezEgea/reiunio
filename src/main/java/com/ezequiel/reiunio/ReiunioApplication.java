@@ -9,8 +9,7 @@ import org.springframework.core.env.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Excluir SecurityAutoConfiguration para evitar problemas con la seguridad
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication
 public class ReiunioApplication implements CommandLineRunner {
     
     private static final Logger logger = LoggerFactory.getLogger(ReiunioApplication.class);
