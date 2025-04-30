@@ -2,13 +2,22 @@ package com.ezequiel.reiunio;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.ConfigurableWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootApplication
+@RestController
 public class ReiunioApplication implements CommandLineRunner {
     
     private static final Logger logger = LoggerFactory.getLogger(ReiunioApplication.class);
@@ -17,19 +26,38 @@ public class ReiunioApplication implements CommandLineRunner {
     private Environment env;
 
     public static void main(String[] args) {
+        // IMPORTANTE: Forzar configuración de puerto antes de iniciar Spring Boot
+        int port = 8081; // Puerto diferente del predeterminado 8080
+        try {
+            String envPort = System.getenv("PORT");
+            if (envPort != null && !envPort.isEmpty()) {
+                port = Integer.parseInt(envPort);
+            }
+        } catch (Exception e) {
+            System.err.println("Error al leer variable de entorno PORT: " + e.getMessage());
+        }
+        
+        // Forzar configuración del puerto a través de propiedades del sistema
+        System.setProperty("server.port", String.valueOf(port));
+        System.setProperty("server.address", "0.0.0.0");
+        
+        // Registro para diagnóstico
+        System.out.println("========================================================");
+        System.out.println("INICIANDO APLICACIÓN EN PUERTO: " + port);
+        System.out.println("VARIABLES DE ENTORNO:");
+        System.out.println("PORT: " + System.getenv("PORT"));
+        System.out.println("RAILWAY_SERVICE_NAME: " + System.getenv("RAILWAY_SERVICE_NAME"));
+        System.out.println("========================================================");
+        
         SpringApplication.run(ReiunioApplication.class, args);
     }
     
     @Override
     public void run(String... args) throws Exception {
-        // Mostrar información de la base de datos (ocultando contraseña)
-        String dbUrl = env.getProperty("spring.datasource.url");
-        String dbUser = env.getProperty("spring.datasource.username");
-        
         logger.info("Aplicación iniciada correctamente");
-        logger.info("URL de base de datos: {}", dbUrl);
-        logger.info("Usuario de base de datos: {}", dbUser);
-        logger.info("Puerto del servidor: {}", env.getProperty("server.port", "8080"));
+        logger.info("URL de base de datos: {}", env.getProperty("spring.datasource.url"));
+        logger.info("Puerto del servidor: {}", env.getProperty("server.port", "No configurado"));
+        logger.info("Dirección del servidor: {}", env.getProperty("server.address", "No configurada"));
         
         // Detectar si estamos en Railway
         boolean isRailway = System.getenv("RAILWAY_SERVICE_NAME") != null;
@@ -38,5 +66,55 @@ public class ReiunioApplication implements CommandLineRunner {
         } else {
             logger.info("Ejecutando en entorno local");
         }
+    }
+    
+    // Forzar configuración de puerto a nivel de servidor web
+    @Bean
+    public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
+        return factory -> {
+            // Leer puerto de variable de entorno o usar 8081 como respaldo
+            int port = 8081;
+            try {
+                String envPort = System.getenv("PORT");
+                if (envPort != null && !envPort.isEmpty()) {
+                    port = Integer.parseInt(envPort);
+                } else if (System.getProperty("server.port") != null) {
+                    port = Integer.parseInt(System.getProperty("server.port"));
+                }
+            } catch (Exception e) {
+                logger.error("Error al configurar puerto: " + e.getMessage());
+            }
+            
+            // Configurar puerto y dirección explícitamente
+            factory.setPort(port);
+            factory.setAddress(java.net.InetAddress.getByName("0.0.0.0"));
+            
+            logger.info("Configurado servidor web para usar puerto {} y dirección 0.0.0.0", port);
+        };
+    }
+    
+    // Endpoint de verificación de estado para Railway
+    @GetMapping("/")
+    public Map<String, Object> health() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("message", "La aplicación está funcionando correctamente");
+        
+        // Añadir información de configuración
+        response.put("port", env.getProperty("server.port", "No configurado"));
+        response.put("address", env.getProperty("server.address", "No configurada"));
+        
+        // Añadir información de Railway
+        Map<String, String> railwayInfo = new HashMap<>();
+        for (String key : System.getenv().keySet()) {
+            if (key.startsWith("RAILWAY_")) {
+                railwayInfo.put(key, System.getenv(key));
+            }
+        }
+        if (!railwayInfo.isEmpty()) {
+            response.put("railway", railwayInfo);
+        }
+        
+        return response;
     }
 }
