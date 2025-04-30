@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar target/reiunio-0.0.1-SNAPSHOT.jar
+web: java -Dserver.port=8081 -Dserver.address=0.0.0.0 -jar target/reiunio-0.0.1-SNAPSHOT.jar
