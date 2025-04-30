@@ -2,19 +2,12 @@ package com.ezequiel.reiunio.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-// import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-// import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-// import org.springframework.security.web.SecurityFilterChain;
-
-/**
- * Configuración de seguridad temporalmente deshabilitada para diagnóstico
- */
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 @Configuration
-// @EnableWebSecurity - comentado para deshabilitar temporalmente
+@EnableWebSecurity
 public class SecurityConfig {
-
-    // Método comentado para deshabilitar temporalmente
-    /*
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -37,6 +30,5 @@ public class SecurityConfig {
             );
             
         return http.build();
-    }
-    */
+    
 }
