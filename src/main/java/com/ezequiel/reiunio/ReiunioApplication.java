@@ -2,13 +2,15 @@ package com.ezequiel.reiunio;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SpringBootApplication
+// Excluir SecurityAutoConfiguration para evitar problemas con la seguridad
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class ReiunioApplication implements CommandLineRunner {
     
     private static final Logger logger = LoggerFactory.getLogger(ReiunioApplication.class);
