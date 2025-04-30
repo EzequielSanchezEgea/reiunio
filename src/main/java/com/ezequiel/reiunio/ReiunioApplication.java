@@ -10,14 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @SpringBootApplication
-@RestController
 public class ReiunioApplication implements CommandLineRunner {
     
     private static final Logger logger = LoggerFactory.getLogger(ReiunioApplication.class);
@@ -26,7 +23,7 @@ public class ReiunioApplication implements CommandLineRunner {
     private Environment env;
 
     public static void main(String[] args) {
-        // IMPORTANTE: Forzar configuración de puerto antes de iniciar Spring Boot
+        // Forzar configuración de puerto antes de iniciar Spring Boot
         int port = 8081; // Puerto diferente del predeterminado 8080
         try {
             String envPort = System.getenv("PORT");
@@ -87,34 +84,22 @@ public class ReiunioApplication implements CommandLineRunner {
             
             // Configurar puerto y dirección explícitamente
             factory.setPort(port);
-            factory.setAddress(java.net.InetAddress.getByName("0.0.0.0"));
             
-            logger.info("Configurado servidor web para usar puerto {} y dirección 0.0.0.0", port);
-        };
-    }
-    
-    // Endpoint de verificación de estado para Railway
-    @GetMapping("/")
-    public Map<String, Object> health() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "UP");
-        response.put("message", "La aplicación está funcionando correctamente");
-        
-        // Añadir información de configuración
-        response.put("port", env.getProperty("server.port", "No configurado"));
-        response.put("address", env.getProperty("server.address", "No configurada"));
-        
-        // Añadir información de Railway
-        Map<String, String> railwayInfo = new HashMap<>();
-        for (String key : System.getenv().keySet()) {
-            if (key.startsWith("RAILWAY_")) {
-                railwayInfo.put(key, System.getenv(key));
+            // Configurar dirección - ESTE ES EL MÉTODO QUE CAUSA EL ERROR
+            // Necesitamos manejar la excepción UnknownHostException
+            try {
+                factory.setAddress(InetAddress.getByName("0.0.0.0"));
+                logger.info("Configurado servidor web para usar puerto {} y dirección 0.0.0.0", port);
+            } catch (UnknownHostException e) {
+                logger.error("Error al configurar dirección del servidor: " + e.getMessage());
+                // Intentamos un enfoque alternativo
+                try {
+                    factory.setAddress(InetAddress.getLocalHost());
+                    logger.info("Configurado servidor web para usar puerto {} y dirección localhost", port);
+                } catch (UnknownHostException ex) {
+                    logger.error("No se pudo configurar dirección del servidor: " + ex.getMessage());
+                }
             }
-        }
-        if (!railwayInfo.isEmpty()) {
-            response.put("railway", railwayInfo);
-        }
-        
-        return response;
+        };
     }
 }
