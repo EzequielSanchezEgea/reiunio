@@ -28,7 +28,7 @@ import com.ezequiel.reiunio.repository.UsuarioRepository;
  * Solo se ejecutará cuando la aplicación se inicie con el perfil "dev".
  */
 @Component
-@Profile("dev")
+//@Profile("dev")
 public class DataInitializer implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepository;
