@@ -1,2 +1,1 @@
-
-web: java -Xmx512m -jar target/reiunio-0.0.1-SNAPSHOT.jar
+web: java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/reiunio-0.0.1-SNAPSHOT.jar
