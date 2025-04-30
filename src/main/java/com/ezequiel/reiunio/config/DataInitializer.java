@@ -56,7 +56,7 @@ public class DataInitializer implements CommandLineRunner {
             initUsers();
             initGames();
             initLoans();
-            initGames();
+            initParties();
         }
     }
 
