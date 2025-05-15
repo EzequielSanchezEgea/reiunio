@@ -4,192 +4,196 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ezequiel.reiunio.entity.Juego;
-import com.ezequiel.reiunio.entity.Partida;
-import com.ezequiel.reiunio.entity.Prestamo;
-import com.ezequiel.reiunio.entity.Usuario;
-import com.ezequiel.reiunio.enums.EstadoJuego;
-import com.ezequiel.reiunio.enums.EstadoPartida;
-import com.ezequiel.reiunio.enums.Rol;
-import com.ezequiel.reiunio.repository.JuegoRepository;
-import com.ezequiel.reiunio.repository.PartidaRepository;
-import com.ezequiel.reiunio.repository.PrestamoRepository;
-import com.ezequiel.reiunio.repository.UsuarioRepository;
+import com.ezequiel.reiunio.entity.Game;
+import com.ezequiel.reiunio.entity.GameSession;
+import com.ezequiel.reiunio.entity.Loan;
+import com.ezequiel.reiunio.entity.User;
+import com.ezequiel.reiunio.enums.GameState;
+import com.ezequiel.reiunio.enums.GameSessionStatus;
+import com.ezequiel.reiunio.enums.Role;
+import com.ezequiel.reiunio.repository.GameRepository;
+import com.ezequiel.reiunio.repository.GameSessionRepository;
+import com.ezequiel.reiunio.repository.LoanRepository;
+import com.ezequiel.reiunio.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Esta clase inicializa datos de prueba para la aplicación.
- * Solo se ejecutará cuando la aplicación se inicie con el perfil "dev".
+ * This class initializes sample data for the application.
+ * Only runs when the application starts with "dev" profile.
  */
 @Component
-//@Profile("dev")
+@Profile("dev")
+@RequiredArgsConstructor
+@Slf4j
 public class DataInitializer implements CommandLineRunner {
 
-    private final UsuarioRepository usuarioRepository;
-    private final JuegoRepository juegoRepository;
-    private final PrestamoRepository prestamoRepository;
-    private final PartidaRepository partidaRepository;
+    private final UserRepository userRepository;
+    private final GameRepository gameRepository;
+    private final LoanRepository loanRepository;
+    private final GameSessionRepository gameSessionRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public DataInitializer(UsuarioRepository usuarioRepository, JuegoRepository juegoRepository,
-                          PrestamoRepository prestamoRepository, PartidaRepository partidaRepository,
-                          PasswordEncoder passwordEncoder) {
-        this.usuarioRepository = usuarioRepository;
-        this.juegoRepository = juegoRepository;
-        this.prestamoRepository = prestamoRepository;
-        this.partidaRepository = partidaRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // Solo inicializar datos si no hay usuarios en la base de datos
-        if (usuarioRepository.count() == 0) {
+        // Only initialize data if no users exist in the database
+        if (userRepository.count() == 0) {
+            log.info("Initializing sample data...");
             initUsers();
             initGames();
             initLoans();
-            initParties();
+            initGameSessions();
+            log.info("Sample data initialized successfully");
         }
     }
 
     private void initUsers() {
-        System.out.println("Iniciando datos de usuarios...");
+        log.debug("Initializing users...");
 
-        Usuario admin = new Usuario();
-        admin.setUsername("admin");
-        admin.setPassword(passwordEncoder.encode("admin"));
-        admin.setEmail("admin@reiunio.com");
-        admin.setNombre("Administrador");
-        admin.setApellidos("Sistema");
-        admin.setRol(Rol.ADMIN);
-        admin.setFechaRegistro(LocalDate.now());
+        User admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin"))
+                .email("admin@reiunio.com")
+                .firstName("Administrator")
+                .lastName("System")
+                .role(Role.ADMIN)
+                .registrationDate(LocalDate.now())
+                .build();
 
-        Usuario usuario1 = new Usuario();
-        usuario1.setUsername("usuario1");
-        usuario1.setPassword(passwordEncoder.encode("password"));
-        usuario1.setEmail("usuario1@example.com");
-        usuario1.setNombre("Usuario");
-        usuario1.setApellidos("Uno");
-        usuario1.setRol(Rol.USUARIO_BASICO);
-        usuario1.setFechaRegistro(LocalDate.now());
+        User user1 = User.builder()
+                .username("user1")
+                .password(passwordEncoder.encode("password"))
+                .email("user1@example.com")
+                .firstName("John")
+                .lastName("Doe")
+                .role(Role.BASIC_USER)
+                .registrationDate(LocalDate.now())
+                .build();
 
-        Usuario usuario2 = new Usuario();
-        usuario2.setUsername("usuario2");
-        usuario2.setPassword(passwordEncoder.encode("password"));
-        usuario2.setEmail("usuario2@example.com");
-        usuario2.setNombre("Usuario");
-        usuario2.setApellidos("Dos");
-        usuario2.setRol(Rol.USUARIO_EXTENDIDO);
-        usuario2.setFechaRegistro(LocalDate.now());
+        User user2 = User.builder()
+                .username("user2")
+                .password(passwordEncoder.encode("password"))
+                .email("user2@example.com")
+                .firstName("Jane")
+                .lastName("Smith")
+                .role(Role.EXTENDED_USER)
+                .registrationDate(LocalDate.now())
+                .build();
 
-        usuarioRepository.saveAll(Arrays.asList(admin, usuario1, usuario2));
+        userRepository.saveAll(Arrays.asList(admin, user1, user2));
     }
 
     private void initGames() {
-        System.out.println("Iniciando datos de juegos...");
+        log.debug("Initializing games...");
 
-        Juego juego1 = new Juego();
-        juego1.setNombre("Catan");
-        juego1.setDescripcion("Juego de estrategia y comercio ambientado en una isla");
-        juego1.setMinJugadores(3);
-        juego1.setMaxJugadores(4);
-        juego1.setDuracionMinutos(120);
-        juego1.setCategoria("Estrategia");
-        juego1.setDisponible(true);
-        juego1.setEstado(EstadoJuego.BUENO);
-        juego1.setFechaAdquisicion(LocalDate.now().minusMonths(2));
+        Game game1 = Game.builder()
+                .name("Catan")
+                .description("Strategy and trading game set on an island")
+                .minPlayers(3)
+                .maxPlayers(4)
+                .durationMinutes(120)
+                .category("Strategy")
+                .available(true)
+                .state(GameState.GOOD)
+                .acquisitionDate(LocalDate.now().minusMonths(2))
+                .build();
 
-        Juego juego2 = new Juego();
-        juego2.setNombre("Carcassonne");
-        juego2.setDescripcion("Juego de colocación de losetas para construir ciudades y caminos");
-        juego2.setMinJugadores(2);
-        juego2.setMaxJugadores(5);
-        juego2.setDuracionMinutos(45);
-        juego2.setCategoria("Estrategia");
-        juego2.setDisponible(true);
-        juego2.setEstado(EstadoJuego.NUEVO);
-        juego2.setFechaAdquisicion(LocalDate.now().minusMonths(1));
+        Game game2 = Game.builder()
+                .name("Carcassonne")
+                .description("Tile-placement game for building cities and roads")
+                .minPlayers(2)
+                .maxPlayers(5)
+                .durationMinutes(45)
+                .category("Strategy")
+                .available(true)
+                .state(GameState.NEW)
+                .acquisitionDate(LocalDate.now().minusMonths(1))
+                .build();
 
-        Juego juego3 = new Juego();
-        juego3.setNombre("Dixit");
-        juego3.setDescripcion("Juego de cartas con ilustraciones para adivinar historias");
-        juego3.setMinJugadores(3);
-        juego3.setMaxJugadores(6);
-        juego3.setDuracionMinutos(30);
-        juego3.setCategoria("Cartas");
-        juego3.setDisponible(true);
-        juego3.setEstado(EstadoJuego.BUENO);
-        juego3.setFechaAdquisicion(LocalDate.now().minusMonths(3));
+        Game game3 = Game.builder()
+                .name("Dixit")
+                .description("Card game with illustrations for guessing stories")
+                .minPlayers(3)
+                .maxPlayers(6)
+                .durationMinutes(30)
+                .category("Cards")
+                .available(true)
+                .state(GameState.GOOD)
+                .acquisitionDate(LocalDate.now().minusMonths(3))
+                .build();
 
-        juegoRepository.saveAll(Arrays.asList(juego1, juego2, juego3));
+        gameRepository.saveAll(Arrays.asList(game1, game2, game3));
     }
 
     private void initLoans() {
-        System.out.println("Iniciando datos de préstamos...");
+        log.debug("Initializing loans...");
 
-        // Recuperar usuarios y juegos
-        Usuario usuario1 = usuarioRepository.findByUsername("usuario1").orElseThrow();
-        Usuario usuario2 = usuarioRepository.findByUsername("usuario2").orElseThrow();
+        // Get users and games
+        User user1 = userRepository.findByUsername("user1").orElseThrow();
+        User user2 = userRepository.findByUsername("user2").orElseThrow();
         
-        Juego catan = juegoRepository.findByNombreContainingIgnoreCase("Catan").get(0);
-        Juego carcassonne = juegoRepository.findByNombreContainingIgnoreCase("Carcassonne").get(0);
+        Game catan = gameRepository.findByNameContainingIgnoreCase("Catan").get(0);
+        Game carcassonne = gameRepository.findByNameContainingIgnoreCase("Carcassonne").get(0);
 
-        // Crear préstamos
-        Prestamo prestamo1 = new Prestamo();
-        prestamo1.setUsuario(usuario1);
-        prestamo1.setJuego(catan);
-        prestamo1.setFechaPrestamo(LocalDate.now().minusDays(5));
-        prestamo1.setFechaDevolucionEstimada(LocalDate.now().plusDays(2));
-        prestamo1.setEstado(com.ezequiel.reiunio.enums.EstadoPrestamo.ACTIVO);
+        // Create loans
+        Loan loan1 = Loan.builder()
+                .user(user1)
+                .game(catan)
+                .loanDate(LocalDate.now().minusDays(5))
+                .estimatedReturnDate(LocalDate.now().plusDays(2))
+                .status(com.ezequiel.reiunio.enums.LoanStatus.ACTIVE)
+                .build();
         
-        // Marcar el juego como no disponible
-        catan.setDisponible(false);
-        juegoRepository.save(catan);
+        // Mark the game as unavailable
+        catan.setAvailable(false);
+        gameRepository.save(catan);
 
-        prestamoRepository.save(prestamo1);
+        loanRepository.save(loan1);
     }
 
-    private void initParties() {
-        System.out.println("Iniciando datos de partidas...");
+    private void initGameSessions() {
+        log.debug("Initializing game sessions...");
 
-        // Recuperar usuarios y juegos
-        Usuario admin = usuarioRepository.findByUsername("admin").orElseThrow();
-        Usuario usuario1 = usuarioRepository.findByUsername("usuario1").orElseThrow();
+        // Get users and games
+        User admin = userRepository.findByUsername("admin").orElseThrow();
+        User user1 = userRepository.findByUsername("user1").orElseThrow();
         
-        Juego dixit = juegoRepository.findByNombreContainingIgnoreCase("Dixit").get(0);
-        Juego carcassonne = juegoRepository.findByNombreContainingIgnoreCase("Carcassonne").get(0);
+        Game dixit = gameRepository.findByNameContainingIgnoreCase("Dixit").get(0);
+        Game carcassonne = gameRepository.findByNameContainingIgnoreCase("Carcassonne").get(0);
 
-        // Crear partidas
-        Partida partida1 = new Partida();
-        partida1.setCreador(admin);
-        partida1.setJuego(dixit);
-        partida1.setTitulo("Tarde de Dixit");
-        partida1.setDescripcion("Partida para principiantes");
-        partida1.setFecha(LocalDate.now().plusDays(1));
-        partida1.setHoraInicio(LocalTime.of(17, 0));
-        partida1.setHoraFin(LocalTime.of(19, 0));
-        partida1.setMaxJugadores(6);
-        partida1.setEstado(EstadoPartida.PROGRAMADA);
+        // Create game sessions
+        GameSession session1 = GameSession.builder()
+                .creator(admin)
+                .game(dixit)
+                .title("Dixit Afternoon")
+                .description("Game session for beginners")
+                .date(LocalDate.now().plusDays(1))
+                .startTime(LocalTime.of(17, 0))
+                .endTime(LocalTime.of(19, 0))
+                .maxPlayers(6)
+                .status(GameSessionStatus.SCHEDULED)
+                .build();
 
-        Partida partida2 = new Partida();
-        partida2.setCreador(usuario1);
-        partida2.setJuego(carcassonne);
-        partida2.setTitulo("Campeonato de Carcassonne");
-        partida2.setDescripcion("Torneo oficial");
-        partida2.setFecha(LocalDate.now().plusDays(7));
-        partida2.setHoraInicio(LocalTime.of(10, 0));
-        partida2.setHoraFin(LocalTime.of(14, 0));
-        partida2.setMaxJugadores(5);
-        partida2.setEstado(EstadoPartida.PROGRAMADA);
+        GameSession session2 = GameSession.builder()
+                .creator(user1)
+                .game(carcassonne)
+                .title("Carcassonne Championship")
+                .description("Official tournament")
+                .date(LocalDate.now().plusDays(7))
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(14, 0))
+                .maxPlayers(5)
+                .status(GameSessionStatus.SCHEDULED)
+                .build();
 
-        partidaRepository.saveAll(Arrays.asList(partida1, partida2));
+        gameSessionRepository.saveAll(Arrays.asList(session1, session2));
     }
 }

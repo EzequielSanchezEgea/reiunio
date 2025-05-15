@@ -2,48 +2,58 @@ package com.ezequiel.reiunio.security;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.ezequiel.reiunio.entity.Partida;
-import com.ezequiel.reiunio.entity.Prestamo;
-import com.ezequiel.reiunio.service.PartidaService;
-import com.ezequiel.reiunio.service.PrestamoService;
-import com.ezequiel.reiunio.service.UsuarioService;
+import com.ezequiel.reiunio.entity.GameSession;
+import com.ezequiel.reiunio.entity.Loan;
+import com.ezequiel.reiunio.entity.User;
+import com.ezequiel.reiunio.service.GameSessionService;
+import com.ezequiel.reiunio.service.LoanService;
+import com.ezequiel.reiunio.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class SecurityUtils {
 
-    private final PartidaService partidaService;
-    private final PrestamoService prestamoService;
-    private final UsuarioService usuarioService;
+    private final GameSessionService gameSessionService;
+    private final LoanService loanService;
+    private final UserService userService;
 
-    @Autowired
-    public SecurityUtils(PartidaService partidaService, PrestamoService prestamoService, UsuarioService usuarioService) {
-        this.partidaService = partidaService;
-        this.prestamoService = prestamoService;
-        this.usuarioService = usuarioService;
+    /**
+     * Checks if a user is the creator of a game session
+     * @param sessionId Game session ID
+     * @param username Username
+     * @return true if the user is the creator of the game session, false otherwise
+     */
+    public boolean isGameSessionCreator(Long sessionId, String username) {
+        Optional<GameSession> gameSession = gameSessionService.findById(sessionId);
+        return gameSession.isPresent() && 
+               gameSession.get().getCreator().getUsername().equals(username);
     }
 
     /**
-     * Verifica si un usuario es el creador de una partida
-     * @param partidaId ID de la partida
-     * @param username Nombre de usuario
-     * @return true si el usuario es el creador de la partida, false en caso contrario
+     * Checks if a loan belongs to a user
+     * @param loanId Loan ID
+     * @param username Username
+     * @return true if the loan belongs to the user, false otherwise
      */
-    public boolean esCreadorPartida(Long partidaId, String username) {
-        Optional<Partida> partida = partidaService.findById(partidaId);
-        return partida.isPresent() && partida.get().getCreador().getUsername().equals(username);
+    public boolean isUserLoan(Long loanId, String username) {
+        Optional<Loan> loan = loanService.findById(loanId);
+        return loan.isPresent() && 
+               loan.get().getUser().getUsername().equals(username);
     }
 
     /**
-     * Verifica si un préstamo pertenece a un usuario
-     * @param prestamoId ID del préstamo
-     * @param username Nombre de usuario
-     * @return true si el préstamo pertenece al usuario, false en caso contrario
+     * Checks if the current user is the same as the one being viewed
+     * @param userId User ID to check
+     * @param currentUsername Current logged in username
+     * @return true if it's the same user, false otherwise
      */
-    public boolean esPrestamoDeUsuario(Long prestamoId, String username) {
-        Optional<Prestamo> prestamo = prestamoService.findById(prestamoId);
-        return prestamo.isPresent() && prestamo.get().getUsuario().getUsername().equals(username);
+    public boolean isCurrentUser(Long userId, String currentUsername) {
+        Optional<User> user = userService.findById(userId);
+        return user.isPresent() && 
+               user.get().getUsername().equals(currentUsername);
     }
 }

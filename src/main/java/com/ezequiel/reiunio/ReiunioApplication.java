@@ -22,8 +22,21 @@ public class ReiunioApplication implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
+        // Mostrar información de la base de datos (ocultando contraseña)
+        String dbUrl = env.getProperty("spring.datasource.url");
+        String dbUser = env.getProperty("spring.datasource.username");
+        
         logger.info("Aplicación iniciada correctamente");
-        logger.info("Puerto configurado: {}", env.getProperty("server.port"));
-        logger.info("URL de base de datos: {}", env.getProperty("spring.datasource.url"));
+        logger.info("URL de base de datos: {}", dbUrl);
+        logger.info("Usuario de base de datos: {}", dbUser);
+        logger.info("Puerto del servidor: {}", env.getProperty("server.port", "8080"));
+        
+        // Detectar si estamos en Railway
+        boolean isRailway = System.getenv("RAILWAY_SERVICE_NAME") != null;
+        if (isRailway) {
+            logger.info("Ejecutando en Railway");
+        } else {
+            logger.info("Ejecutando en entorno local");
+        }
     }
 }
