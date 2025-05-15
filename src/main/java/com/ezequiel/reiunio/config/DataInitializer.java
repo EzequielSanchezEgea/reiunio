@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * Only runs when the application starts with "dev" profile.
  */
 @Component
-@Profile("dev")
+//@Profile("dev")
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
