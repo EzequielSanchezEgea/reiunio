@@ -30,9 +30,43 @@ public class HomeController {
     private final GameSessionService gameSessionService;
     private final LoanService loanService;
 
+    /**
+     * Página de bienvenida con login - para usuarios no autenticados
+     */
+    @GetMapping("/welcome")
+    public String welcome(Principal principal) {
+        log.debug("Processing welcome request");
+        
+        // Si el usuario ya está autenticado, redirigir al verdadero home
+        if (principal != null) {
+            return "redirect:/home";
+        }
+        
+        return "welcome";
+    }
+
+    /**
+     * Redirigir root a welcome si no está autenticado, o a home si está autenticado
+     */
     @GetMapping("/")
+    public String root(Principal principal) {
+        if (principal != null) {
+            return "redirect:/home";
+        }
+        return "redirect:/welcome";
+    }
+
+    /**
+     * Verdadero home para usuarios autenticados
+     */
+    @GetMapping("/home")
     public String home(Model model, Principal principal) {
         log.debug("Processing home request");
+        
+        // Si no está autenticado, redirigir a welcome
+        if (principal == null) {
+            return "redirect:/welcome";
+        }
         
         try {
             // Today's sessions
@@ -50,20 +84,16 @@ public class HomeController {
             model.addAttribute("availableGames", availableGames);
             log.debug("Found {} available games", availableGames != null ? availableGames.size() : 0);
             
-            // If user is authenticated, show personalized information
-            if (principal != null) {
-                Optional<User> user = userService.findByUsername(principal.getName());
-                if (user.isPresent()) {
-                    model.addAttribute("user", user.get());
-                    log.debug("User authenticated: {}", user.get().getUsername());
-                    
-                    // Sessions where the user is registered
-                    List<GameSession> mySessions = gameSessionService.findSessionsByPlayer(user.get().getId());
-                    model.addAttribute("mySessions", mySessions);
-                    log.debug("Found {} user sessions", mySessions != null ? mySessions.size() : 0);
-                }
-            } else {
-                log.debug("No authenticated user");
+            // User information
+            Optional<User> user = userService.findByUsername(principal.getName());
+            if (user.isPresent()) {
+                model.addAttribute("user", user.get());
+                log.debug("User authenticated: {}", user.get().getUsername());
+                
+                // Sessions where the user is registered
+                List<GameSession> mySessions = gameSessionService.findSessionsByPlayer(user.get().getId());
+                model.addAttribute("mySessions", mySessions);
+                log.debug("Found {} user sessions", mySessions != null ? mySessions.size() : 0);
             }
             
         } catch (Exception e) {
@@ -79,9 +109,16 @@ public class HomeController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(Principal principal) {
         log.debug("Processing login request");
-        return "login";
+        
+        // Si ya está autenticado, redirigir al home
+        if (principal != null) {
+            return "redirect:/home";
+        }
+        
+        // Redirigir a la página de bienvenida con formulario de login
+        return "redirect:/welcome";
     }
 
     @GetMapping("/access-denied")
