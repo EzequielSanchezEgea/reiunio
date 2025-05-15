@@ -22,18 +22,19 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
-                .requestMatchers("/", "/register", "/login", "/error").permitAll()
+                .requestMatchers("/welcome", "/login", "/error").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/", true)
+                .loginPage("/welcome")  // Cambiar a la nueva página de bienvenida
+                .loginProcessingUrl("/login")  // URL para procesar el login
+                .defaultSuccessUrl("/home", true)  // Redirigir al verdadero home después del login
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/welcome")  // Redirigir a welcome después del logout
                 .permitAll()
             );
             
