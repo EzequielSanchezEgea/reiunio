@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${listTitle != null ? listTitle : 'Game Sessions'} + ' - Reiunio'">Game Sessions - Reiunio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="/images/logo-reiunio.jpg" alt="Reiunio Logo">
+            Reiunio
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/games">Games</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/game-sessions">Sessions</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')">
+                    <a class="nav-link" href="/loans">Loans</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/users">Users</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/audit-logs">Audit Logs</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <div sec:authorize="isAuthenticated()">
+                    <span class="navbar-text me-3" sec:authentication="name"></span>
+                    <a class="btn btn-outline-light btn-sm" href="/users/profile">My Profile</a>
+                    <form class="d-inline" th:action="@{/logout}" method="post">
+                        <button class="btn btn-outline-light btn-sm ms-2" type="submit">Logout</button>
+                    </form>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <a class="btn btn-outline-light btn-sm" href="/login">Login</a>
+                    <a class="btn btn-outline-light btn-sm ms-2" href="/users/register">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <div class="container my-4">
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 th:text="${listTitle != null ? listTitle : 'Game Sessions'}">Game Sessions</h1>
+            <div>
+                <a href="/game-sessions/new" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> New Session
+                </a>
+                <a href="/game-sessions/my-sessions" class="btn btn-outline-primary ms-2">
+                    <i class="bi bi-calendar-event"></i> My Sessions
+                </a>
+                <a href="/game-sessions/my-participations" class="btn btn-outline-info ms-2">
+                    <i class="bi bi-people"></i> My Participations
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick navigation -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <a href="/game-sessions/today" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-calendar-today"></i><br>
+                            <span>Today's Sessions</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/game-sessions/upcoming" class="btn btn-outline-success w-100">
+                            <i class="bi bi-calendar-plus"></i><br>
+                            <span>Upcoming Sessions</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/game-sessions?status=IN_PROGRESS" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-play-circle"></i><br>
+                            <span>In Progress</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/game-sessions?status=FINISHED" class="btn btn-outline-info w-100">
+                            <i class="bi bi-check-circle"></i><br>
+                            <span>Finished</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/game-sessions}" method="get" class="filter-form">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All statuses</option>
+                                <option th:each="statusOption : ${statuses}" 
+                                        th:value="${statusOption}" 
+                                        th:text="${statusOption}"
+                                        th:selected="${filterStatus != null && filterStatus.equals(statusOption.toString())}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-8 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">Filter</button>
+                            <button type="button" class="btn btn-secondary reset-filters">Clear</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sessions list -->
+        <div class="row">
+            <div th:if="${gameSessions != null and !gameSessions.empty}">
+                <div class="col-md-6 col-lg-4 mb-4" th:each="gameSession : ${gameSessions}">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0" th:text="${gameSession.title}">Session Title</h5>
+                            <span class="badge" th:text="${gameSession.status}"
+                                  th:classappend="${gameSession.status.name() == 'SCHEDULED' ? 'bg-light text-dark' : 
+                                                  gameSession.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 
+                                                  gameSession.status.name() == 'FINISHED' ? 'bg-success' : 'bg-danger'}">
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="bi bi-joystick"></i> 
+                                <a th:href="@{/games/{id}(id=${gameSession.game.id})}" 
+                                   th:text="${gameSession.game.name}" 
+                                   class="text-decoration-none">Game Name</a>
+                            </h6>
+                            <p class="card-text">
+                                <i class="bi bi-calendar3"></i> 
+                                <span th:text="${#temporals.format(gameSession.date, 'dd/MM/yyyy')}">Date</span>
+                            </p>
+                            <p class="card-text">
+                                <i class="bi bi-clock"></i> 
+                                <span th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+                                - 
+                                <span th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
+                            </p>
+                            <p class="card-text">
+                                <i class="bi bi-people"></i> 
+                                <span th:text="${gameSession.getConfirmedPlayersCount()}">2</span>
+                                / 
+                                <span th:text="${gameSession.maxPlayers}">4</span>
+                                confirmed players
+                            </p>
+                            <p class="card-text">
+                                <i class="bi bi-person-badge"></i> 
+                                <small class="text-muted">
+                                    Created by 
+                                    <span th:text="${gameSession.creator.firstName + ' ' + gameSession.creator.lastName}">John Doe</span>
+                                </small>
+                            </p>
+                            <!-- User participation indicator -->
+                            <div sec:authorize="isAuthenticated()">
+                                <div th:with="currentUserName=${#authentication.principal.username}">
+                                    <div th:each="player : ${gameSession.players}">
+                                        <div th:if="${player.user != null and player.user.username == currentUserName}" 
+                                             class="alert alert-info py-2 mb-2">
+                                            <i class="bi bi-check-circle"></i> You are registered for this session
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a th:href="@{/game-sessions/{id}(id=${gameSession.id})}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <div sec:authorize="hasRole('ADMIN') or hasRole('EXTENDED_USER') or authentication.principal.username == gameSession.creator.username">
+                                <a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}" 
+                                   class="btn btn-warning btn-sm ms-1">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm ms-1" 
+                                        data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${gameSession.id}">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                                <div class="modal fade" th:id="'deleteModal' + ${gameSession.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-danger text-white">
+                                                <h5 class="modal-title">Confirm deletion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete the session <strong th:text="${gameSession.title}"></strong>?</p>
+                                                <p class="text-danger">This action cannot be undone and all player registrations will be lost.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form th:action="@{/game-sessions/{id}/delete(id=${gameSession.id})}" method="post">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${gameSessions == null or gameSessions.empty}" class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-calendar-x" style="font-size: 3rem; color: #6c757d;"></i>
+                    <h3 class="mt-3 text-muted">No game sessions found</h3>
+                    <p class="text-muted">No sessions match your current filter criteria.</p>
+                    <a href="/game-sessions/new" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Your First Session
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Reiunio</h5>
+                    <p>Application for managing game libraries and board games.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

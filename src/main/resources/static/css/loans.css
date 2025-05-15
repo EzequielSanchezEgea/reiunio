@@ -1,0 +1,282 @@
+/* Loans-specific styles */
+
+/* Loan cards */
+.loan-card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 100%;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.loan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.loan-card-header {
+    background-color: rgba(13, 110, 253, 0.1);
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Loan status badges */
+.status-active,
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+    color: white !important;
+}
+
+.status-returned,
+.badge.bg-success {
+    background-color: #198754 !important;
+    color: white !important;
+}
+
+.status-late,
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.status-overdue {
+    background-color: #fd7e14 !important;
+    color: white !important;
+}
+
+/* Overdue indicators */
+.overdue-warning {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.overdue-days {
+    background-color: #dc3545;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Loan table specific styles */
+.table-loans {
+    background: #fff;
+}
+
+.table-loans th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table-loans td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table-loans tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-loans tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    transform: scale(1.01);
+}
+
+/* Loan detail styles */
+.loan-detail-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.loan-info-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.loan-info-card h5 {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+/* Date highlighting */
+.date-normal {
+    color: #495057;
+}
+
+.date-warning {
+    color: #fd7e14;
+    font-weight: 600;
+}
+
+.date-danger {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+/* Loan form styles */
+.loan-form-section {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Preview sections in form */
+.preview-section {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.preview-section:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Return modal styles */
+.return-modal .modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+.return-modal .modal-header {
+    background-color: #198754;
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Quick navigation buttons */
+.loan-nav-buttons .btn {
+    margin: 5px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.loan-nav-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Loan statistics */
+.loan-stats-card {
+    background: #fff;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.loan-stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.loan-stats-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive design for loans */
+@media (max-width: 768px) {
+    .loan-detail-header {
+        padding: 1rem;
+    }
+    
+    .loan-info-card {
+        padding: 1rem;
+    }
+    
+    .table-loans {
+        font-size: 0.875rem;
+    }
+    
+    .loan-nav-buttons {
+        text-align: center;
+    }
+    
+    .loan-nav-buttons .btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Animation for status changes */
+@keyframes status-change {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.status-change {
+    animation: status-change 0.5s ease;
+}
+
+/* User info in loans */
+.user-info-mini {
+    display: flex;
+    align-items: center;
+}
+
+.user-info-mini .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+}
+
+.user-info-mini .user-details .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-info-mini .user-details .user-username {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Game info in loans */
+.game-info-mini {
+    display: flex;
+    align-items: center;
+}
+
+.game-info-mini .game-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+}
+
+.game-info-mini .game-details .game-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.game-info-mini .game-details .game-category {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
