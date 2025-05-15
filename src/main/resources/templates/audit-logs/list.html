@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - Reiunio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/home">
+            <img src="/images/logo-reiunio.jpg" alt="Reiunio Logo">
+            Reiunio
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/games">Games</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/game-sessions">Sessions</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')">
+                    <a class="nav-link" href="/loans">Loans</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/users">Users</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/audit-logs">Audit Logs</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <div sec:authorize="isAuthenticated()">
+                    <span class="navbar-text me-3" sec:authentication="name"></span>
+                    <a class="btn btn-outline-light btn-sm" href="/users/profile">My Profile</a>
+                    <form class="d-inline" th:action="@{/logout}" method="post">
+                        <button class="btn btn-outline-light btn-sm ms-2" type="submit">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <div class="container my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-clock-history"></i> Audit Logs
+                <span th:if="${subtitle}" class="text-muted fs-5" th:text="' - ' + ${subtitle}"></span>
+            </h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/audit-logs}" method="get" class="filter-form">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="actionType" class="form-label">Action Type</label>
+                            <select class="form-select" id="actionType" name="actionType">
+                                <option value="">All Actions</option>
+                                <option th:each="actionTypeOption : ${actionTypes}" 
+                                        th:value="${actionTypeOption}" 
+                                        th:text="${actionTypeOption}"
+                                        th:selected="${filterActionType != null && filterActionType.equals(actionTypeOption.toString())}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="entity" class="form-label">Entity</label>
+                            <select class="form-select" id="entity" name="entity">
+                                <option value="">All Entities</option>
+                                <option th:each="entityOption : ${entities}" 
+                                        th:value="${entityOption}" 
+                                        th:text="${entityOption}"
+                                        th:selected="${filterEntity != null && filterEntity.equals(entityOption)}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="startDate" class="form-label">From Date</label>
+                            <input type="datetime-local" class="form-control" id="startDate" name="startDate" 
+                                   th:value="${filterStartDate}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="endDate" class="form-label">To Date</label>
+                            <input type="datetime-local" class="form-control" id="endDate" name="endDate" 
+                                   th:value="${filterEndDate}">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="button" class="btn btn-secondary me-2 reset-filters">Clear</button>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick filter buttons -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <a href="/audit-logs?actionType=CREATION" class="btn btn-outline-success w-100">
+                            <i class="bi bi-plus-circle"></i><br>
+                            <span>Creations</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/audit-logs?actionType=MODIFICATION" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-pencil"></i><br>
+                            <span>Modifications</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/audit-logs?actionType=DELETION" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-trash"></i><br>
+                            <span>Deletions</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/audit-logs/entity?entity=Game" class="btn btn-outline-info w-100">
+                            <i class="bi bi-joystick"></i><br>
+                            <span>Game Changes</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit logs table -->
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${auditLogs != null and !auditLogs.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Entity</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="log : ${auditLogs}">
+                                    <td>
+                                        <span th:text="${#temporals.format(log.changeDateTime, 'dd/MM/yyyy HH:mm:ss')}">
+                                            01/01/2025 10:30:00
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle me-2"></i>
+                                            <div>
+                                                <div th:text="${log.user.firstName + ' ' + log.user.lastName}">User Name</div>
+                                                <small class="text-muted" th:text="'@' + ${log.user.username}">@username</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge fs-6" th:text="${log.actionType}"
+                                              th:classappend="${log.actionType.name() == 'CREATION' ? 'bg-success' : 
+                                                              log.actionType.name() == 'MODIFICATION' ? 'bg-warning text-dark' : 'bg-danger'}">
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i th:class="${log.affectedEntity == 'Game' ? 'bi bi-joystick' : 
+                                                          log.affectedEntity == 'User' ? 'bi bi-person' : 
+                                                          log.affectedEntity == 'Loan' ? 'bi bi-box' : 
+                                                          log.affectedEntity == 'GameSession' ? 'bi bi-calendar-event' : 'bi bi-info-circle'}" 
+                                               class="me-2"></i>
+                                            <div>
+                                                <span th:text="${log.affectedEntity}">Entity</span>
+                                                <small th:if="${log.entityId != null}" 
+                                                       class="text-muted d-block" th:text="'ID: ' + ${log.entityId}">ID: 123</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span th:text="${log.description}">Description of the action performed</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div th:if="${auditLogs == null or auditLogs.empty}" class="text-center py-5">
+                    <i class="bi bi-clock-history" style="font-size: 3rem; color: #6c757d;"></i>
+                    <h3 class="mt-3 text-muted">No audit logs found</h3>
+                    <p class="text-muted">No logs match your current filter criteria or no actions have been logged yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics summary -->
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Audit Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-bar-chart fs-1 text-primary me-3"></i>
+                                    <div>
+                                        <h3 class="text-primary" th:text="${auditLogs != null ? auditLogs.size() : 0}">0</h3>
+                                        <p class="mb-0">Total Records</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-people fs-1 text-info me-3"></i>
+                                    <div>
+                                        <h3 class="text-info" th:text="${#lists.size(#sets.toSet(auditLogs.![user.username]))}">0</h3>
+                                        <p class="mb-0">Active Users</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-calendar-range fs-1 text-success me-3"></i>
+                                    <div>
+                                        <h3 class="text-success">Today</h3>
+                                        <p class="mb-0">Current Period</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Reiunio</h5>
+                    <p>Application for managing game libraries and board games.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/scripts.js"></script>
+    <script>
+        // Set default end date to now and start date to beginning of day
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            // Only set defaults if no values are present
+            if (!startDateInput.value) {
+                const now = new Date();
+                const beginningOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                startDateInput.value = beginningOfDay.toISOString().slice(0, 16);
+            }
+            
+            if (!endDateInput.value) {
+                const now = new Date();
+                endDateInput.value = now.toISOString().slice(0, 16);
+            }
+        });
+    </script>
+</body>
+</html>

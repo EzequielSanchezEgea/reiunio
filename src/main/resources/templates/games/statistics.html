@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Statistics - Reiunio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/games.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/home">
+            <img src="/images/logo-reiunio.jpg" alt="Reiunio Logo">
+            Reiunio
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/games">Games</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/game-sessions">Sessions</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')">
+                    <a class="nav-link" href="/loans">Loans</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/users">Users</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" href="/audit-logs">Audit Logs</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <div sec:authorize="isAuthenticated()">
+                    <span class="navbar-text me-3" sec:authentication="name"></span>
+                    <a class="btn btn-outline-light btn-sm" href="/users/profile">My Profile</a>
+                    <form class="d-inline" th:action="@{/logout}" method="post">
+                        <button class="btn btn-outline-light btn-sm ms-2" type="submit">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <div class="container my-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="/games" class="text-decoration-none">Games</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Statistics</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Game Statistics</h1>
+            <a href="/games" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Games
+            </a>
+        </div>
+
+        <!-- General summary -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card counter-box shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-dice-6 fs-1 text-primary mb-2"></i>
+                        <div class="counter-number" th:text="${totalGames}">0</div>
+                        <div class="counter-label">Total Games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card counter-box shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle fs-1 text-success mb-2"></i>
+                        <div class="counter-number" th:text="${availableGames}">0</div>
+                        <div class="counter-label">Available Games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card counter-box shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-x-circle fs-1 text-danger mb-2"></i>
+                        <div class="counter-number" th:text="${unavailableGames}">0</div>
+                        <div class="counter-label">Unavailable Games</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card counter-box shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-tag fs-1 text-info mb-2"></i>
+                        <div class="counter-number" th:text="${gamesByCategory.size()}">0</div>
+                        <div class="counter-label">Different Categories</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics charts -->
+        <div class="row">
+            <!-- Games by state chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Games by State</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="gamesByStateChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Games by category chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Games by Category</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="gamesByCategoryChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most borrowed games -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-award"></i> Most Borrowed Games</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${mostBorrowedGames != null and !mostBorrowedGames.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-games">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Players</th>
+                                    <th>State</th>
+                                    <th>Available</th>
+                                    <th>Times Borrowed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="gameData : ${mostBorrowedGames}">
+                                    <td>
+                                        <a th:href="@{/games/{id}(id=${gameData[0].id})}" 
+                                           th:text="${gameData[0].name}" 
+                                           class="fw-bold text-decoration-none"></a>
+                                    </td>
+                                    <td th:text="${gameData[0].category}"></td>
+                                    <td th:text="${gameData[0].minPlayers} + '-' + ${gameData[0].maxPlayers}"></td>
+                                    <td>
+                                        <span class="badge" th:text="${gameData[0].state}"
+                                              th:classappend="${gameData[0].state.name() == 'NEW' ? 'bg-success' : 
+                                                              gameData[0].state.name() == 'GOOD' ? 'bg-info' : 
+                                                              gameData[0].state.name() == 'ACCEPTABLE' ? 'bg-warning' : 'bg-danger'}">
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:text="${gameData[0].available ? 'Available' : 'Not available'}"
+                                              th:classappend="${gameData[0].available ? 'bg-success' : 'bg-danger'}">
+                                        </span>
+                                    </td>
+                                    <td><span class="badge bg-primary" th:text="${gameData[1]}">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div th:if="${mostBorrowedGames == null or mostBorrowedGames.empty}" class="text-center py-4">
+                    <p class="lead text-muted">No loan data registered.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Games never borrowed -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Games Never Borrowed</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${neverBorrowedGames != null and !neverBorrowedGames.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-games">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Players</th>
+                                    <th>State</th>
+                                    <th>Available</th>
+                                    <th>Acquisition Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="game : ${neverBorrowedGames}">
+                                    <td>
+                                        <a th:href="@{/games/{id}(id=${game.id})}" 
+                                           th:text="${game.name}" 
+                                           class="fw-bold text-decoration-none"></a>
+                                    </td>
+                                    <td th:text="${game.category}"></td>
+                                    <td th:text="${game.minPlayers} + '-' + ${game.maxPlayers}"></td>
+                                    <td>
+                                        <span class="badge" th:text="${game.state}"
+                                              th:classappend="${game.state.name() == 'NEW' ? 'bg-success' : 
+                                                              game.state.name() == 'GOOD' ? 'bg-info' : 
+                                                              game.state.name() == 'ACCEPTABLE' ? 'bg-warning' : 'bg-danger'}">
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:text="${game.available ? 'Available' : 'Not available'}"
+                                              th:classappend="${game.available ? 'bg-success' : 'bg-danger'}">
+                                        </span>
+                                    </td>
+                                    <td th:text="${#temporals.format(game.acquisitionDate, 'dd/MM/yyyy')}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div th:if="${neverBorrowedGames == null or neverBorrowedGames.empty}" class="text-center py-4">
+                    <p class="lead text-muted">All games have been borrowed at least once!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Reiunio</h5>
+                    <p>Application for managing game libraries and board games.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/scripts.js"></script>
+    <script src="/js/games.js"></script>
+    
+    <!-- Scripts for charts -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data for games by state chart
+            const gamesByState = /*[[${gamesByState}]]*/ {};
+            const stateLabels = Object.keys(gamesByState);
+            const stateData = Object.values(gamesByState);
+            
+            const stateColors = [
+                'rgba(40, 167, 69, 0.7)',   // NEW - green
+                'rgba(23, 162, 184, 0.7)',  // GOOD - light blue
+                'rgba(255, 193, 7, 0.7)',   // ACCEPTABLE - yellow
+                'rgba(220, 53, 69, 0.7)'    // DAMAGED - red
+            ];
+            
+            // State chart configuration
+            const ctxStates = document.getElementById('gamesByStateChart').getContext('2d');
+            new Chart(ctxStates, {
+                type: 'pie',
+                data: {
+                    labels: stateLabels,
+                    datasets: [{
+                        data: stateData,
+                        backgroundColor: stateColors,
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Data for games by category chart
+            const gamesByCategory = /*[[${gamesByCategory}]]*/ {};
+            const categoryLabels = Object.keys(gamesByCategory);
+            const categoryData = Object.values(gamesByCategory);
+            
+            // Category chart configuration
+            const ctxCategories = document.getElementById('gamesByCategoryChart').getContext('2d');
+            new Chart(ctxCategories, {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: 'Number of games',
+                        data: categoryData,
+                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
