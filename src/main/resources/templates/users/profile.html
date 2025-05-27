@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Reiunio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container my-4">
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4">
+                <!-- Profile Info Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-camera"></i> Profile Photo</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- Current Photo Display -->
+                        <div class="mb-3">
+                            <img th:src="${user.profilePhotoUrl}" 
+                                 th:alt="'Profile photo of ' + ${user.firstName}"
+                                 class="rounded-circle img-fluid profile-photo-preview"
+                                 style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #dee2e6;">
+                        </div>
+                        
+                        <!-- User info -->
+                        <h4 class="card-title" th:text="${user.firstName + ' ' + user.lastName}">User Name</h4>
+                        <p class="text-muted" th:text="'@' + ${user.username}">@username</p>
+                        <span class="badge" th:text="${user.role}"
+                              th:classappend="${user.role.name() == 'ADMIN' ? 'bg-danger' : 
+                                              user.role.name() == 'EXTENDED_USER' ? 'bg-warning text-dark' : 'bg-info'}">
+                        </span>
+                        <p class="mt-3 text-muted">
+                            <i class="bi bi-calendar-check"></i>
+                            Member since <span th:text="${#temporals.format(user.registrationDate, 'MMMM yyyy')}">January 2025</span>
+                        </p>
+                        
+                        <!-- Photo Upload Form -->
+                        <form th:action="@{/upload/user/{id}/photo(id=${user.id})}" 
+                              method="post" enctype="multipart/form-data" 
+                              class="photo-upload-form" style="display: none;">
+                            <div class="mb-3">
+                                <input type="file" class="form-control" name="photo" 
+                                       accept="image/*" required>
+                                <div class="form-text">Max size: 2MB. Formats: JPG, PNG, GIF, WebP</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm me-2">
+                                <i class="bi bi-upload"></i> Upload Photo
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm cancel-upload">
+                                Cancel
+                            </button>
+                        </form>
+                        
+                        <!-- Photo Action Buttons -->
+                        <div class="photo-actions mt-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm me-2 show-upload">
+                                <i class="bi bi-camera"></i> Change Photo
+                            </button>
+                            <form th:if="${user.hasCustomProfilePhoto()}" 
+                                  th:action="@{/upload/user/{id}/photo/delete(id=${user.id})}" 
+                                  method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Are you sure you want to delete your profile photo?')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/game-sessions/new" class="btn btn-primary">
+                                <i class="bi bi-calendar-plus"></i> Create Game Session
+                            </a>
+                            <a href="/games" class="btn btn-outline-secondary">
+                                <i class="bi bi-joystick"></i> Browse Games
+                            </a>
+                            <a href="/game-sessions/my-sessions" class="btn btn-outline-info">
+                                <i class="bi bi-calendar-event"></i> My Sessions
+                            </a>
+                            <a sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')" 
+                               href="/loans/my-loans" class="btn btn-outline-warning">
+                                <i class="bi bi-box"></i> My Loans
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <!-- Edit Profile Form -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person-gear"></i> Edit Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/users/profile/update}" th:object="${user}" method="post" class="needs-validation" novalidate>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                    </div>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                                        Please enter a valid email address.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Username</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" th:value="${user.username}" disabled>
+                                    </div>
+                                    <small class="form-text text-muted">Username cannot be changed</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                        <input type="text" class="form-control" id="firstName" th:field="*{firstName}" required>
+                                    </div>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">
+                                        Please enter your first name.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                        <input type="text" class="form-control" id="lastName" th:field="*{lastName}">
+                                    </div>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">
+                                        Please enter a valid last name.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label">New Password <span class="text-muted">(optional)</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" th:field="*{password}">
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted">Leave empty to keep current password</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Role</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-shield"></i></span>
+                                        <input type="text" class="form-control" th:value="${user.role}" disabled>
+                                    </div>
+                                    <small class="form-text text-muted">Contact an administrator to change your role</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Update Profile
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Account Statistics -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Account Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-primary mb-1">12</h3>
+                                    <small class="text-muted">Sessions Joined</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-success mb-1">5</h3>
+                                    <small class="text-muted">Sessions Created</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-warning mb-1">8</h3>
+                                    <small class="text-muted">Games Borrowed</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="border rounded p-3">
+                                    <h3 class="text-info mb-1" th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(user.registrationDate, T(java.time.LocalDate).now())}">30</h3>
+                                    <small class="text-muted">Days Active</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Role privileges -->
+                        <div class="mt-4">
+                            <h6>Your Privileges</h6>
+                            <div th:switch="${user.role.name()}">
+                                <div th:case="'ADMIN'" class="alert alert-danger persistent">
+                                    <h6 class="alert-heading"><i class="bi bi-shield-fill-check"></i> Administrator</h6>
+                                    <ul class="mb-0">
+                                        <li>Full system administration access</li>
+                                        <li>User management and role assignment</li>
+                                        <li>Game library management</li>
+                                        <li>Loan management and oversight</li>
+                                        <li>System audit logs access</li>
+                                        <li>All game session management</li>
+                                    </ul>
+                                </div>
+                                <div th:case="'EXTENDED_USER'" class="alert alert-warning persistent">
+                                    <h6 class="alert-heading"><i class="bi bi-shield-check"></i> Extended User</h6>
+                                    <ul class="mb-0">
+                                        <li>Create and manage game sessions</li>
+                                        <li>Create and manage loans</li>
+                                        <li>Access to loan management features</li>
+                                        <li>View all games and sessions</li>
+                                        <li>Join game sessions</li>
+                                    </ul>
+                                </div>
+                                <div th:case="'BASIC_USER'" class="alert alert-info persistent">
+                                    <h6 class="alert-heading"><i class="bi bi-shield"></i> Basic User</h6>
+                                    <ul class="mb-0">
+                                        <li>View available games</li>
+                                        <li>Join game sessions</li>
+                                        <li>Create basic game sessions</li>
+                                        <li>View your own profile and activities</li>
+                                    </ul>
+                                    <hr>
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i>
+                                        Contact an administrator to upgrade your account for additional features like loan management.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Reiunio</h5>
+                    <p>Application for managing game libraries and board games.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/scripts.js"></script>
+    <script>
+        // Photo upload functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const showUploadBtn = document.querySelector('.show-upload');
+            const cancelUploadBtn = document.querySelector('.cancel-upload');
+            const uploadForm = document.querySelector('.photo-upload-form');
+            const photoActions = document.querySelector('.photo-actions');
+
+            if (showUploadBtn && uploadForm && photoActions) {
+                showUploadBtn.addEventListener('click', function() {
+                    uploadForm.style.display = 'block';
+                    photoActions.style.display = 'none';
+                });
+
+                cancelUploadBtn.addEventListener('click', function() {
+                    uploadForm.style.display = 'none';
+                    photoActions.style.display = 'block';
+                    uploadForm.querySelector('input[type="file"]').value = '';
+                });
+            }
+        });
+
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        // Form validation
+        (function () {
+            'use strict'
+            
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        // Custom password validation (only if password is provided)
+                        const password = document.getElementById('password');
+                        
+                        if (password.value && password.value.length < 6) {
+                            password.setCustomValidity('Password must be at least 6 characters long');
+                        } else {
+                            password.setCustomValidity('');
+                        }
+                        
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+</body>
+</html>
