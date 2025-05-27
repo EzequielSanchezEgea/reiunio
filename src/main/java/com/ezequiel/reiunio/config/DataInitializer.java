@@ -33,37 +33,19 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initData() {
         return args -> {
-            try {
-                // Solo inicializar si no hay datos
-                if (userService.findAll().isEmpty()) {
-                    log.info("Inicializando datos de ejemplo...");
-                    
-                    try {
-                        initializeUsers();
-                        log.info("Usuarios creados exitosamente");
-                    } catch (Exception e) {
-                        log.error("Error creando usuarios: {}", e.getMessage(), e);
-                        // Continuar con los juegos aunque fallen los usuarios
-                    }
-                    
-                    try {
-                        initializeGames();
-                        log.info("Juegos creados exitosamente");
-                    } catch (Exception e) {
-                        log.error("Error creando juegos: {}", e.getMessage(), e);
-                    }
-                    
-                    log.info("Datos de ejemplo inicializados correctamente");
-                } else {
-                    log.info("Los datos ya existen, saltando inicialización");
-                }
-            } catch (Exception e) {
-                log.error("Error general en DataInitializer: {}", e.getMessage(), e);
+            // Solo inicializar si no hay datos
+            if (userService.findAll().isEmpty()) {
+                log.info("Inicializando datos de ejemplo...");
+                initializeUsers(userService);
+                initializeGames(gameService);
+                log.info("Datos de ejemplo inicializados correctamente");
+            } else {
+                log.info("Los datos ya existen, saltando inicialización");
             }
         };
     }
 
-    private void initializeUsers() {
+    private void initializeUsers(UserService userService) {
         log.info("Creando usuarios de ejemplo...");
 
         // Usuario administrador
@@ -142,16 +124,12 @@ public class DataInitializer {
         List<User> users = Arrays.asList(admin, extendedUser, basicUser1, basicUser2, basicUser3, basicUser4, basicUser5);
         
         for (User user : users) {
-            try {
-                User savedUser = userService.save(user);
-                log.info("Usuario creado: {} ({})", savedUser.getUsername(), savedUser.getRole());
-            } catch (Exception e) {
-                log.error("Error guardando usuario {}: {}", user.getUsername(), e.getMessage());
-            }
+            userService.save(user);
+            log.info("Usuario creado: {} ({})", user.getUsername(), user.getRole());
         }
     }
 
-    private void initializeGames() {
+    private void initializeGames(GameService gameService) {
         log.info("Creando biblioteca de juegos...");
 
         List<Game> games = Arrays.asList(
