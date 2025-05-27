@@ -1,42 +1,37 @@
 package com.ezequiel.reiunio.config;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.ezequiel.reiunio.entity.Game;
-import com.ezequiel.reiunio.entity.GameSession;
-import com.ezequiel.reiunio.entity.Loan;
 import com.ezequiel.reiunio.entity.User;
 import com.ezequiel.reiunio.enums.GameState;
-import com.ezequiel.reiunio.enums.GameSessionStatus;
 import com.ezequiel.reiunio.enums.Role;
-import com.ezequiel.reiunio.repository.GameRepository;
-import com.ezequiel.reiunio.repository.GameSessionRepository;
-import com.ezequiel.reiunio.repository.LoanRepository;
-import com.ezequiel.reiunio.repository.UserRepository;
+import com.ezequiel.reiunio.service.GameService;
+import com.ezequiel.reiunio.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * This class initializes sample data for the application.
- * Only runs when the application starts with "dev" profile.
- */
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
 @Slf4j
-public class DataInitializer implements CommandLineRunner {
+public class DataInitializer {
+
+    private final UserService userService;
+    private final GameService gameService;
 
     @Bean
-    public CommandLineRunner initData(UserService userService, GameService gameService) {
+    public CommandLineRunner initData() {
         return args -> {
             // Solo inicializar si no hay datos
             if (userService.findAll().isEmpty()) {
