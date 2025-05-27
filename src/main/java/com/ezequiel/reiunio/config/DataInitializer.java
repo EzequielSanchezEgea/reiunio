@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import com.ezequiel.reiunio.entity.Game;
 import com.ezequiel.reiunio.entity.User;
@@ -23,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 public class DataInitializer {
 
     @Bean
-   // @Profile("!test")  No ejecutar en tests
     public CommandLineRunner initData(UserService userService, GameService gameService) {
         return args -> {
             // Solo inicializar si no hay datos
@@ -368,8 +366,64 @@ public class DataInitializer {
                 .state(GameState.ACCEPTABLE)
                 .available(true)
                 .acquisitionDate(LocalDate.now().minusYears(1))
+                .build(),
+
+            // Juegos adicionales para más variedad
+            Game.builder()
+                .name("Chess")
+                .description("El clásico juego de estrategia")
+                .category("Abstracto")
+                .minPlayers(2)
+                .maxPlayers(2)
+                .durationMinutes(60)
+                .state(GameState.ACCEPTABLE)
+                .available(true)
+                .acquisitionDate(LocalDate.now().minusYears(10))
+                .build(),
+
+            Game.builder()
+                .name("Checkers")
+                .description("Juego de estrategia con fichas")
+                .category("Abstracto")
+                .minPlayers(2)
+                .maxPlayers(2)
+                .durationMinutes(30)
+                .state(GameState.GOOD)
+                .available(true)
+                .acquisitionDate(LocalDate.now().minusYears(5))
+                .build(),
+
+            Game.builder()
+                .name("Risk")
+                .description("Conquista el mundo en este juego de estrategia")
+                .category("Estrategia")
+                .minPlayers(2)
+                .maxPlayers(6)
+                .durationMinutes(180)
+                .state(GameState.ACCEPTABLE)
+                .available(true)
+                .acquisitionDate(LocalDate.now().minusYears(3))
+                .build(),
+
+            Game.builder()
+                .name("Exploding Kittens")
+                .description("Juego de cartas explosivo y divertido")
+                .category("Fiesta")
+                .minPlayers(2)
+                .maxPlayers(5)
+                .durationMinutes(15)
+                .state(GameState.NEW)
+                .available(true)
+                .acquisitionDate(LocalDate.now().minusMonths(1))
                 .build()
         );
 
+        // ¡AQUÍ ESTABA EL PROBLEMA! Hay que guardar cada juego
+        for (Game game : games) {
+            gameService.save(game);
+            log.info("Juego creado: {} ({})", game.getName(), game.getCategory());
+        }
+        
+        log.info("Se crearon {} juegos en la biblioteca", games.size());
     }
 }
