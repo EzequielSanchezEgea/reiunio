@@ -375,47 +375,9 @@
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/js/scripts.js"></script>
+	<script src="/js/game-sessions.js"></script>
+	
 
-	<!-- Modal handling script -->
-	<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle delete modal for sessions
-            const deleteModal = document.getElementById('deleteSessionModal');
-            const deleteForm = document.getElementById('deleteSessionForm');
-            const sessionTitleSpan = document.getElementById('sessionTitleToDelete');
-            const libraryGameInfo = document.getElementById('libraryGameInfo');
-            const gameNameSpan = document.getElementById('gameNameToRelease');
-            const deleteButtons = document.querySelectorAll('.delete-session-btn');
-            
-            // Event handling for delete buttons
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const sessionId = this.getAttribute('data-session-id');
-                    const sessionTitle = this.getAttribute('data-session-title');
-                    const isLibraryGame = this.getAttribute('data-is-library-game') === 'true';
-                    const gameName = this.getAttribute('data-game-name');
-                    
-                    // Update modal content
-                    sessionTitleSpan.textContent = sessionTitle;
-                    deleteForm.action = '/game-sessions/' + sessionId + '/delete';
-                    
-                    // Show/hide library game info
-                    if (isLibraryGame && gameName) {
-                        gameNameSpan.textContent = gameName;
-                        libraryGameInfo.style.display = 'block';
-                    } else {
-                        libraryGameInfo.style.display = 'none';
-                    }
-                    
-                    // Show modal
-                    const modalInstance = new bootstrap.Modal(deleteModal);
-                    modalInstance.show();
-                });
-            });
-        });
-    </script>
+	
 </body>
 </html>
