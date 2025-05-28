@@ -4,14 +4,16 @@ import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,14 +24,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ezequiel.reiunio.entity.Game;
 import com.ezequiel.reiunio.entity.GameSession;
 import com.ezequiel.reiunio.entity.User;
-import com.ezequiel.reiunio.enums.GameSessionStatus;
 import com.ezequiel.reiunio.enums.ActionType;
+import com.ezequiel.reiunio.enums.GameSessionStatus;
 import com.ezequiel.reiunio.service.AuditLogService;
 import com.ezequiel.reiunio.service.FileUploadService; // AGREGADO
 import com.ezequiel.reiunio.service.GameService;
@@ -323,17 +326,37 @@ public class GameSessionController {
     }
 
 
-    // NUEVO: Edit game session form
     @GetMapping("/{id}/edit")
     @PreAuthorize("hasRole('ADMIN') or @securityUtils.isGameSessionCreator(#id, principal.username)")
     public String editGameSession(@PathVariable Long id, Model model) {
         Optional<GameSession> gameSession = gameSessionService.findById(id);
         
         if (gameSession.isPresent()) {
-            List<Game> games = gameService.findAll(); // Mostrar TODOS los juegos
+            GameSession session = gameSession.get();
             
-            model.addAttribute("gameSession", gameSession.get());
-            model.addAttribute("games", games);
+            // Obtener juegos disponibles
+            List<Game> availableGames = gameService.findByAvailable(true);
+            
+            // Si la sesión actual usa un juego de biblioteca, agregarlo a la lista 
+            // aunque no esté disponible (para que aparezca seleccionado)
+            if (session.getGame() != null) {
+                Game currentGame = session.getGame();
+                // Solo agregar si no está ya en la lista de disponibles
+                boolean isAlreadyInList = availableGames.stream()
+                        .anyMatch(game -> game.getId().equals(currentGame.getId()));
+                
+                if (!isAlreadyInList) {
+                    // Crear una nueva lista mutable y agregar el juego actual
+                    availableGames = new ArrayList<>(availableGames);
+                    availableGames.add(currentGame);
+                    
+                    // Ordenar la lista por nombre para mantener consistencia
+                    availableGames.sort(Comparator.comparing(Game::getName));
+                }
+            }
+            
+            model.addAttribute("gameSession", session);
+            model.addAttribute("games", availableGames);
             model.addAttribute("editing", true);
             return "game-sessions/form";
         } else {
@@ -667,5 +690,46 @@ public class GameSessionController {
         });
         
         return "game-sessions/list";
+    }
+    /**
+     * AJAX endpoint para obtener información de juego incluyendo imagen
+     */
+    @GetMapping("/api/game-info/{gameId}")
+    @ResponseBody
+    public ResponseEntity<GameInfoResponse> getGameInfo(@PathVariable Long gameId) {
+        try {
+            Optional<Game> gameOpt = gameService.findById(gameId);
+            
+            if (!gameOpt.isPresent()) {
+                return ResponseEntity.badRequest().body(new GameInfoResponse(false, "Game not found", null));
+            }
+            
+            Game game = gameOpt.get();
+            return ResponseEntity.ok(new GameInfoResponse(true, "Game information loaded successfully", game));
+            
+        } catch (Exception e) {
+            log.error("Error getting game info for gameId: " + gameId, e);
+            return ResponseEntity.internalServerError().body(new GameInfoResponse(false, "Error loading game information", null));
+        }
+    }
+
+    /**
+     * Response class for game info AJAX requests
+     */
+    public static class GameInfoResponse {
+        private boolean success;
+        private String message;
+        private Game game;
+        
+        public GameInfoResponse(boolean success, String message, Game game) {
+            this.success = success;
+            this.message = message;
+            this.game = game;
+        }
+        
+        // Getters
+        public boolean isSuccess() { return success; }
+        public String getMessage() { return message; }
+        public Game getGame() { return game; }
     }
 }
