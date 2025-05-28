@@ -1,2 +1,2 @@
 # reiunio
-Repositorio para el TFC REIUNIO
+Repositorio para el TFC del Sotero Hernandez REIUNIO
