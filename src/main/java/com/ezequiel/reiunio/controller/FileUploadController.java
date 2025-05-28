@@ -84,7 +84,9 @@ public class FileUploadController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
-        return "redirect:/users/" + userId;
+        // Determinar la redirección correcta
+        String referer = determineRedirectForUser(userId, principal);
+        return "redirect:" + referer;
     }
 
     /**
@@ -144,7 +146,7 @@ public class FileUploadController {
             Optional<Game> gameOpt = gameService.findById(gameId);
             if (!gameOpt.isPresent()) {
                 redirectAttributes.addFlashAttribute("error", "Game not found");
-                return "redirect:/games/" + gameId;
+                return "redirect:/games";
             }
 
             Game game = gameOpt.get();
@@ -223,7 +225,7 @@ public class FileUploadController {
     }
 
     /**
-     * NUEVO: Upload game session custom image
+     * Upload game session custom image
      */
     @PostMapping("/game-session/{sessionId}/photo")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER') or @securityUtils.isGameSessionCreator(#sessionId, principal.username)")
@@ -235,7 +237,7 @@ public class FileUploadController {
             Optional<GameSession> sessionOpt = gameSessionService.findById(sessionId);
             if (!sessionOpt.isPresent()) {
                 redirectAttributes.addFlashAttribute("error", "Game session not found");
-                return "redirect:/game-sessions/" + sessionId;
+                return "redirect:/game-sessions";
             }
 
             GameSession gameSession = sessionOpt.get();
@@ -276,7 +278,7 @@ public class FileUploadController {
     }
 
     /**
-     * NUEVO: Upload game session custom image via AJAX
+     * Upload game session custom image via AJAX
      */
     @PostMapping("/game-session/{sessionId}/photo/ajax")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER') or @securityUtils.isGameSessionCreator(#sessionId, principal.username)")
@@ -335,7 +337,7 @@ public class FileUploadController {
         Optional<User> userOpt = userService.findById(userId);
         if (!userOpt.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "User not found");
-            return "redirect:/users/" + userId;
+            return "redirect:/users";
         }
 
         User user = userOpt.get();
@@ -354,7 +356,9 @@ public class FileUploadController {
             redirectAttributes.addFlashAttribute("message", "Profile photo deleted successfully");
         }
 
-        return "redirect:/users/" + userId;
+        // Determinar la redirección correcta
+        String referer = determineRedirectForUser(userId, principal);
+        return "redirect:" + referer;
     }
 
     /**
@@ -368,7 +372,7 @@ public class FileUploadController {
         Optional<Game> gameOpt = gameService.findById(gameId);
         if (!gameOpt.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Game not found");
-            return "redirect:/games/" + gameId;
+            return "redirect:/games";
         }
 
         Game game = gameOpt.get();
@@ -391,7 +395,7 @@ public class FileUploadController {
     }
 
     /**
-     * NUEVO: Delete game session custom image
+     * Delete game session custom image
      */
     @PostMapping("/game-session/{sessionId}/photo/delete")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER') or @securityUtils.isGameSessionCreator(#sessionId, principal.username)")
@@ -401,7 +405,7 @@ public class FileUploadController {
         Optional<GameSession> sessionOpt = gameSessionService.findById(sessionId);
         if (!sessionOpt.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Game session not found");
-            return "redirect:/game-sessions/" + sessionId;
+            return "redirect:/game-sessions";
         }
 
         GameSession gameSession = sessionOpt.get();
@@ -421,6 +425,33 @@ public class FileUploadController {
         }
 
         return "redirect:/game-sessions/" + sessionId;
+    }
+
+    /**
+     * Determina la redirección correcta para operaciones de usuario
+     */
+    private String determineRedirectForUser(Long userId, Principal principal) {
+        try {
+            Optional<User> currentUserOpt = userService.findByUsername(principal.getName());
+            if (currentUserOpt.isPresent()) {
+                User currentUser = currentUserOpt.get();
+                
+                // Si es el mismo usuario, redirigir al perfil
+                if (currentUser.getId().equals(userId)) {
+                    return "/users/profile";
+                }
+                
+                // Si es admin editando otro usuario, redirigir a la vista del usuario
+                if (currentUser.getRole().name().equals("ADMIN")) {
+                    return "/users/" + userId;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error determining redirect for user {}: {}", userId, e.getMessage());
+        }
+        
+        // Fallback por defecto
+        return "/users/" + userId;
     }
 
     /**
