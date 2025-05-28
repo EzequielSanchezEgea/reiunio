@@ -110,7 +110,7 @@
                                         Please enter a valid username.
                                     </div>
                                     <div class="invalid-feedback" th:unless="${#fields.hasErrors('username')}">
-                                        Username must be 3-50 characters. Only letters, numbers, dots, hyphens and underscores allowed.
+                                        Username malformed (3-50 characters) or already taken
                                     </div>
                                     <div class="form-text">
                                         <small>3-50 characters. Only letters, numbers, dots, hyphens and underscores.</small>
@@ -124,7 +124,7 @@
                                         Please enter a valid email.
                                     </div>
                                     <div class="invalid-feedback" th:unless="${#fields.hasErrors('email')}">
-                                        Please enter a valid email address.
+                                        Invalid address or already taken.
                                     </div>
                                 </div>
                             </div>
