@@ -1065,3 +1065,163 @@ small, .small {
 .btn-inline:last-child {
     margin-right: 0;
 }
+
+/* User Form CSS - Simple validation styles */
+
+/* Password Strength Indicator */
+.password-strength {
+    height: 4px;
+    margin-top: 5px;
+    border-radius: 2px;
+    background-color: #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.strength-weak { 
+    background: linear-gradient(to right, #dc3545 25%, #e9ecef 25%); 
+}
+
+.strength-fair { 
+    background: linear-gradient(to right, #fd7e14 50%, #e9ecef 50%); 
+}
+
+.strength-good { 
+    background: linear-gradient(to right, #ffc107 75%, #e9ecef 75%); 
+}
+
+.strength-strong { 
+    background: linear-gradient(to right, #198754 100%, #e9ecef 100%); 
+}
+
+/* Password Feedback Text */
+.password-feedback {
+    font-size: 0.875rem;
+    margin-top: 5px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.text-weak { color: #dc3545; }
+.text-fair { color: #fd7e14; }
+.text-good { color: #ffc107; }
+.text-strong { color: #198754; }
+
+/* Password Requirements */
+.password-requirements {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+}
+
+.requirement {
+    margin-bottom: 2px;
+    transition: color 0.3s ease;
+}
+
+.requirement:last-child {
+    margin-bottom: 0;
+}
+
+.requirement.met { 
+    color: #198754; 
+    font-weight: 500;
+}
+
+.requirement.unmet { 
+    color: #dc3545; 
+}
+
+/* Form enhancements */
+.form-label.required {
+    font-weight: 500;
+}
+
+/* Input group for password with toggle */
+.input-group .btn {
+    border-left: none;
+}
+
+.input-group .form-control:focus + .btn {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Role description card */
+.card.bg-light {
+    border: 1px solid #dee2e6;
+}
+
+.card.bg-light .card-body {
+    padding: 1rem;
+}
+
+/* Photo upload styles */
+.profile-photo-preview {
+    transition: transform 0.3s ease;
+}
+
+.profile-photo-preview:hover {
+    transform: scale(1.05);
+}
+
+.photo-upload-form {
+    background: #f8f9fa;
+    border: 1px dashed #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.photo-actions .btn {
+    margin-bottom: 0.5rem;
+}
+
+/* Validation states enhancement */
+.was-validated .form-control:invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.8m0-2.8-2.4 2.8'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.was-validated .form-control:valid {
+    border-color: #198754;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.4.42c.34.28.76.42 1.2.42.47 0 .92-.18 1.24-.49.32-.31.51-.74.51-1.18 0-.65-.5-1.18-1.13-1.18-.61 0-1.11.49-1.15 1.12-.02.07-.02.15-.02.24 0 .32.13.62.37.83z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Select validation states */
+.was-validated .form-select:invalid {
+    border-color: #dc3545;
+}
+
+.was-validated .form-select:valid {
+    border-color: #198754;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .password-requirements {
+        font-size: 0.75rem;
+        padding: 0.4rem;
+    }
+    
+    .profile-photo-preview {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    
+    .photo-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
