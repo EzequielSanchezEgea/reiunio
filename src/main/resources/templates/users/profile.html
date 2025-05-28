@@ -13,12 +13,15 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <div class="container my-4">
+        <!-- SUCCESS/ERROR MESSAGES -->
         <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
             <span th:text="${message}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
         <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
             <span th:text="${error}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -35,6 +38,7 @@
                         <div class="mb-3">
                             <img th:src="${user.profilePhotoUrl}" 
                                  th:alt="'Profile photo of ' + ${user.firstName}"
+                                 id="currentProfileImage"
                                  class="rounded-circle img-fluid profile-photo-preview"
                                  style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #dee2e6;">
                         </div>
@@ -296,6 +300,7 @@
             const cancelUploadBtn = document.querySelector('.cancel-upload');
             const uploadForm = document.querySelector('.photo-upload-form');
             const photoActions = document.querySelector('.photo-actions');
+            const currentImage = document.getElementById('currentProfileImage');
 
             if (showUploadBtn && uploadForm && photoActions) {
                 showUploadBtn.addEventListener('click', function() {
@@ -307,6 +312,41 @@
                     uploadForm.style.display = 'none';
                     photoActions.style.display = 'block';
                     uploadForm.querySelector('input[type="file"]').value = '';
+                });
+            }
+
+            // Handle form submission for photo upload
+            const uploadFormElement = document.querySelector('.photo-upload-form');
+            if (uploadFormElement) {
+                uploadFormElement.addEventListener('submit', function(e) {
+                    const fileInput = this.querySelector('input[type="file"]');
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    
+                    if (fileInput.files.length === 0) {
+                        e.preventDefault();
+                        alert('Please select a file to upload.');
+                        return false;
+                    }
+                    
+                    // Validate file size (2MB = 2 * 1024 * 1024 bytes)
+                    const file = fileInput.files[0];
+                    if (file.size > 2 * 1024 * 1024) {
+                        e.preventDefault();
+                        alert('File size exceeds 2MB limit. Please choose a smaller image.');
+                        return false;
+                    }
+                    
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        e.preventDefault();
+                        alert('Please select a valid image file (JPG, PNG, GIF, or WebP).');
+                        return false;
+                    }
+                    
+                    // Show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
                 });
             }
         });
