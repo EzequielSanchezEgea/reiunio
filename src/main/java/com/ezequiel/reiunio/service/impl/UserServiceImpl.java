@@ -1,5 +1,6 @@
 package com.ezequiel.reiunio.service.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,8 +12,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ezequiel.reiunio.entity.Loan;
 import com.ezequiel.reiunio.entity.User;
+import com.ezequiel.reiunio.enums.LoanStatus;
 import com.ezequiel.reiunio.enums.Role;
+import com.ezequiel.reiunio.repository.LoanRepository;
 import com.ezequiel.reiunio.repository.UserRepository;
 import com.ezequiel.reiunio.service.UserService;
 
@@ -30,6 +34,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LoanRepository loanRepository;
 
     /**
      * Retrieves all users from the repository.
@@ -108,7 +113,43 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteById(Long id) {
         log.debug("Deleting user by id: {}", id);
-        userRepository.deleteById(id);
+        
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            List<Loan> activeLoans = user.getLoans().stream()
+                    .filter(loan -> loan.getStatus() == LoanStatus.ACTIVE)
+                    .toList();
+            
+            List<Loan> overdueLoans = user.getLoans().stream()
+                    .filter(loan -> loan.getStatus() == LoanStatus.ACTIVE && 
+                                   loan.getEstimatedReturnDate().isBefore(LocalDate.now()))
+                    .toList();
+            
+            if (!activeLoans.isEmpty()) {
+                String message = "Cannot delete user with active loans. ";
+                if (!overdueLoans.isEmpty()) {
+                    message += "User has " + overdueLoans.size() + " overdue loan(s) and " + 
+                              (activeLoans.size() - overdueLoans.size()) + " current loan(s). ";
+                } else {
+                    message += "User has " + activeLoans.size() + " active loan(s). ";
+                }
+                message += "Please return all borrowed games first.";
+                throw new IllegalStateException(message);
+            }
+            
+            List<Loan> completedLoans = user.getLoans().stream()
+                    .filter(loan -> loan.getStatus() == LoanStatus.RETURNED || 
+                                   loan.getStatus() == LoanStatus.LATE)
+                    .toList();
+            
+            for (Loan loan : completedLoans) {
+                loanRepository.delete(loan);
+            }
+            
+            userRepository.deleteById(id);
+        }
     }
 
     /**
