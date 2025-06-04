@@ -1,4 +1,4 @@
-// game-sessions.js - Specific functionalities for game sessions
+// game-sessions.js - Specific functionalities for game sessions - VERSIÓN CORREGIDA
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize functionalities for game sessions
@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initGamePreview();
     initCustomImageUpload();
     initDateValidation();
+    initSessionFeatures();
 });
 
 // Function to initialize game session form validation
@@ -566,48 +567,6 @@ function validateGameSessionForm() {
     return valid;
 }
 
-// Function to handle session deletion (for list pages)
-function initSessionDeletion() {
-    const deleteButtons = document.querySelectorAll('.delete-session-btn');
-    const deleteModal = document.getElementById('deleteSessionModal');
-    const deleteForm = document.getElementById('deleteSessionForm');
-    const sessionTitleSpan = document.getElementById('sessionTitleToDelete');
-    const libraryGameInfo = document.getElementById('libraryGameInfo');
-    const gameNameSpan = document.getElementById('gameNameToRelease');
-    
-    if (!deleteButtons.length || !deleteModal) return;
-    
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const sessionId = this.getAttribute('data-session-id');
-            const sessionTitle = this.getAttribute('data-session-title');
-            const isLibraryGame = this.getAttribute('data-is-library-game') === 'true';
-            const gameName = this.getAttribute('data-game-name');
-            
-            // Update modal content
-            if (sessionTitleSpan) sessionTitleSpan.textContent = sessionTitle;
-            if (deleteForm) deleteForm.action = '/game-sessions/' + sessionId + '/delete';
-            
-            // Show/hide library game info
-            if (libraryGameInfo && gameNameSpan) {
-                if (isLibraryGame && gameName) {
-                    gameNameSpan.textContent = gameName;
-                    libraryGameInfo.style.display = 'block';
-                } else {
-                    libraryGameInfo.style.display = 'none';
-                }
-            }
-            
-            // Show modal
-            const modalInstance = new bootstrap.Modal(deleteModal);
-            modalInstance.show();
-        });
-    });
-}
-
 // Function to handle session filters (for list pages)
 function initSessionFilters() {
     const filterButtons = document.querySelectorAll('.btn[href*="filter="]');
@@ -632,13 +591,8 @@ function initSessionFeatures() {
     }
 }
 
-// Initialize all session features when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initSessionFeatures();
-});
-
-// Handle delete modal for sessions
-document.addEventListener('DOMContentLoaded', function() {
+// ✅ FUNCIÓN CORREGIDA: Handle delete modal for sessions
+function initSessionDeletion() {
     const deleteModal = document.getElementById('deleteSessionModal');
     const deleteForm = document.getElementById('deleteSessionForm');
     const sessionTitleSpan = document.getElementById('sessionTitleToDelete');
@@ -646,8 +600,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const gameNameSpan = document.getElementById('gameNameToRelease');
     const deleteButtons = document.querySelectorAll('.delete-session-btn');
     
+    console.log('🚀 Inicializando modal de eliminación:', {
+        modal: !!deleteModal,
+        form: !!deleteForm,
+        titleSpan: !!sessionTitleSpan,
+        libraryInfo: !!libraryGameInfo,
+        gameNameSpan: !!gameNameSpan,
+        buttons: deleteButtons.length
+    });
+    
+    if (!deleteModal || !deleteForm || deleteButtons.length === 0) {
+        console.warn('⚠️ Elementos del modal de eliminación no encontrados');
+        return;
+    }
+    
     // Event handling for delete buttons
-    deleteButtons.forEach(button => {
+    deleteButtons.forEach((button, index) => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -657,21 +625,75 @@ document.addEventListener('DOMContentLoaded', function() {
             const isLibraryGame = this.getAttribute('data-is-library-game') === 'true';
             const gameName = this.getAttribute('data-game-name');
             
+            console.log(`🎯 Delete button ${index} clicked:`, {
+                sessionId,
+                sessionTitle,
+                isLibraryGame,
+                gameName
+            });
+            
             // Update modal content
-            if (sessionTitleSpan) sessionTitleSpan.textContent = sessionTitle;
-            if (deleteForm) deleteForm.action = '/game-sessions/' + sessionId + '/delete';
+            if (sessionTitleSpan) {
+                sessionTitleSpan.textContent = sessionTitle || 'Unknown Session';
+            }
+            
+            if (deleteForm) {
+                deleteForm.action = '/game-sessions/' + sessionId + '/delete';
+                console.log('📝 Form action set to:', deleteForm.action);
+            }
             
             // Show/hide library game info
             if (isLibraryGame && gameName && gameNameSpan && libraryGameInfo) {
                 gameNameSpan.textContent = gameName;
                 libraryGameInfo.style.display = 'block';
+                console.log('📚 Showing library game info for:', gameName);
             } else if (libraryGameInfo) {
                 libraryGameInfo.style.display = 'none';
+                console.log('🎮 Hiding library game info (personal game)');
             }
             
-            // Show modal
-            const modalInstance = new bootstrap.Modal(deleteModal);
-            modalInstance.show();
+            // Show modal usando Bootstrap 5
+            try {
+                const modalInstance = new bootstrap.Modal(deleteModal, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+                modalInstance.show();
+                console.log('✅ Modal mostrado correctamente');
+            } catch (error) {
+                console.error('❌ Error showing modal:', error);
+            }
         });
     });
-});
+    
+
+    deleteModal.addEventListener('hidden.bs.modal', function () {
+        console.log('🧹 Modal closed, cleaning up');
+        
+        // Limpiar contenido
+        if (sessionTitleSpan) sessionTitleSpan.textContent = '';
+        if (deleteForm) deleteForm.action = '';
+        if (libraryGameInfo) libraryGameInfo.style.display = 'none';
+        if (gameNameSpan) gameNameSpan.textContent = '';
+    });
+    
+ 
+    deleteModal.addEventListener('show.bs.modal', function () {
+        console.log('📱 Modal about to show');
+    });
+    
+    deleteModal.addEventListener('shown.bs.modal', function () {
+        console.log('✨ Modal shown successfully');
+    });
+    
+    deleteModal.addEventListener('hide.bs.modal', function () {
+        console.log('🔄 Modal about to hide');
+    });
+    
+
+    deleteForm.addEventListener('submit', function(e) {
+        console.log('📤 Form submitted, action:', this.action);
+
+    });
+}
