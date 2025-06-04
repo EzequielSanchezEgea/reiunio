@@ -51,7 +51,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- Statistics summary -->
 		<div class="row mb-4">
 			<div class="col-lg-12">
@@ -98,7 +98,8 @@
 
 		<!-- Advanced Filters -->
 		<div class="card games-filter-card mb-4">
-			<div class="card-header d-flex justify-content-between align-items-center">
+			<div
+				class="card-header d-flex justify-content-between align-items-center">
 				<h5 class="mb-0">
 					<i class="bi bi-funnel-fill"></i> Game Filters
 				</h5>
@@ -109,24 +110,26 @@
 				</button>
 			</div>
 			<div class="card-body">
-				<form th:action="@{/games}" method="get" class="filter-form" id="filterForm">
+				<form th:action="@{/games}" method="get" class="filter-form"
+					id="filterForm">
 					<!-- Hidden inputs to preserve pagination -->
-					<input type="hidden" name="page" value="0">
-					<input type="hidden" name="size" th:value="${pageSize ?: 20}">
-					<input type="hidden" name="sortBy" th:value="${sortBy ?: 'name'}">
+					<input type="hidden" name="page" value="0"> <input
+						type="hidden" name="size" th:value="${pageSize ?: 20}"> <input
+						type="hidden" name="sortBy" th:value="${sortBy ?: 'name'}">
 					<input type="hidden" name="sortDir" th:value="${sortDir ?: 'asc'}">
 
 					<!-- Basic Filters (Always Visible) -->
 					<div class="row g-3 mb-3">
 						<div class="col-md-4">
-							<label for="name" class="form-label games-label">Game Name</label>
-							<input type="text" class="form-control games-input"
+							<label for="name" class="form-label games-label">Game
+								Name</label> <input type="text" class="form-control games-input"
 								id="name" name="name" th:value="${filterName}"
 								placeholder="Search by name...">
 						</div>
 						<div class="col-md-4">
 							<label for="category" class="form-label games-label">Category</label>
-							<select class="form-select games-input" id="category" name="category">
+							<select class="form-select games-input" id="category"
+								name="category">
 								<option value="">All Categories</option>
 								<option th:each="cat : ${categories}" th:value="${cat}"
 									th:text="${cat}"
@@ -136,12 +139,14 @@
 						</div>
 						<div class="col-md-4">
 							<label for="available" class="form-label games-label">Availability</label>
-							<select class="form-select games-input" id="available" name="available">
+							<select class="form-select games-input" id="available"
+								name="available">
 								<option value="">All</option>
 								<option value="true"
 									th:selected="${filterAvailable != null && filterAvailable == true}">Available</option>
 								<option value="false"
-									th:selected="${filterAvailable != null && filterAvailable == false}">Not Available</option>
+									th:selected="${filterAvailable != null && filterAvailable == false}">Not
+									Available</option>
 							</select>
 						</div>
 					</div>
@@ -154,8 +159,9 @@
 							</h6>
 							<div class="row g-3 mb-3">
 								<div class="col-md-3">
-									<label for="state" class="form-label games-label">Game State</label>
-									<select class="form-select games-input" id="state" name="state">
+									<label for="state" class="form-label games-label">Game
+										State</label> <select class="form-select games-input" id="state"
+										name="state">
 										<option value="">All States</option>
 										<option th:each="stateOption : ${gameStates}"
 											th:value="${stateOption}" th:text="${stateOption}"
@@ -164,19 +170,22 @@
 									</select>
 								</div>
 								<div class="col-md-3">
-									<label for="minPlayers" class="form-label games-label">Min Players</label>
-									<input type="number" class="form-control games-input"
+									<label for="minPlayers" class="form-label games-label">Min
+										Players</label> <input type="number" class="form-control games-input"
 										id="minPlayers" name="minPlayers"
-										th:value="${filterMinPlayers}" min="1" max="20" placeholder="Min">
+										th:value="${filterMinPlayers}" min="1" max="20"
+										placeholder="Min">
 								</div>
 								<div class="col-md-3">
-									<label for="maxPlayers" class="form-label games-label">Max Players</label>
-									<input type="number" class="form-control games-input"
+									<label for="maxPlayers" class="form-label games-label">Max
+										Players</label> <input type="number" class="form-control games-input"
 										id="maxPlayers" name="maxPlayers"
-										th:value="${filterMaxPlayers}" min="1" max="20" placeholder="Max">
+										th:value="${filterMaxPlayers}" min="1" max="20"
+										placeholder="Max">
 								</div>
 								<div class="col-md-3">
-									<label class="form-label games-label">Duration (minutes)</label>
+									<label class="form-label games-label">Duration
+										(minutes)</label>
 									<div class="row g-1">
 										<div class="col-6">
 											<input type="number"
@@ -197,7 +206,8 @@
 					</div>
 
 					<div class="d-flex justify-content-end gap-2 mt-3">
-						<button type="button" class="btn games-btn-secondary reset-filters">
+						<button type="button"
+							class="btn games-btn-secondary reset-filters">
 							<i class="bi bi-arrow-clockwise"></i> Clear All
 						</button>
 						<button type="submit" class="btn games-btn-primary">
@@ -213,25 +223,29 @@
 			<div class="card-body">
 				<div class="row align-items-center">
 					<div class="col-md-4">
-						<form method="get" class="d-flex align-items-center" id="pageSizeForm">
+						<form method="get" class="d-flex align-items-center"
+							id="pageSizeForm">
 							<!-- Preserve current filters -->
 							<input type="hidden" name="name" th:value="${filterName}">
 							<input type="hidden" name="category" th:value="${filterCategory}">
-							<input type="hidden" name="available" th:value="${filterAvailable}">
-							<input type="hidden" name="state" th:value="${filterState}">
-							<input type="hidden" name="minPlayers" th:value="${filterMinPlayers}">
-							<input type="hidden" name="maxPlayers" th:value="${filterMaxPlayers}">
-							<input type="hidden" name="minDuration" th:value="${filterMinDuration}">
-							<input type="hidden" name="maxDuration" th:value="${filterMaxDuration}">
+							<input type="hidden" name="available"
+								th:value="${filterAvailable}"> <input type="hidden"
+								name="state" th:value="${filterState}"> <input
+								type="hidden" name="minPlayers" th:value="${filterMinPlayers}">
+							<input type="hidden" name="maxPlayers"
+								th:value="${filterMaxPlayers}"> <input type="hidden"
+								name="minDuration" th:value="${filterMinDuration}"> <input
+								type="hidden" name="maxDuration" th:value="${filterMaxDuration}">
 							<input type="hidden" name="sortBy" th:value="${sortBy}">
 							<input type="hidden" name="sortDir" th:value="${sortDir}">
-							<input type="hidden" name="page" value="0">
-							
-							<label for="pageSize" class="form-label games-label me-2 mb-0">Games per page:</label>
-							<select name="size" id="pageSize"
-								class="form-select form-select-sm games-input me-2" style="width: auto;">
+							<input type="hidden" name="page" value="0"> <label
+								for="pageSize" class="form-label games-label me-2 mb-0">Games
+								per page:</label> <select name="size" id="pageSize"
+								class="form-select form-select-sm games-input me-2"
+								style="width: auto;">
 								<option value="10" th:selected="${pageSize == 10}">10</option>
-								<option value="20" th:selected="${pageSize == 20 or pageSize == null}">20</option>
+								<option value="20"
+									th:selected="${pageSize == 20 or pageSize == null}">20</option>
 								<option value="50" th:selected="${pageSize == 50}">50</option>
 								<option value="100" th:selected="${pageSize == 100}">100</option>
 							</select>
@@ -241,34 +255,49 @@
 						</form>
 					</div>
 					<div class="col-md-5">
-						<form method="get" class="d-flex align-items-center justify-content-center" id="sortForm">
+						<form method="get"
+							class="d-flex align-items-center justify-content-center"
+							id="sortForm">
 							<!-- Preserve current filters and pagination -->
 							<input type="hidden" name="name" th:value="${filterName}">
 							<input type="hidden" name="category" th:value="${filterCategory}">
-							<input type="hidden" name="available" th:value="${filterAvailable}">
-							<input type="hidden" name="state" th:value="${filterState}">
-							<input type="hidden" name="minPlayers" th:value="${filterMinPlayers}">
-							<input type="hidden" name="maxPlayers" th:value="${filterMaxPlayers}">
-							<input type="hidden" name="minDuration" th:value="${filterMinDuration}">
-							<input type="hidden" name="maxDuration" th:value="${filterMaxDuration}">
+							<input type="hidden" name="available"
+								th:value="${filterAvailable}"> <input type="hidden"
+								name="state" th:value="${filterState}"> <input
+								type="hidden" name="minPlayers" th:value="${filterMinPlayers}">
+							<input type="hidden" name="maxPlayers"
+								th:value="${filterMaxPlayers}"> <input type="hidden"
+								name="minDuration" th:value="${filterMinDuration}"> <input
+								type="hidden" name="maxDuration" th:value="${filterMaxDuration}">
 							<input type="hidden" name="page" th:value="${currentPage}">
 							<input type="hidden" name="size" th:value="${pageSize}">
 
-							<label for="sortBy" class="form-label games-label me-2 mb-0">Sort by:</label>
-							<select name="sortBy" id="sortBy"
-								class="form-select form-select-sm games-input me-2" style="width: auto;">
-								<option value="name" th:selected="${sortBy == 'name' or sortBy == null}">Name</option>
+							<label for="sortBy" class="form-label games-label me-2 mb-0">Sort
+								by:</label> <select name="sortBy" id="sortBy"
+								class="form-select form-select-sm games-input me-2"
+								style="width: auto;">
+								<option value="name"
+									th:selected="${sortBy == 'name' or sortBy == null}">Name</option>
 								<option value="category" th:selected="${sortBy == 'category'}">Category</option>
-								<option value="minPlayers" th:selected="${sortBy == 'minPlayers'}">Min Players</option>
-								<option value="maxPlayers" th:selected="${sortBy == 'maxPlayers'}">Max Players</option>
-								<option value="durationMinutes" th:selected="${sortBy == 'durationMinutes'}">Duration</option>
-								<option value="acquisitionDate" th:selected="${sortBy == 'acquisitionDate'}">Acquisition Date</option>
+								<option value="minPlayers"
+									th:selected="${sortBy == 'minPlayers'}">Min Players</option>
+								<option value="maxPlayers"
+									th:selected="${sortBy == 'maxPlayers'}">Max Players</option>
+								<option value="durationMinutes"
+									th:selected="${sortBy == 'durationMinutes'}">Duration</option>
+								<option value="acquisitionDate"
+									th:selected="${sortBy == 'acquisitionDate'}">Acquisition
+									Date</option>
 								<option value="available" th:selected="${sortBy == 'available'}">Availability</option>
 								<option value="state" th:selected="${sortBy == 'state'}">State</option>
-							</select>
-							<select name="sortDir" class="form-select form-select-sm games-input me-2" style="width: auto;">
-								<option value="asc" th:selected="${sortDir == 'asc' or sortDir == null}">↑ Asc</option>
-								<option value="desc" th:selected="${sortDir == 'desc'}">↓ Desc</option>
+							</select> <select name="sortDir"
+								class="form-select form-select-sm games-input me-2"
+								style="width: auto;">
+								<option value="asc"
+									th:selected="${sortDir == 'asc' or sortDir == null}">↑
+									Asc</option>
+								<option value="desc" th:selected="${sortDir == 'desc'}">↓
+									Desc</option>
 							</select>
 							<button type="submit"
 								class="btn btn-sm games-btn-outline d-flex align-items-center justify-content-center"
@@ -276,9 +305,9 @@
 						</form>
 					</div>
 					<div class="col-md-3 text-end">
-						<small class="games-info-text">
-							Showing <span th:text="${games != null ? #lists.size(games) : 0}">0</span> of 
-							<span th:text="${totalElements ?: 0}">0</span> games
+						<small class="games-info-text"> Showing <span
+							th:text="${games != null ? #lists.size(games) : 0}">0</span> of <span
+							th:text="${totalElements ?: 0}">0</span> games
 						</small>
 					</div>
 				</div>
@@ -293,23 +322,41 @@
 						<table class="table games-table">
 							<thead>
 								<tr>
-									<th><a th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='name', sortDir=${sortBy == 'name' and sortDir == 'asc' ? 'desc' : 'asc'})}" class="games-sort-link">
-										Name <i th:if="${sortBy == 'name'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+									<th><a
+										th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='name', sortDir=${sortBy == 'name' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+										class="games-sort-link"> Name <i
+											th:if="${sortBy == 'name'}"
+											th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
 									</a></th>
-									<th><a th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='category', sortDir=${sortBy == 'category' and sortDir == 'asc' ? 'desc' : 'asc'})}" class="games-sort-link">
-										Category <i th:if="${sortBy == 'category'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+									<th><a
+										th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='category', sortDir=${sortBy == 'category' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+										class="games-sort-link"> Category <i
+											th:if="${sortBy == 'category'}"
+											th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
 									</a></th>
-									<th><a th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='minPlayers', sortDir=${sortBy == 'minPlayers' and sortDir == 'asc' ? 'desc' : 'asc'})}" class="games-sort-link">
-										Players <i th:if="${sortBy == 'minPlayers'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+									<th><a
+										th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='minPlayers', sortDir=${sortBy == 'minPlayers' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+										class="games-sort-link"> Players <i
+											th:if="${sortBy == 'minPlayers'}"
+											th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
 									</a></th>
-									<th><a th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='durationMinutes', sortDir=${sortBy == 'durationMinutes' and sortDir == 'asc' ? 'desc' : 'asc'})}" class="games-sort-link">
-										Duration <i th:if="${sortBy == 'durationMinutes'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+									<th><a
+										th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='durationMinutes', sortDir=${sortBy == 'durationMinutes' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+										class="games-sort-link"> Duration <i
+											th:if="${sortBy == 'durationMinutes'}"
+											th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
 									</a></th>
-									<th><a th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='state', sortDir=${sortBy == 'state' and sortDir == 'asc' ? 'desc' : 'asc'})}" class="games-sort-link">
-										State <i th:if="${sortBy == 'state'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+									<th><a
+										th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='state', sortDir=${sortBy == 'state' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+										class="games-sort-link"> State <i
+											th:if="${sortBy == 'state'}"
+											th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
 									</a></th>
-									<th><a th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='available', sortDir=${sortBy == 'available' and sortDir == 'asc' ? 'desc' : 'asc'})}" class="games-sort-link">
-										Available <i th:if="${sortBy == 'available'}" th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
+									<th><a
+										th:href="@{/games(name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, page=${currentPage}, size=${pageSize}, sortBy='available', sortDir=${sortBy == 'available' and sortDir == 'asc' ? 'desc' : 'asc'})}"
+										class="games-sort-link"> Available <i
+											th:if="${sortBy == 'available'}"
+											th:class="${sortDir == 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'}"></i>
 									</a></th>
 									<th>Actions</th>
 								</tr>
@@ -318,52 +365,51 @@
 								<tr th:each="game : ${games}" class="games-table-row">
 									<td>
 										<div class="d-flex align-items-center">
-											<img th:src="${game.imageUrl}" th:alt="'Photo of ' + ${game.name}"
+											<img th:src="${game.imageUrl}"
+												th:alt="'Photo of ' + ${game.name}"
 												class="rounded me-2 games-thumbnail"
 												style="width: 40px; height: 40px; object-fit: cover;">
-											<a th:href="@{/games/{id}(id=${game.id})}" th:text="${game.name}" class="games-link fw-bold"></a>
+											<a th:href="@{/games/{id}(id=${game.id})}"
+												th:text="${game.name}" class="games-link fw-bold"></a>
 										</div>
 									</td>
 									<td th:text="${game.category}"></td>
 									<td th:text="${game.minPlayers} + '-' + ${game.maxPlayers}"></td>
 									<td th:text="${game.durationMinutes} + ' min'"></td>
-									<td>
-										<span class="badge games-state-badge" th:text="${game.state}"
-											th:classappend="${game.state.name() == 'NEW' ? 'games-state-new' : 
+									<td><span class="badge games-state-badge"
+										th:text="${game.state}"
+										th:classappend="${game.state.name() == 'NEW' ? 'games-state-new' : 
                                                               game.state.name() == 'GOOD' ? 'games-state-good' : 
                                                               game.state.name() == 'ACCEPTABLE' ? 'games-state-acceptable' : 'games-state-damaged'}">
-										</span>
-									</td>
+									</span></td>
+									<td><span class="badge games-availability-badge"
+										th:text="${game.available ? 'Available' : 'Not available'}"
+										th:classappend="${game.available ? 'games-available' : 'games-not-available'}">
+									</span></td>
 									<td>
-										<span class="badge games-availability-badge"
-											th:text="${game.available ? 'Available' : 'Not available'}"
-											th:classappend="${game.available ? 'games-available' : 'games-not-available'}">
-										</span>
-									</td>
-									<td>
-										<div class="btn-group btn-group-sm games-actions">
+										<div class="d-flex gap-1 align-items-center">
 											<a th:href="@{/games/{id}(id=${game.id})}"
-												class="btn games-btn-outline" title="View details">
+												class="btn btn-sm games-btn-outline" title="View details">
 												<i class="bi bi-eye"></i>
 											</a>
-											<div sec:authorize="hasRole('ADMIN')">
+											<div sec:authorize="hasRole('ADMIN')" class="d-flex gap-1">
 												<a th:href="@{/games/{id}/edit(id=${game.id})}"
-													class="btn games-btn-warning ms-1" title="Edit">
-													<i class="bi bi-pencil"></i>
+													class="btn btn-sm games-btn-warning" title="Edit"> <i
+													class="bi bi-pencil"></i>
 												</a>
-												<button type="button" class="btn games-btn-danger ms-1"
-														title="Delete" data-bs-toggle="modal"
-														th:data-bs-target="'#deleteModal' + ${game.id}">
+												<button type="button" class="btn btn-sm games-btn-danger"
+													title="Delete" data-bs-toggle="modal"
+													th:data-bs-target="'#deleteModal' + ${game.id}">
 													<i class="bi bi-trash"></i>
 												</button>
 
-												<!-- Change availability -->
 												<form th:if="${game.available}"
 													th:action="@{/games/{id}/availability(id=${game.id})}"
 													method="post" class="d-inline">
 													<input type="hidden" name="available" value="false">
-													<button type="submit" class="btn games-btn-secondary ms-1"
-															title="Mark as not available">
+													<button type="submit"
+														class="btn btn-sm games-btn-secondary"
+														title="Mark as not available">
 														<i class="bi bi-x-circle"></i>
 													</button>
 												</form>
@@ -371,8 +417,8 @@
 													th:action="@{/games/{id}/availability(id=${game.id})}"
 													method="post" class="d-inline">
 													<input type="hidden" name="available" value="true">
-													<button type="submit" class="btn games-btn-success ms-1"
-															title="Mark as available">
+													<button type="submit" class="btn btn-sm games-btn-success"
+														title="Mark as available">
 														<i class="bi bi-check-circle"></i>
 													</button>
 												</form>
@@ -385,76 +431,79 @@
 					</div>
 
 					<!-- PAGINATION -->
-					<div class="d-flex justify-content-center mt-4" th:if="${totalPages != null and totalPages > 1}">
+					<div class="d-flex justify-content-center mt-4"
+						th:if="${totalPages != null and totalPages > 1}">
 						<nav aria-label="Games pagination">
 							<ul class="pagination games-pagination">
 								<!-- First page -->
-								<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-									<a class="page-link games-page-link"
-									   th:href="@{/games(page=0, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
-									   aria-label="First">
-										<span aria-hidden="true">&laquo;&laquo;</span>
-									</a>
-								</li>
+								<li class="page-item"
+									th:classappend="${currentPage == 0} ? 'disabled'"><a
+									class="page-link games-page-link"
+									th:href="@{/games(page=0, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
+									aria-label="First"> <span aria-hidden="true">&laquo;&laquo;</span>
+								</a></li>
 
 								<!-- Previous page -->
-								<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-									<a class="page-link games-page-link"
-									   th:href="@{/games(page=${currentPage > 0 ? currentPage - 1 : 0}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
-									   aria-label="Previous">
-										<span aria-hidden="true">&laquo;</span>
-									</a>
-								</li>
+								<li class="page-item"
+									th:classappend="${currentPage == 0} ? 'disabled'"><a
+									class="page-link games-page-link"
+									th:href="@{/games(page=${currentPage > 0 ? currentPage - 1 : 0}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
+									aria-label="Previous"> <span aria-hidden="true">&laquo;</span>
+								</a></li>
 
 								<!-- Page numbers -->
-								<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+								<li class="page-item"
+									th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
 									th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
-									th:classappend="${i == currentPage} ? 'active'">
-									<a class="page-link games-page-link"
-									   th:href="@{/games(page=${i}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
-									   th:text="${i + 1}">1</a>
-								</li>
+									th:classappend="${i == currentPage} ? 'active'"><a
+									class="page-link games-page-link"
+									th:href="@{/games(page=${i}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
+									th:text="${i + 1}">1</a></li>
 
 								<!-- Next page -->
-								<li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+								<li class="page-item"
+									th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
 									<a class="page-link games-page-link"
-									   th:href="@{/games(page=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
-									   aria-label="Next">
-										<span aria-hidden="true">&raquo;</span>
-									</a>
+									th:href="@{/games(page=${currentPage < totalPages - 1 ? currentPage + 1 : totalPages - 1}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
+									aria-label="Next"> <span aria-hidden="true">&raquo;</span>
+								</a>
 								</li>
 
 								<!-- Last page -->
-								<li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+								<li class="page-item"
+									th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
 									<a class="page-link games-page-link"
-									   th:href="@{/games(page=${totalPages - 1}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
-									   aria-label="Last">
-										<span aria-hidden="true">&raquo;&raquo;</span>
-									</a>
+									th:href="@{/games(page=${totalPages - 1}, size=${pageSize}, name=${filterName}, category=${filterCategory}, available=${filterAvailable}, state=${filterState}, minPlayers=${filterMinPlayers}, maxPlayers=${filterMaxPlayers}, minDuration=${filterMinDuration}, maxDuration=${filterMaxDuration}, sortBy=${sortBy}, sortDir=${sortDir})}"
+									aria-label="Last"> <span aria-hidden="true">&raquo;&raquo;</span>
+								</a>
 								</li>
 							</ul>
 						</nav>
 					</div>
 
 					<!-- Pagination info -->
-					<div class="text-center mt-2" th:if="${totalPages != null and totalPages > 1}">
-						<small class="games-info-text">
-							Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">1</span>
+					<div class="text-center mt-2"
+						th:if="${totalPages != null and totalPages > 1}">
+						<small class="games-info-text"> Page <span
+							th:text="${currentPage + 1}">1</span> of <span
+							th:text="${totalPages}">1</span>
 						</small>
 					</div>
 				</div>
 
-				<div th:if="${games == null or games.empty}" class="text-center py-4 games-empty-state">
+				<div th:if="${games == null or games.empty}"
+					class="text-center py-4 games-empty-state">
 					<i class="bi bi-dice-6 games-empty-icon"></i>
 					<h3 class="mt-3 games-empty-title">No games found</h3>
-					<p class="lead games-empty-text">No games match the search criteria.</p>
+					<p class="lead games-empty-text">No games match the search
+						criteria.</p>
 					<div class="mt-3">
-						<a href="/games" class="btn games-btn-outline me-2">
-							<i class="bi bi-arrow-clockwise"></i> Clear Filters
+						<a href="/games" class="btn games-btn-outline me-2"> <i
+							class="bi bi-arrow-clockwise"></i> Clear Filters
 						</a>
 						<div sec:authorize="hasRole('ADMIN')">
-							<a href="/games/new" class="btn games-btn-primary">
-								<i class="bi bi-plus-circle"></i> Add New Game
+							<a href="/games/new" class="btn games-btn-primary"> <i
+								class="bi bi-plus-circle"></i> Add New Game
 							</a>
 						</div>
 					</div>
@@ -469,22 +518,28 @@
 				<div class="modal-dialog">
 					<div class="modal-content games-modal">
 						<div class="modal-header games-modal-header">
-							<h5 class="modal-title" id="deleteModalLabel">Confirm deletion</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							<h5 class="modal-title" id="deleteModalLabel">Confirm
+								deletion</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"
+								aria-label="Close"></button>
 						</div>
 						<div class="modal-body persistent">
 							<p>
-								Are you sure you want to delete the game <strong th:text="${game.name}"></strong>?
+								Are you sure you want to delete the game <strong
+									th:text="${game.name}"></strong>?
 							</p>
 							<div class="alert alert-warning persistent">
 								<i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong>
-								If this game has associated sessions or loans, the deletion will be blocked and you'll need to remove those first.
+								If this game has associated sessions or loans, the deletion will
+								be blocked and you'll need to remove those first.
 							</div>
 							<p class="text-danger">This action cannot be undone.</p>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn games-btn-secondary" data-bs-dismiss="modal">Cancel</button>
-							<form th:action="@{/games/{id}/delete(id=${game.id})}" method="post">
+							<button type="button" class="btn games-btn-secondary"
+								data-bs-dismiss="modal">Cancel</button>
+							<form th:action="@{/games/{id}/delete(id=${game.id})}"
+								method="post">
 								<button type="submit" class="btn games-btn-danger">Delete</button>
 							</form>
 						</div>
@@ -497,7 +552,8 @@
 	<!-- Footer -->
 	<div th:replace="~{fragments/footer :: footer}"></div>
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/js/scripts.js"></script>
 	<script src="/js/games.js"></script>
 
