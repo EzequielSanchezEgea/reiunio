@@ -12,6 +12,7 @@
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 <link rel="stylesheet" href="/css/game-sessions.css">
+<link rel="stylesheet" href="/css/games.css">
 <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -337,40 +338,34 @@
 	</div>
 
 	<!-- Delete Confirmation Modal -->
-	<div class="modal fade" id="deleteSessionModal" tabindex="-1"
-		aria-labelledby="deleteSessionModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content games-modal">
-				<div class="modal-header games-modal-header">
-					<h5 class="modal-title" id="deleteSessionModalLabel">Confirm
-						deletion</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"
-						aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<p>
-						Are you sure you want to delete the session <strong
-							id="sessionTitleToDelete"></strong>?
-					</p>
-					<p class="text-danger">This action cannot be undone and all
-						player registrations will be lost.</p>
-					<div id="libraryGameInfo" class="alert alert-info"
-						style="display: none;">
-						<i class="bi bi-info-circle"></i> The library game "<span
-							id="gameNameToRelease"></span>" will become available for loans
-						again.
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn games-btn-secondary"
-						data-bs-dismiss="modal">Cancel</button>
-					<form id="deleteSessionForm" method="post">
-						<button type="submit" class="btn games-btn-danger">Delete</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteSessionModal" tabindex="-1"
+     aria-labelledby="deleteSessionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content games-modal">
+            <div class="modal-header games-modal-header">
+                <h5 class="modal-title" id="deleteSessionModalLabel">Confirm Session Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body persistent">
+                <p>
+                    Are you sure you want to delete the session <strong id="sessionTitleToDelete"></strong>?
+                </p>
+                <div class="alert alert-warning persistent">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong>
+                    This action cannot be undone and all player registrations will be lost.
+                </div>
+                <p class="text-danger">This session will be permanently removed from the system.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn games-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteSessionForm" method="post">
+                    <button type="submit" class="btn games-btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 	<!-- Footer -->
 	<div th:replace="~{fragments/footer :: footer}"></div>
