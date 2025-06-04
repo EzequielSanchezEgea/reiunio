@@ -1,4 +1,4 @@
-// loans.js - JavaScript for loan form functionality
+// loans.js - JavaScript for loan form functionality - FIXED
 
 document.addEventListener('DOMContentLoaded', function() {
     const gameSelect = document.getElementById('gameId');
@@ -127,51 +127,60 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to display game information
-    function displayGameInfo(data) {
-        const game = data.game;
-        
-        const gameInfoHtml = `
-            <div class="card bg-light mb-3">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Selected Game Information</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div>
-                                <h5>${escapeHtml(game.name)}</h5>
-                                ${game.description ? `<p>${escapeHtml(game.description)}</p>` : ''}
-                                <ul class="list-unstyled">
-                                    <li><i class="bi bi-tag"></i> Category: ${escapeHtml(game.category || 'N/A')}</li>
-                                    <li><i class="bi bi-people"></i> Players: ${game.minPlayers}-${game.maxPlayers}</li>
-                                    <li><i class="bi bi-clock"></i> Duration: ${game.durationMinutes} minutes</li>
-                                    <li><i class="bi bi-star"></i> State: 
-                                        <span class="badge ${getStateBadgeClass(game.state)}">${game.state}</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <img src="${game.imageUrl || '/defaults/game-placeholder.jpg'}" 
-                                 alt="Photo of ${escapeHtml(game.name)}"
-                                 class="img-fluid rounded shadow-sm"
-                                 style="height: 120px; width: 120px; object-fit: cover; border: 2px solid #0d6efd;"
-                                 onerror="this.src='/defaults/game-placeholder.jpg';">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        gamePreview.innerHTML = gameInfoHtml;
-        gamePreview.style.display = 'block';
-    }
+	function displayGameInfo(data) {
+	    const game = data.game;
+	    
+	    const gameInfoHtml = `
+	        <div class="text-center mb-3">
+	            <img src="${game.imageUrl || '/defaults/game-placeholder.jpg'}" 
+	                 alt="Photo of ${escapeHtml(game.name)}"
+	                 class="img-fluid rounded"
+	                 style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border: 2px solid #fed001; box-shadow: 0 4px 15px rgba(254, 208, 1, 0.3); border-radius: 8px;"
+	                 onerror="this.src='/defaults/game-placeholder.jpg';">
+	        </div>
+	        <div style="background: rgba(254, 208, 1, 0.05); border: 1px solid rgba(254, 208, 1, 0.2); border-radius: 12px; padding: 1.5rem;">
+	            <h5 style="color: #fed001; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center;">
+	                <i class="bi bi-info-circle me-2"></i> Selected Game Information
+	            </h5>
+	            <h6 style="color: #ffffff; font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(game.name)}</h6>
+	            ${game.description ? `<p style="color: rgba(255, 255, 255, 0.9); font-size: 0.95rem; margin-bottom: 1rem;">${escapeHtml(game.description)}</p>` : ''}
+	            <ul style="list-style: none; padding: 0; margin: 0;">
+	                <li style="color: #ffffff; display: flex; align-items: center; margin-bottom: 0.8rem;">
+	                    <i class="bi bi-tag me-2" style="color: #fed001; min-width: 20px;"></i>
+	                    <strong style="margin-right: 0.5rem;">Category:</strong>
+	                    <span style="color: rgba(255, 255, 255, 0.9);">${escapeHtml(game.category || 'N/A')}</span>
+	                </li>
+	                <li style="color: #ffffff; display: flex; align-items: center; margin-bottom: 0.8rem;">
+	                    <i class="bi bi-people me-2" style="color: #fed001; min-width: 20px;"></i>
+	                    <strong style="margin-right: 0.5rem;">Players:</strong>
+	                    <span style="color: rgba(255, 255, 255, 0.9);">${game.minPlayers}-${game.maxPlayers}</span>
+	                </li>
+	                <li style="color: #ffffff; display: flex; align-items: center; margin-bottom: 0.8rem;">
+	                    <i class="bi bi-clock me-2" style="color: #fed001; min-width: 20px;"></i>
+	                    <strong style="margin-right: 0.5rem;">Duration:</strong>
+	                    <span style="color: rgba(255, 255, 255, 0.9);">${game.durationMinutes} minutes</span>
+	                </li>
+	                <li style="color: #ffffff; display: flex; align-items: center; margin-bottom: 0.8rem;">
+	                    <i class="bi bi-star me-2" style="color: #fed001; min-width: 20px;"></i>
+	                    <strong style="margin-right: 0.5rem;">State:</strong>
+	                    <span class="badge ${getStateBadgeClass(game.state)}" style="font-weight: 600; border-radius: 6px; padding: 0.4rem 0.8rem;">${game.state}</span>
+	                </li>
+	            </ul>
+	            <p style="margin-bottom: 0; margin-top: 1rem;"><small style="color: #00b894; font-weight: 600;">✓ Available in our library</small></p>
+	        </div>
+	    `;
+	    
+	    gamePreview.innerHTML = gameInfoHtml;
+	    gamePreview.style.display = 'block';
+	}
 
-    // Function to display game sessions information
+    // FIXED: Function to display game sessions information with persistent alerts
     function displayGameSessions(data) {
+        console.log('Game sessions data:', data); // Debug log
+        
         if (!data.upcomingSessions || data.upcomingSessions.length === 0) {
             gameSessionsInfo.innerHTML = `
-                <div class="alert alert-success">
+                <div class="alert alert-success persistent">
                     <i class="bi bi-check-circle"></i>
                     <strong>Perfect!</strong> No upcoming sessions are scheduled for this game. 
                     You have complete flexibility with the return date.
@@ -195,41 +204,44 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="list-group list-group-flush">
         `;
+		data.upcomingSessions.forEach(session => {
+		    sessionsHtml += `
+		        <div class="list-group-item bg-transparent border-info">
+		            <div class="d-flex justify-content-between align-items-center">
+		                <div>
+		                    <h6 class="mb-1">${escapeHtml(session.sessionTitle)}</h6>
+		                    <div class="d-flex align-items-center">
+		                        <small class="me-3" style="color: #ffffff;">
+		                            <i class="bi bi-person"></i> Created by: ${escapeHtml(session.creatorName)}
+		                        </small>
+		                    </div>
+		                </div>
+		                <div class="text-end">
+		                    <span class="badge bg-info text-dark">${escapeHtml(session.formattedDateRange)}</span>
+		                    <br>
+		                    <small style="color: #ffffff;">${escapeHtml(session.formattedTimeRange)}</small>
+		                </div>
+		            </div>
+		        </div>
+		    `;
+		});
 
-        data.upcomingSessions.forEach(session => {
-            sessionsHtml += `
-                <div class="list-group-item bg-transparent border-info">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1">${escapeHtml(session.sessionTitle)}</h6>
-                            <div class="d-flex align-items-center">
-                                <small class="text-muted me-3">
-                                    <i class="bi bi-person"></i> Created by: ${escapeHtml(session.creatorName)}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-info text-dark">${escapeHtml(session.formattedDateRange)}</span>
-                            <br>
-                            <small class="text-muted">${escapeHtml(session.formattedTimeRange)}</small>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
+        // Debug log for conflict detection
+        console.log('Has conflicts:', data.hasConflicts);
+        console.log('Conflict message:', data.conflictMessage);
 
         sessionsHtml += `
                     </div>
                     
-                    <div class="alert ${data.hasConflicts ? 'alert-warning' : 'alert-success'} mt-3 mb-0">
-                        <i class="bi bi-${data.hasConflicts ? 'lightbulb-fill' : 'check-circle'}"></i>
+                    <div class="alert ${data.hasConflicts ? 'alert-warning' : 'alert-success'} mt-3 mb-0 persistent">
+                        <i class="bi bi-${data.hasConflicts ? 'exclamation-triangle-fill' : 'check-circle'}"></i>
                         ${data.hasConflicts ? 
-                            `<strong>💡 Smart Suggestion:</strong> Based on the scheduled sessions, we recommend returning the game by 
-                            <strong>${formatDate(data.suggestedReturnDate)}</strong> 
-                            to avoid any scheduling conflicts.
+                            `<strong>Scheduling Conflict:</strong> There are upcoming sessions for this game that conflict with the loan period. 
+                            We recommend returning the game by <strong>${formatDate(data.suggestedReturnDate)}</strong> 
+                            to ensure it's available for scheduled sessions.
                             <br>
-                            <small class="text-muted">You can still proceed with your preferred date if needed!</small>` :
-                            `<strong>✅ All Good!</strong> Your proposed return date doesn't conflict with any scheduled sessions. 
+                            <small class="text-muted mt-1 d-block">${data.conflictMessage || 'The game will be needed for upcoming sessions.'}</small>` :
+                            `<strong>✅ All Clear!</strong> No scheduling conflicts detected with the proposed return date. 
                             You can proceed with confidence!`
                         }
                     </div>
@@ -238,6 +250,18 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         gameSessionsInfo.innerHTML = sessionsHtml;
+        
+        // FIXED: Ensure the element stays visible and doesn't get auto-dismissed
+        const alertElements = gameSessionsInfo.querySelectorAll('.alert.persistent');
+        alertElements.forEach(alert => {
+            // Remove any auto-dismiss functionality
+            alert.classList.add('persistent');
+            // Remove close button if exists
+            const closeBtn = alert.querySelector('.btn-close');
+            if (closeBtn) {
+                closeBtn.remove();
+            }
+        });
     }
 
     // Helper functions
@@ -257,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showGameError(message) {
         gamePreview.innerHTML = `
-            <div class="alert alert-danger">
+            <div class="alert alert-danger persistent">
                 <i class="bi bi-exclamation-triangle"></i>
                 ${escapeHtml(message)}
             </div>

@@ -227,11 +227,27 @@ function removeImagePreview() {
     if (fileInputSection) fileInputSection.style.display = 'block';
 }
 
+// Helper function to clear custom validity
+function clearCustomValidity(element) {
+    if (element) {
+        element.setCustomValidity('');
+    }
+}
+
+// Helper function to clear validation classes
+function clearValidationClasses(element) {
+    if (element) {
+        element.classList.remove('is-valid', 'is-invalid');
+    }
+}
+
 // Function to initialize date validation
 function initDateValidation() {
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
+    const startTimeInput = document.getElementById('startTime');
     const endTimeInput = document.getElementById('endTime');
+    const customGameNameInput = document.getElementById('customGameName');
     
     if (!startDateInput || !endDateInput) return;
     
@@ -247,9 +263,69 @@ function initDateValidation() {
         endDateInput.setAttribute('min', today);
     }
     
-    // Add event listeners
-    startDateInput.addEventListener('change', handleStartDateChange);
-    endDateInput.addEventListener('change', toggleEndTimeRequirement);
+    // Add event listeners with proper validation clearing
+    if (startDateInput) {
+        startDateInput.addEventListener('change', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+            handleStartDateChange();
+            validateDatesAndTimes();
+        });
+        
+        startDateInput.addEventListener('input', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+        });
+    }
+    
+    if (endDateInput) {
+        endDateInput.addEventListener('change', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+            toggleEndTimeRequirement();
+            validateDatesAndTimes();
+        });
+        
+        endDateInput.addEventListener('input', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+        });
+    }
+    
+    if (startTimeInput) {
+        startTimeInput.addEventListener('change', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+            validateDatesAndTimes();
+            toggleEndTimeRequirement(); // Update help text based on time conflict
+        });
+        
+        startTimeInput.addEventListener('input', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+        });
+    }
+    
+    if (endTimeInput) {
+        endTimeInput.addEventListener('change', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+            validateDatesAndTimes();
+            toggleEndTimeRequirement(); // Update help text based on time conflict
+        });
+        
+        endTimeInput.addEventListener('input', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+        });
+    }
+    
+    if (customGameNameInput) {
+        customGameNameInput.addEventListener('input', function() {
+            clearCustomValidity(this);
+            clearValidationClasses(this);
+        });
+    }
     
     // Initial check for end time requirement
     toggleEndTimeRequirement();
@@ -286,11 +362,168 @@ function toggleEndTimeRequirement() {
     if (isSameDay) {
         endTimeInput.setAttribute('required', 'required');
         if (formText) {
-            formText.innerHTML = '<strong>Required</strong> for same-day sessions.';
+            // Check if there's a time conflict to show specific message
+            const startTime = document.getElementById('startTime').value;
+            const endTime = endTimeInput.value;
+            
+            if (startTime && endTime && endTime <= startTime) {
+                formText.innerHTML = '<strong class="text-danger">End time must be later than start time (' + startTime + ')</strong>';
+            } else {
+                formText.innerHTML = '<strong>Required</strong> for same-day sessions.';
+            }
         }
     } else {
         endTimeInput.removeAttribute('required');
         if (formText) {
+            formText.innerHTML = 'Optional for multi-day sessions. Required for same-day sessions.';
+        }
+    }
+}
+
+// NEW: Comprehensive date and time validation function
+function validateDatesAndTimes() {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const startTimeInput = document.getElementById('startTime');
+    const endTimeInput = document.getElementById('endTime');
+    
+    if (!startDateInput || !endDateInput || !startTimeInput) return;
+    
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput ? endTimeInput.value : null;
+    
+    // Clear all previous validation states
+    [startDateInput, endDateInput, startTimeInput, endTimeInput].forEach(input => {
+        if (input) {
+            clearCustomValidity(input);
+            clearValidationClasses(input);
+        }
+    });
+    
+    // Only validate if we have the basic required values
+    if (!startDate || !endDate || !startTime) return;
+    
+    const isEditing = document.querySelector('input[type="hidden"][name="_method"]') !== null ||
+                     window.location.pathname.includes('/edit');
+    
+    let hasErrors = false;
+    
+    // Validate start date is not in the past (only for new sessions)
+    if (!isEditing) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const startDateObj = new Date(startDate);
+        
+        if (startDateObj < today) {
+            startDateInput.setCustomValidity('The start date cannot be in the past.');
+            startDateInput.classList.add('is-invalid');
+            hasErrors = true;
+        }
+    }
+    
+    // Validate end date is not before start date
+    if (endDate < startDate) {
+        endDateInput.setCustomValidity('End date cannot be before start date.');
+        endDateInput.classList.add('is-invalid');
+        hasErrors = true;
+    }
+    
+    // Validate times for same-day sessions
+    if (startDate === endDate) {
+        if (!endTime) {
+            if (endTimeInput) {
+                endTimeInput.setCustomValidity('End time is required for same-day sessions.');
+                endTimeInput.classList.add('is-invalid');
+                hasErrors = true;
+            }
+        } else if (endTime <= startTime) {
+            if (endTimeInput) {
+                const formattedStartTime = formatTimeForDisplay(startTime);
+                const formattedEndTime = formatTimeForDisplay(endTime);
+                endTimeInput.setCustomValidity(`End time (${formattedEndTime}) must be after start time (${formattedStartTime})`);
+                endTimeInput.classList.add('is-invalid');
+                hasErrors = true;
+                
+                // Update the help text dynamically
+                updateEndTimeHelpText(startTime, endTime);
+            }
+        } else {
+            // Valid same-day times, reset help text
+            resetEndTimeHelpText();
+        }
+    } else {
+        // Multi-day session, reset help text
+        resetEndTimeHelpText();
+    }
+    
+    // If no errors, mark valid inputs as valid
+    if (!hasErrors) {
+        [startDateInput, endDateInput, startTimeInput, endTimeInput].forEach(input => {
+            if (input && input.value) {
+                input.classList.add('is-valid');
+            }
+        });
+    }
+    
+    return !hasErrors;
+}
+
+// Helper function to format time for user-friendly display
+function formatTimeForDisplay(timeString) {
+    if (!timeString) return '';
+    
+    try {
+        const [hours, minutes] = timeString.split(':');
+        const hour = parseInt(hours);
+        const minute = minutes || '00';
+        
+        // Convert to 12-hour format
+        if (hour === 0) {
+            return `12:${minute} AM`;
+        } else if (hour < 12) {
+            return `${hour}:${minute} AM`;
+        } else if (hour === 12) {
+            return `12:${minute} PM`;
+        } else {
+            return `${hour - 12}:${minute} PM`;
+        }
+    } catch (e) {
+        // Fallback to original format if parsing fails
+        return timeString;
+    }
+}
+
+// Helper function to update end time help text with specific time conflict info
+function updateEndTimeHelpText(startTime, endTime) {
+    const endTimeInput = document.getElementById('endTime');
+    if (!endTimeInput) return;
+    
+    const formText = endTimeInput.parentElement.querySelector('.form-text');
+    if (formText) {
+        const formattedStartTime = formatTimeForDisplay(startTime);
+        const formattedEndTime = formatTimeForDisplay(endTime);
+        
+        formText.innerHTML = `<strong class="text-danger"><i class="bi bi-exclamation-triangle"></i> 
+            End time (${formattedEndTime}) must be later than start time (${formattedStartTime})</strong>`;
+    }
+}
+
+// Helper function to reset end time help text to default
+function resetEndTimeHelpText() {
+    const endTimeInput = document.getElementById('endTime');
+    if (!endTimeInput) return;
+    
+    const formText = endTimeInput.parentElement.querySelector('.form-text');
+    if (formText) {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const isSameDay = startDate && endDate && startDate === endDate;
+        
+        if (isSameDay) {
+            formText.innerHTML = '<strong>Required</strong> for same-day sessions.';
+        } else {
             formText.innerHTML = 'Optional for multi-day sessions. Required for same-day sessions.';
         }
     }
@@ -303,57 +536,31 @@ function validateGameSessionForm() {
                      window.location.pathname.includes('/edit');
     
     // Get values
-    const startDate = document.getElementById('startDate')?.value;
-    const endDate = document.getElementById('endDate')?.value;
-    const startTime = document.getElementById('startTime')?.value;
-    const endTime = document.getElementById('endTime')?.value;
-    const customGameName = document.getElementById('customGameName')?.value;
+    const customGameNameInput = document.getElementById('customGameName');
+    const customGameName = customGameNameInput ? customGameNameInput.value : '';
     
-    // Clear previous custom validation
-    const fields = ['startDate', 'endDate', 'endTime', 'customGameName'];
+    // Clear all custom validation first
+    const fields = ['startDate', 'endDate', 'startTime', 'endTime', 'customGameName'];
     fields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
-        if (field) field.setCustomValidity('');
+        if (field) {
+            clearCustomValidity(field);
+            clearValidationClasses(field);
+        }
     });
     
     // Validate custom game name
     if (!customGameName || customGameName.trim() === '') {
-        const field = document.getElementById('customGameName');
-        if (field) field.setCustomValidity('Game name is required.');
-        valid = false;
-    }
-    
-    // Validate start date is not in the past (only for new sessions)
-    if (!isEditing && startDate) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const startDateObj = new Date(startDate);
-        
-        if (startDateObj < today) {
-            const field = document.getElementById('startDate');
-            if (field) field.setCustomValidity('The start date cannot be in the past.');
+        if (customGameNameInput) {
+            customGameNameInput.setCustomValidity('Game name is required.');
+            customGameNameInput.classList.add('is-invalid');
             valid = false;
         }
     }
     
-    // Validate end date is not before start date
-    if (startDate && endDate && endDate < startDate) {
-        const field = document.getElementById('endDate');
-        if (field) field.setCustomValidity('End date cannot be before start date.');
+    // Validate dates and times
+    if (!validateDatesAndTimes()) {
         valid = false;
-    }
-    
-    // Validate times for same-day sessions
-    if (startDate && endDate && startDate === endDate) {
-        if (!endTime) {
-            const field = document.getElementById('endTime');
-            if (field) field.setCustomValidity('End time is required for same-day sessions.');
-            valid = false;
-        } else if (startTime && endTime && endTime <= startTime) {
-            const field = document.getElementById('endTime');
-            if (field) field.setCustomValidity('End time must be after start time for same-day sessions.');
-            valid = false;
-        }
     }
     
     return valid;
@@ -430,41 +637,41 @@ document.addEventListener('DOMContentLoaded', function() {
     initSessionFeatures();
 });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle delete modal for sessions
-            const deleteModal = document.getElementById('deleteSessionModal');
-            const deleteForm = document.getElementById('deleteSessionForm');
-            const sessionTitleSpan = document.getElementById('sessionTitleToDelete');
-            const libraryGameInfo = document.getElementById('libraryGameInfo');
-            const gameNameSpan = document.getElementById('gameNameToRelease');
-            const deleteButtons = document.querySelectorAll('.delete-session-btn');
+// Handle delete modal for sessions
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteSessionModal');
+    const deleteForm = document.getElementById('deleteSessionForm');
+    const sessionTitleSpan = document.getElementById('sessionTitleToDelete');
+    const libraryGameInfo = document.getElementById('libraryGameInfo');
+    const gameNameSpan = document.getElementById('gameNameToRelease');
+    const deleteButtons = document.querySelectorAll('.delete-session-btn');
+    
+    // Event handling for delete buttons
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             
-            // Event handling for delete buttons
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const sessionId = this.getAttribute('data-session-id');
-                    const sessionTitle = this.getAttribute('data-session-title');
-                    const isLibraryGame = this.getAttribute('data-is-library-game') === 'true';
-                    const gameName = this.getAttribute('data-game-name');
-                    
-                    // Update modal content
-                    sessionTitleSpan.textContent = sessionTitle;
-                    deleteForm.action = '/game-sessions/' + sessionId + '/delete';
-                    
-                    // Show/hide library game info
-                    if (isLibraryGame && gameName) {
-                        gameNameSpan.textContent = gameName;
-                        libraryGameInfo.style.display = 'block';
-                    } else {
-                        libraryGameInfo.style.display = 'none';
-                    }
-                    
-                    // Show modal
-                    const modalInstance = new bootstrap.Modal(deleteModal);
-                    modalInstance.show();
-                });
-            });
+            const sessionId = this.getAttribute('data-session-id');
+            const sessionTitle = this.getAttribute('data-session-title');
+            const isLibraryGame = this.getAttribute('data-is-library-game') === 'true';
+            const gameName = this.getAttribute('data-game-name');
+            
+            // Update modal content
+            if (sessionTitleSpan) sessionTitleSpan.textContent = sessionTitle;
+            if (deleteForm) deleteForm.action = '/game-sessions/' + sessionId + '/delete';
+            
+            // Show/hide library game info
+            if (isLibraryGame && gameName && gameNameSpan && libraryGameInfo) {
+                gameNameSpan.textContent = gameName;
+                libraryGameInfo.style.display = 'block';
+            } else if (libraryGameInfo) {
+                libraryGameInfo.style.display = 'none';
+            }
+            
+            // Show modal
+            const modalInstance = new bootstrap.Modal(deleteModal);
+            modalInstance.show();
         });
+    });
+});

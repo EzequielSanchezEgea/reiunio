@@ -13,6 +13,10 @@ import com.ezequiel.reiunio.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Utility class for performing security-related checks 
+ * involving game sessions, loans, and users.
+ */
 @Component
 @RequiredArgsConstructor
 public class SecurityUtils {
@@ -22,38 +26,41 @@ public class SecurityUtils {
     private final UserService userService;
 
     /**
-     * Checks if a user is the creator of a game session
-     * @param sessionId Game session ID
-     * @param username Username
-     * @return true if the user is the creator of the game session, false otherwise
+     * Determines if the given username matches the creator of the specified game session.
+     *
+     * @param sessionId the ID of the game session
+     * @param username the username to check
+     * @return true if the user is the creator, false otherwise
      */
     public boolean isGameSessionCreator(Long sessionId, String username) {
         Optional<GameSession> gameSession = gameSessionService.findById(sessionId);
-        return gameSession.isPresent() && 
+        return gameSession.isPresent() &&
                gameSession.get().getCreator().getUsername().equals(username);
     }
 
     /**
-     * Checks if a loan belongs to a user
-     * @param loanId Loan ID
-     * @param username Username
+     * Determines if the specified loan belongs to the given username.
+     *
+     * @param loanId the ID of the loan
+     * @param username the username to check
      * @return true if the loan belongs to the user, false otherwise
      */
     public boolean isUserLoan(Long loanId, String username) {
         Optional<Loan> loan = loanService.findById(loanId);
-        return loan.isPresent() && 
+        return loan.isPresent() &&
                loan.get().getUser().getUsername().equals(username);
     }
 
     /**
-     * Checks if the current user is the same as the one being viewed
-     * @param userId User ID to check
-     * @param currentUsername Current logged in username
-     * @return true if it's the same user, false otherwise
+     * Determines if the specified user ID belongs to the currently authenticated user.
+     *
+     * @param userId the ID of the user to check
+     * @param currentUsername the username of the currently logged-in user
+     * @return true if the user ID matches the current user, false otherwise
      */
     public boolean isCurrentUser(Long userId, String currentUsername) {
         Optional<User> user = userService.findById(userId);
-        return user.isPresent() && 
+        return user.isPresent() &&
                user.get().getUsername().equals(currentUsername);
     }
 }

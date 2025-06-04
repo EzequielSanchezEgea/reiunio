@@ -1,27 +1,32 @@
-// User Form Validation JavaScript - Improved Version
+// User Form Validation JavaScript - Enhanced with Profile Support
 
 document.addEventListener('DOMContentLoaded', function() {
     // Form elements
-    const form = document.getElementById('userForm');
+    const form = document.getElementById('userForm') || document.getElementById('profileForm');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const togglePasswordBtn = document.getElementById('togglePassword');
     const togglePasswordIcon = document.getElementById('togglePasswordIcon');
-    const roleSelect = document.getElementById('role');
+    const roleSelect = document.getElementById('role') || document.getElementById('roleSelect');
     const roleDescription = document.getElementById('roleDescription');
     const usernameInput = document.getElementById('username');
     const emailInput = document.getElementById('email');
     const firstNameInput = document.getElementById('firstName');
     const lastNameInput = document.getElementById('lastName');
     
-    // Check if we're editing (presence of hidden ID field or readonly username)
+    // Detect form type
+    const isProfileForm = document.getElementById('profileForm') !== null;
+    const isUserForm = document.getElementById('userForm') !== null;
     const isEditing = document.querySelector('input[name="id"]') !== null || 
                      (usernameInput && usernameInput.hasAttribute('readonly'));
     
-    console.log('Form initialized. Editing mode:', isEditing);
+    console.log('Form initialized. Type:', isProfileForm ? 'Profile' : 'User Form', 'Editing mode:', isEditing);
     
     // Photo upload functionality
     initPhotoUpload();
+    
+    // Role description functionality - Updated for new IDs
+    initRoleDescription();
     
     // Password visibility toggle
     if (togglePasswordBtn && passwordInput) {
@@ -84,24 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Confirm password validation
-    if (confirmPasswordInput) {
+    // Confirm password validation (only for user form, not profile)
+    if (confirmPasswordInput && isUserForm) {
         confirmPasswordInput.addEventListener('input', validatePasswordMatch);
         confirmPasswordInput.addEventListener('focus', function() {
             clearValidationClasses(this);
         });
-    }
-    
-    // Role description
-    if (roleSelect && roleDescription) {
-        roleSelect.addEventListener('change', function() {
-            updateRoleDescription(this.value);
-        });
-        
-        // Set initial description if editing
-        if (roleSelect.value) {
-            updateRoleDescription(roleSelect.value);
-        }
     }
     
     // Username validation - simplified and non-blocking
@@ -168,10 +161,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear timeout for previous request
             clearTimeout(emailTimeout);
             
-            // Set timeout for API check (debounce)
-            emailTimeout = setTimeout(() => {
-                checkEmailAvailability(email, this);
-            }, 500);
+            // Set timeout for API check (debounce) - only for editing or profile
+            if (isEditing || isProfileForm) {
+                emailTimeout = setTimeout(() => {
+                    checkEmailAvailability(email, this);
+                }, 500);
+            }
         });
         
         emailInput.addEventListener('focus', function() {
@@ -212,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission validation
     if (form) {
         form.addEventListener('submit', function(event) {
-            console.log('Form submission started');
+            console.log('Form submission started for:', isProfileForm ? 'Profile' : 'User Form');
             
             // Clear all custom validity first
             const inputs = this.querySelectorAll('input, select');
@@ -220,18 +215,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let isValid = true;
             
-            // Custom validation for password match
-            if (confirmPasswordInput && passwordInput) {
-                if (passwordInput.value !== confirmPasswordInput.value) {
-                    confirmPasswordInput.setCustomValidity('Passwords do not match');
-                    isValid = false;
-                }
-            }
-            
-            // Validate required password for new users
-            if (!isEditing && passwordInput && !passwordInput.value.trim()) {
-                passwordInput.setCustomValidity('Password is required for new users');
-                isValid = false;
+            // Profile-specific validation
+            if (isProfileForm) {
+                isValid = validateProfileForm();
+            } else {
+                // User form validation
+                isValid = validateUserForm();
             }
             
             // Check HTML5 validation
@@ -254,6 +243,76 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize role description on page load
     if (roleSelect && roleSelect.value) {
         updateRoleDescription(roleSelect.value);
+    }
+    
+    // Role description functionality
+    function initRoleDescription() {
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function() {
+                updateRoleDescription(this.value);
+            });
+            
+            // Set initial description if editing
+            if (roleSelect.value) {
+                updateRoleDescription(roleSelect.value);
+            }
+        }
+    }
+    
+    // Profile-specific validation function
+    function validateProfileForm() {
+        let isValid = true;
+        
+        // Password validation (optional for profile)
+        if (passwordInput && passwordInput.value.trim() !== '') {
+            const password = passwordInput.value.trim();
+            
+            if (password.length < 8) {
+                passwordInput.setCustomValidity('Password must be at least 8 characters long');
+                isValid = false;
+            } else {
+                // Check for letters
+                const hasLetter = /[a-zA-Z]/.test(password);
+                // Check for numbers or symbols
+                const hasNumberOrSymbol = /\d/.test(password) || /[!@#$%^&*(),.?\":{}|<>]/.test(password);
+                
+                if (!hasLetter) {
+                    passwordInput.setCustomValidity('Password must contain at least one letter');
+                    isValid = false;
+                } else if (!hasNumberOrSymbol) {
+                    passwordInput.setCustomValidity('Password must contain at least one number or symbol');
+                    isValid = false;
+                } else {
+                    passwordInput.setCustomValidity('');
+                }
+            }
+        } else if (passwordInput) {
+            // Clear any custom validity if password is empty (optional for profile)
+            passwordInput.setCustomValidity('');
+        }
+        
+        return isValid;
+    }
+    
+    // User form validation function
+    function validateUserForm() {
+        let isValid = true;
+        
+        // Custom validation for password match
+        if (confirmPasswordInput && passwordInput) {
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity('Passwords do not match');
+                isValid = false;
+            }
+        }
+        
+        // Validate required password for new users
+        if (!isEditing && passwordInput && !passwordInput.value.trim()) {
+            passwordInput.setCustomValidity('Password is required for new users');
+            isValid = false;
+        }
+        
+        return isValid;
     }
     
     // Helper functions
@@ -292,6 +351,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     return false;
                 }
                 
+                // Validate file
+                if (fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    if (!validatePhotoFile(file)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                
                 // Show loading state
                 if (submitBtn) {
                     submitBtn.disabled = true;
@@ -299,6 +367,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+    }
+    
+    function validatePhotoFile(file) {
+        // Validate file size (2MB = 2 * 1024 * 1024 bytes)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('File size exceeds 2MB limit. Please choose a smaller image.');
+            return false;
+        }
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please select a valid image file (JPG, PNG, GIF, or WebP).');
+            return false;
+        }
+        
+        return true;
     }
     
     function clearValidationClasses(element) {
@@ -330,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function validateNameField(element, fieldName) {
         const name = element.value.trim();
-        if (!name) return true; // Optional field
+        if (!name && fieldName === 'Last name') return true; // Last name is optional
         
         const namePattern = fieldName === 'Last name' ? /^[a-zA-ZÀ-ÿ\s]*$/ : /^[a-zA-ZÀ-ÿ\s]+$/;
         
@@ -460,14 +545,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateRoleDescription(role) {
-        if (!roleDescription) return;
+        // Hide all descriptions first
+        const descriptions = ['adminDescription', 'extendedDescription', 'basicDescription', 'defaultDescription'];
+        descriptions.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'none';
+        });
         
-        const descriptions = {
-            'ADMIN': '<strong class="text-danger"><i class="bi bi-shield-fill"></i> Administrator</strong><br><small>Full system access, can manage all users, games, and settings</small>',
-            'EXTENDED_USER': '<strong class="text-warning"><i class="bi bi-person-gear"></i> Extended User</strong><br><small>Can create game sessions, manage loans, and access extended features</small>',
-            'BASIC_USER': '<strong class="text-primary"><i class="bi bi-person"></i> Basic User</strong><br><small>Can view games, join sessions, and access basic features</small>'
-        };
+        // Show relevant description
+        let targetId = 'defaultDescription';
+        switch(role) {
+            case 'ADMIN':
+                targetId = 'adminDescription';
+                break;
+            case 'EXTENDED_USER':
+                targetId = 'extendedDescription';
+                break;
+            case 'BASIC_USER':
+                targetId = 'basicDescription';
+                break;
+        }
         
-        roleDescription.innerHTML = descriptions[role] || 'Select a role to see permissions';
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) targetElement.style.display = 'block';
     }
 });

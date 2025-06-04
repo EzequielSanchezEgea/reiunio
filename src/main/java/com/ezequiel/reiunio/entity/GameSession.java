@@ -5,30 +5,20 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.ezequiel.reiunio.enums.GameSessionStatus;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+/**
+ * Entity representing a scheduled game session.
+ * Can be created using a game from the library or a custom-defined game.
+ */
 @Entity
 @Table(name = "game_sessions")
 @Data
@@ -39,150 +29,228 @@ import lombok.ToString;
 @EqualsAndHashCode(exclude = {"players"})
 public class GameSession {
 
+    /**
+     * Unique identifier for the game session.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * User who created the game session.
+     */
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-    // Juego de la biblioteca (opcional)
+    /**
+     * Optional reference to a library game.
+     */
     @ManyToOne
     @JoinColumn(name = "game_id", nullable = true)
     private Game game;
 
-    // Nombre del juego personalizado (requerido)
+    /**
+     * Name of the custom game (required if no library game is selected).
+     */
     @NotBlank
     @Column(name = "custom_game_name", length = 200)
     private String customGameName;
 
-    // Descripción del juego personalizado (opcional)
+    /**
+     * Optional description for the custom game.
+     */
     @Column(name = "custom_game_description", length = 500)
     private String customGameDescription;
 
+    /**
+     * Optional path to the image for the custom game.
+     */
     @Column(name = "custom_game_image_path")
     private String customGameImagePath;
 
+    /**
+     * Title of the game session.
+     */
     @NotBlank
     @Column(length = 100)
     private String title;
 
+    /**
+     * Start date of the session.
+     */
     @NotNull
     @Column(name = "start_date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
+    /**
+     * Start time of the session.
+     */
     @NotNull
     @Column(name = "start_time")
+    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime startTime;
 
+    /**
+     * End date of the session.
+     */
     @NotNull
     @Column(name = "end_date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
+    /**
+     * End time of the session.
+     */
     @Column(name = "end_time")
+    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
+    /**
+     * Maximum number of players allowed in the session.
+     */
     @NotNull
     @Min(1)
     @Column(name = "max_players")
     private Integer maxPlayers;
 
+    /**
+     * Optional description for the session.
+     */
     @Column(length = 500)
     private String description;
 
+    /**
+     * Current status of the session (e.g., SCHEDULED, CANCELLED, COMPLETED).
+     */
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private GameSessionStatus status = GameSessionStatus.SCHEDULED;
 
+    /**
+     * List of players participating in the session.
+     */
     @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<GameSessionPlayer> players = new ArrayList<>();
 
+    /**
+     * Adds a player to the session if not already added and capacity is not full.
+     *
+     * @param user the user to be added
+     * @return true if added successfully, false otherwise
+     */
     public boolean addPlayer(User user) {
         boolean alreadyRegistered = players.stream()
                 .anyMatch(gsp -> gsp.getUser().getId().equals(user.getId()));
-        
-        if (alreadyRegistered) {
+
+        if (alreadyRegistered || players.size() >= maxPlayers) {
             return false;
         }
-        
-        if (players.size() >= maxPlayers) {
-            return false;
-        }
-        
+
         GameSessionPlayer gameSessionPlayer = GameSessionPlayer.builder()
                 .user(user)
                 .gameSession(this)
                 .joinDate(LocalDate.now())
-                .confirmed(true) // Automáticamente confirmado
+                .confirmed(true)
                 .build();
-        
+
         players.add(gameSessionPlayer);
         return true;
     }
 
+    /**
+     * Removes a player from the session.
+     *
+     * @param user the user to be removed
+     * @return true if removed successfully
+     */
     public boolean removePlayer(User user) {
-        return players.removeIf(gameSessionPlayer -> 
-            gameSessionPlayer.getUser().getId().equals(user.getId()));
+        return players.removeIf(gameSessionPlayer ->
+                gameSessionPlayer.getUser().getId().equals(user.getId()));
     }
 
+    /**
+     * Returns the number of confirmed players.
+     *
+     * @return number of players
+     */
     public int getConfirmedPlayersCount() {
-        // Como todos los jugadores están automáticamente confirmados,
-        // simplemente devolvemos el tamaño de la lista
         return players.size();
     }
 
+    /**
+     * Checks if the session is full.
+     *
+     * @return true if the session is full
+     */
     public boolean isFull() {
         return players.size() >= maxPlayers;
     }
 
-    // Helper method para obtener el nombre del juego a mostrar
+    /**
+     * Returns the display name of the game.
+     * Uses the custom name if no library game is selected.
+     *
+     * @return game name
+     */
     public String getDisplayGameName() {
         return customGameName;
     }
 
-    // Helper method para saber si es un juego de la biblioteca
+    /**
+     * Checks if the session is using a game from the library.
+     *
+     * @return true if using a library game
+     */
     public boolean isLibraryGame() {
         return game != null;
     }
 
-    // Helper method para saber si es una sesión de múltiples días
+    /**
+     * Checks if the session spans multiple days.
+     *
+     * @return true if the session is multi-day
+     */
     public boolean isMultiDay() {
         if (startDate == null || endDate == null) {
-            return false; // Default to single day if dates are null
+            return false;
         }
         return !startDate.equals(endDate);
     }
 
     /**
-     * Returns the appropriate image URL for the game session
-     * Priority: Custom game image > Library game image > Default placeholder
+     * Returns the appropriate image URL for the session.
+     * Priority: Custom image > Library game image > Default placeholder.
+     *
+     * @return image URL
      */
     public String getGameImageUrl() {
-        // If it's a personal game with custom image
         if (!isLibraryGame() && hasCustomGameImage()) {
             return customGameImagePath;
         }
-        
-        // If it's a library game
+
         if (isLibraryGame() && game != null) {
             return game.getImageUrl();
         }
-        
-        // Default placeholder
+
         return "/defaults/game-placeholder.jpg";
     }
-    
+
     /**
-     * Returns true if the session has a custom game image
+     * Checks if the session has a custom game image.
+     *
+     * @return true if a custom image is set
      */
     public boolean hasCustomGameImage() {
         return customGameImagePath != null && !customGameImagePath.isEmpty();
     }
 
     /**
-     * NUEVO: Retorna true si puede tener imagen personalizada (no es juego de biblioteca)
+     * Returns true if the session allows a custom image (i.e., not a library game).
+     *
+     * @return true if a custom image can be set
      */
     public boolean canHaveCustomImage() {
         return !isLibraryGame();

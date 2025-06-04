@@ -39,19 +39,88 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Controller responsible for managing game-related operations in the Reiunio application.
+ * This controller handles the complete lifecycle of board games including creation, modification,
+ * deletion, and viewing operations. It provides comprehensive game library management with
+ * advanced filtering, pagination, and search capabilities.
+ * 
+ * <p>Key features include:</p>
+ * <ul>
+ *   <li>Paginated game listing with multiple filter options</li>
+ *   <li>Game creation and editing with photo upload support</li>
+ *   <li>Game deletion with referential integrity checks</li>
+ *   <li>Availability management for game lending</li>
+ *   <li>Comprehensive audit logging for all operations</li>
+ *   <li>Role-based access control for administrative functions</li>
+ * </ul>
+ * 
+ * <p>Security is enforced through Spring Security annotations, with most administrative
+ * operations restricted to users with ADMIN role. All operations are logged through
+ * the audit system for compliance and tracking purposes.</p>
+ * 
+ * @author Ezequiel
+ * @version 1.0
+ * @since 1.0
+ */
 @Controller
 @RequestMapping("/games")
 @RequiredArgsConstructor
 @Slf4j
 public class GameController {
 
+    /** Service for game-related operations and data management */
     private final GameService gameService;
+    
+    /** Service for user-related operations and authentication */
     private final UserService userService;
+    
+    /** Service for logging audit events and user actions */
     private final AuditLogService auditLogService;
+    
+    /** Service for game session operations and management */
     private final GameSessionService gameSessionService;
+    
+    /** Service for loan operations and tracking */
     private final LoanService loanService;
+    
+    /** Service for handling file upload operations */
     private final FileUploadService fileUploadService;
 
+    /**
+     * Displays a paginated and filtered list of games in the library.
+     * This endpoint provides comprehensive filtering and sorting capabilities to help users
+     * find specific games based on various criteria.
+     * 
+     * <p>Available filter options include:</p>
+     * <ul>
+     *   <li>Name - partial text matching</li>
+     *   <li>Category - exact category matching</li>
+     *   <li>Availability - whether the game is available for loan</li>
+     *   <li>State - physical condition of the game</li>
+     *   <li>Player count - minimum and maximum number of players</li>
+     *   <li>Duration - minimum and maximum game duration in minutes</li>
+     * </ul>
+     * 
+     * <p>The results are paginated with configurable page size and support multiple
+     * sorting options. Filter values are preserved in the model for form persistence
+     * across requests.</p>
+     * 
+     * @param model the Spring MVC model for passing data to the view
+     * @param name optional filter for game name (partial matching)
+     * @param category optional filter for exact category matching
+     * @param available optional filter for game availability status
+     * @param state optional filter for game physical condition
+     * @param minPlayers optional filter for minimum number of players
+     * @param maxPlayers optional filter for maximum number of players
+     * @param minDuration optional filter for minimum game duration in minutes
+     * @param maxDuration optional filter for maximum game duration in minutes
+     * @param page the page number for pagination (0-based, defaults to 0)
+     * @param size the number of items per page (defaults to 20)
+     * @param sortBy the field to sort by (defaults to "name")
+     * @param sortDir the sort direction: "asc" or "desc" (defaults to "asc")
+     * @return the name of the games list view template
+     */
     @GetMapping
     public String listGames(Model model, 
                            @RequestParam(required = false) String name,
@@ -111,6 +180,15 @@ public class GameController {
         return "games/list";
     }
 
+    /**
+     * Displays the detailed view of a specific game.
+     * This endpoint shows comprehensive information about a single game including
+     * all its properties, current status, and associated image if available.
+     * 
+     * @param id the unique identifier of the game to display
+     * @param model the Spring MVC model for passing data to the view
+     * @return the name of the game detail view template, or redirect to games list if not found
+     */
     @GetMapping("/{id}")
     public String viewGame(@PathVariable Long id, Model model) {
         Optional<Game> game = gameService.findById(id);
@@ -123,6 +201,14 @@ public class GameController {
         }
     }
 
+    /**
+     * Displays the form for creating a new game.
+     * This endpoint is restricted to administrators and provides a form with all
+     * necessary fields for game creation, including game state options.
+     * 
+     * @param model the Spring MVC model for passing data to the view
+     * @return the name of the game form view template
+     */
     @GetMapping("/new")
     @PreAuthorize("hasRole('ADMIN')")
     public String newGameForm(Model model) {
@@ -131,6 +217,35 @@ public class GameController {
         return "games/form";
     }
 
+    /**
+     * Handles the creation of a new game with optional photo upload.
+     * This endpoint processes the game creation form, validates the input data,
+     * and optionally handles photo upload. The game is automatically marked as
+     * available and assigned the current date as acquisition date.
+     * 
+     * <p>The creation process includes:</p>
+     * <ul>
+     *   <li>Form validation with error handling</li>
+     *   <li>Game entity creation and initial save</li>
+     *   <li>Optional photo upload and processing</li>
+     *   <li>Audit logging of the creation action</li>
+     *   <li>User feedback through flash messages</li>
+     * </ul>
+     * 
+     * <p>If photo upload fails, the game is still created successfully, but a warning
+     * message is displayed to inform the user about the photo upload issue.</p>
+     * 
+     * @param game the game entity to be created, validated through Spring Validation
+     * @param result the binding result containing validation errors, if any
+     * @param gamePhoto optional multipart file containing the game photo
+     * @param model the Spring MVC model for passing data to the view
+     * @param redirectAttributes Spring MVC attributes for passing messages between requests
+     * @param principal the currently authenticated user's security principal
+     * @return redirect to games list on success, or form view on validation errors
+     * 
+     * @throws IOException if there's an error during photo upload
+     * @throws IllegalArgumentException if the uploaded photo file is invalid
+     */
     @PostMapping("/new")
     @PreAuthorize("hasRole('ADMIN')")
     public String createGame(@Valid @ModelAttribute("game") Game game, 
@@ -190,6 +305,15 @@ public class GameController {
         return "redirect:/games";
     }
 
+    /**
+     * Displays the form for editing an existing game.
+     * This endpoint is restricted to administrators and pre-populates the form
+     * with the current game data for modification.
+     * 
+     * @param id the unique identifier of the game to edit
+     * @param model the Spring MVC model for passing data to the view
+     * @return the name of the game form view template, or redirect to games list if not found
+     */
     @GetMapping("/{id}/edit")
     @PreAuthorize("hasRole('ADMIN')")
     public String editGameForm(@PathVariable Long id, Model model) {
@@ -205,6 +329,30 @@ public class GameController {
         }
     }
 
+    /**
+     * Handles the update of an existing game.
+     * This endpoint processes the game modification form while preserving certain
+     * immutable properties like acquisition date and image path.
+     * 
+     * <p>The update process includes:</p>
+     * <ul>
+     *   <li>Form validation with error handling</li>
+     *   <li>Preservation of original acquisition date and image path</li>
+     *   <li>Game entity update and save</li>
+     *   <li>Audit logging of the modification action</li>
+     *   <li>User feedback through flash messages</li>
+     * </ul>
+     * 
+     * <p>Note: Photo updates are handled through separate endpoints in the FileUploadController.</p>
+     * 
+     * @param id the unique identifier of the game to update
+     * @param game the updated game entity with new values
+     * @param result the binding result containing validation errors, if any
+     * @param model the Spring MVC model for passing data to the view
+     * @param redirectAttributes Spring MVC attributes for passing messages between requests
+     * @param principal the currently authenticated user's security principal
+     * @return redirect to games list on success, or form view on validation errors
+     */
     @PostMapping("/{id}/edit")
     @PreAuthorize("hasRole('ADMIN')")
     public String updateGame(@PathVariable Long id, 
@@ -244,6 +392,30 @@ public class GameController {
         }
     }
 
+    /**
+     * Handles the deletion of a game with referential integrity checks.
+     * This endpoint performs comprehensive validation to ensure that games with
+     * associated sessions or loans cannot be deleted, maintaining data integrity.
+     * 
+     * <p>The deletion process includes:</p>
+     * <ul>
+     *   <li>Validation of game existence</li>
+     *   <li>Referential integrity checks for game sessions and loans</li>
+     *   <li>Photo file deletion if applicable</li>
+     *   <li>Game entity deletion from database</li>
+     *   <li>Audit logging of the deletion action</li>
+     *   <li>Appropriate user feedback based on operation result</li>
+     * </ul>
+     * 
+     * <p>If the game has associated sessions or loans, the deletion is prevented
+     * and an informative error message is displayed to guide the user on how
+     * to proceed with cleanup.</p>
+     * 
+     * @param id the unique identifier of the game to delete
+     * @param redirectAttributes Spring MVC attributes for passing messages between requests
+     * @param principal the currently authenticated user's security principal
+     * @return redirect to games list with appropriate success or error message
+     */
     @PostMapping("/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteGame(@PathVariable Long id, 
@@ -310,6 +482,29 @@ public class GameController {
         return "redirect:/games";
     }
 
+    /**
+     * Handles the availability status change of a game.
+     * This endpoint allows administrators to mark games as available or unavailable
+     * for lending, which affects the loan system functionality.
+     * 
+     * <p>The availability change process includes:</p>
+     * <ul>
+     *   <li>Game existence validation</li>
+     *   <li>Availability status update</li>
+     *   <li>Database persistence of the change</li>
+     *   <li>Audit logging of the status modification</li>
+     *   <li>User feedback through flash messages</li>
+     * </ul>
+     * 
+     * <p>This operation is commonly used when games are temporarily unavailable
+     * due to maintenance, damage, or other administrative reasons.</p>
+     * 
+     * @param id the unique identifier of the game whose availability is being changed
+     * @param available the new availability status (true for available, false for unavailable)
+     * @param redirectAttributes Spring MVC attributes for passing messages between requests
+     * @param principal the currently authenticated user's security principal
+     * @return redirect to games list with appropriate success message
+     */
     @PostMapping("/{id}/availability")
     @PreAuthorize("hasRole('ADMIN')")
     public String changeAvailability(@PathVariable Long id, 

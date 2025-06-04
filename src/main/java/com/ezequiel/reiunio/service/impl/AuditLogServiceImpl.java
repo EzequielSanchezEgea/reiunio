@@ -25,7 +25,11 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     private final AuditLogRepository auditLogRepository;
 
-    // Existing non-paginated methods
+    /**
+     * Retrieves all audit logs.
+     *
+     * @return a list of all audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AuditLog> findAll() {
@@ -33,6 +37,12 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findAll();
     }
 
+    /**
+     * Finds an audit log by its ID.
+     *
+     * @param id the ID of the audit log
+     * @return an optional containing the audit log if found
+     */
     @Override
     @Transactional(readOnly = true)
     public Optional<AuditLog> findById(Long id) {
@@ -40,6 +50,12 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findById(id);
     }
 
+    /**
+     * Saves a new audit log.
+     *
+     * @param auditLog the audit log to save
+     * @return the saved audit log
+     */
     @Override
     @Transactional
     public AuditLog save(AuditLog auditLog) {
@@ -47,6 +63,12 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.save(auditLog);
     }
 
+    /**
+     * Finds audit logs by user.
+     *
+     * @param user the user to filter logs by
+     * @return a list of audit logs related to the user
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AuditLog> findByUser(User user) {
@@ -54,6 +76,12 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByUser(user);
     }
 
+    /**
+     * Finds audit logs by action type.
+     *
+     * @param actionType the action type to filter logs by
+     * @return a list of audit logs matching the action type
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AuditLog> findByActionType(ActionType actionType) {
@@ -61,6 +89,12 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByActionType(actionType);
     }
 
+    /**
+     * Finds audit logs by affected entity name.
+     *
+     * @param affectedEntity the name of the affected entity
+     * @return a list of audit logs related to the entity
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AuditLog> findByAffectedEntity(String affectedEntity) {
@@ -68,6 +102,13 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByAffectedEntity(affectedEntity);
     }
 
+    /**
+     * Finds audit logs by affected entity name and entity ID.
+     *
+     * @param affectedEntity the name of the affected entity
+     * @param entityId       the ID of the affected entity
+     * @return a list of matching audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AuditLog> findByAffectedEntityAndId(String affectedEntity, Long entityId) {
@@ -75,6 +116,13 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByAffectedEntityAndEntityId(affectedEntity, entityId);
     }
 
+    /**
+     * Finds audit logs between two dates.
+     *
+     * @param start the start date and time
+     * @param end   the end date and time
+     * @return a list of audit logs within the date range
+     */
     @Override
     @Transactional(readOnly = true)
     public List<AuditLog> findBetweenDates(LocalDateTime start, LocalDateTime end) {
@@ -82,12 +130,21 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByChangeDateTimeBetween(start, end);
     }
 
+    /**
+     * Logs a new change in the system.
+     *
+     * @param user           the user who performed the action
+     * @param actionType     the type of action performed
+     * @param affectedEntity the affected entity
+     * @param entityId       the ID of the affected entity
+     * @param description    the description of the change
+     */
     @Override
     @Transactional
     public void logChange(User user, ActionType actionType, String affectedEntity, 
-                         Long entityId, String description) {
+                          Long entityId, String description) {
         log.debug("Logging change: {} - {} - {} - {}", user.getUsername(), actionType, affectedEntity, description);
-        
+
         AuditLog auditLog = AuditLog.builder()
                 .user(user)
                 .actionType(actionType)
@@ -95,11 +152,16 @@ public class AuditLogServiceImpl implements AuditLogService {
                 .entityId(entityId)
                 .description(description)
                 .build();
-        
+
         auditLogRepository.save(auditLog);
     }
 
-    // New paginated methods
+    /**
+     * Retrieves all audit logs with pagination.
+     *
+     * @param pageable pagination information
+     * @return a page of audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AuditLog> findAll(Pageable pageable) {
@@ -108,6 +170,13 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findAll(pageable);
     }
 
+    /**
+     * Finds paginated audit logs by user.
+     *
+     * @param user     the user to filter logs by
+     * @param pageable pagination information
+     * @return a page of audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AuditLog> findByUser(User user, Pageable pageable) {
@@ -116,6 +185,13 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByUser(user, pageable);
     }
 
+    /**
+     * Finds paginated audit logs by action type.
+     *
+     * @param actionType the action type to filter logs by
+     * @param pageable   pagination information
+     * @return a page of audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AuditLog> findByActionType(ActionType actionType, Pageable pageable) {
@@ -124,6 +200,13 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByActionType(actionType, pageable);
     }
 
+    /**
+     * Finds paginated audit logs by affected entity name.
+     *
+     * @param affectedEntity the name of the affected entity
+     * @param pageable       pagination information
+     * @return a page of audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AuditLog> findByAffectedEntity(String affectedEntity, Pageable pageable) {
@@ -132,6 +215,14 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByAffectedEntity(affectedEntity, pageable);
     }
 
+    /**
+     * Finds paginated audit logs by affected entity and entity ID.
+     *
+     * @param affectedEntity the name of the affected entity
+     * @param entityId       the ID of the affected entity
+     * @param pageable       pagination information
+     * @return a page of audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AuditLog> findByAffectedEntityAndId(String affectedEntity, Long entityId, Pageable pageable) {
@@ -140,11 +231,44 @@ public class AuditLogServiceImpl implements AuditLogService {
         return auditLogRepository.findByAffectedEntityAndEntityId(affectedEntity, entityId, pageable);
     }
 
+    /**
+     * Finds paginated audit logs within a date range.
+     *
+     * @param start    the start date and time
+     * @param end      the end date and time
+     * @param pageable pagination information
+     * @return a page of audit logs
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AuditLog> findBetweenDates(LocalDateTime start, LocalDateTime end, Pageable pageable) {
         log.debug("Finding audit logs between dates: {} and {} with pagination: page {}, size {}", 
                  start, end, pageable.getPageNumber(), pageable.getPageSize());
         return auditLogRepository.findByChangeDateTimeBetween(start, end, pageable);
+    }
+
+    /**
+     * Finds audit logs with combined filters - supports any combination of filters.
+     * All parameters are optional and will be ignored if null or empty.
+     *
+     * @param actionType the action type to filter by (optional)
+     * @param affectedEntity the affected entity name to filter by (optional)
+     * @param startDate the start date and time to filter by (optional)
+     * @param endDate the end date and time to filter by (optional)
+     * @param pageable pagination information
+     * @return a page of audit logs matching the combined filters
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AuditLog> findWithCombinedFilters(ActionType actionType, String affectedEntity, 
+                                                  LocalDateTime startDate, LocalDateTime endDate, 
+                                                  Pageable pageable) {
+        log.debug("Finding audit logs with combined filters - actionType: {}, entity: {}, startDate: {}, endDate: {}, page: {}, size: {}", 
+                 actionType, affectedEntity, startDate, endDate, pageable.getPageNumber(), pageable.getPageSize());
+
+        // Normalize empty string to null for proper query handling
+        String normalizedEntity = (affectedEntity != null && affectedEntity.trim().isEmpty()) ? null : affectedEntity;
+        
+        return auditLogRepository.findWithCombinedFilters(actionType, normalizedEntity, startDate, endDate, pageable);
     }
 }

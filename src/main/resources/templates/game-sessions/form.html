@@ -1,270 +1,315 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${editing != null and editing ? 'Edit Game Session' : 'New Game Session'} + ' - Reiunio'">Game Session Form - Reiunio</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title
+	th:text="${editing != null and editing ? 'Edit Game Session' : 'New Game Session'} + ' - Reiunio'">Game
+	Session Form - Reiunio</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="/css/game-sessions.css">
+<link rel="stylesheet" href="/css/styles.css">
+
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
+	<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="container my-4">
-        <!-- SUCCESS/ERROR MESSAGES -->
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill"></i>
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+	<div class="container my-4">
+		<!-- SUCCESS/ERROR MESSAGES -->
+		<div th:if="${message}"
+			class="alert alert-success alert-dismissible fade show" role="alert">
+			<i class="bi bi-check-circle-fill"></i> <span th:text="${message}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+		<div th:if="${error}"
+			class="alert alert-danger alert-dismissible fade show" role="alert">
+			<i class="bi bi-exclamation-triangle-fill"></i> <span
+				th:text="${error}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
-            <span th:text="${warning}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+		<div th:if="${warning}"
+			class="alert alert-warning alert-dismissible fade show" role="alert">
+			<i class="bi bi-exclamation-triangle"></i> <span th:text="${warning}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item"><a href="/game-sessions" class="text-decoration-none">Game Sessions</a></li>
-                <li class="breadcrumb-item active" aria-current="page" 
-                    th:text="${editing != null and editing ? 'Edit Session' : 'New Session'}">Session Form</li>
-            </ol>
-        </nav>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb games-breadcrumb">
+				<li class="breadcrumb-item"><a href="/"
+					class="games-breadcrumb-link">Home</a></li>
+				<li class="breadcrumb-item"><a href="/game-sessions"
+					class="games-breadcrumb-link">Game Sessions</a></li>
+				<li class="breadcrumb-item active games-breadcrumb-active"
+					aria-current="page"
+					th:text="${editing != null and editing ? 'Edit Session' : 'New Session'}">Session
+					Form</li>
+			</ol>
+		</nav>
 
-        <div class="row">
-            <!-- Game Selection and Preview Section -->
-            <div class="col-md-4">
-                <!-- Library Game Selection -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-collection"></i> Library Game Selection</h5>
-                    </div>
-                    <div class="card-body">
-                        <label for="gameId" class="form-label">Choose from Library (Optional)</label>
-                        <select class="form-select mb-3" id="gameId" name="gameId" form="gameSessionForm">
-                            <option value="">Use Personal Game Instead</option>
-                            <option th:each="game : ${games}" 
-                                    th:value="${game.id}" 
-                                    th:text="${game.name} + ' (' + ${game.minPlayers} + '-' + ${game.maxPlayers} + ' players, ' + ${game.durationMinutes} + ' min)'"
-                                    th:selected="${gameSession != null and gameSession.game != null and gameSession.game.id == game.id}">
-                            </option>
-                        </select>
-                        <div class="form-text">
-                            <small>Select a game from our library, or leave blank to create a session with your own game.</small>
-                        </div>
-                        
-                        <!-- Library Game Preview -->
-                        <div id="gamePreview" style="display: none;">
-                            <div class="text-center mb-3">
-                                <img id="gamePreviewImage" 
-                                     src="/defaults/game-placeholder.jpg" 
-                                     alt="Game preview"
-                                     class="img-fluid rounded"
-                                     style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border: 2px solid #dee2e6;">
-                            </div>
-                            <div id="gameInfo">
-                                <h5>Game Information</h5>
-                                <p>Loading game details...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+		<div class="row">
+			<!-- Game Selection and Preview Section -->
+			<div class="col-md-4">
+				<!-- Library Game Selection -->
+				<div class="card games-photo-card shadow-sm mb-4">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="bi bi-collection"></i> Library Game Selection
+						</h5>
+					</div>
+					<div class="card-body">
+						<label for="gameId" class="form-label games-label">Choose
+							from Library (Optional)</label> <select
+							class="form-select form-control games-input mb-3" id="gameId"
+							name="gameId" form="gameSessionForm"
+							style="background: rgba(255, 255, 255, 0.1); color: white;">
+							<option value="" style="background: white; color: black;">Use
+								Personal Game Instead</option>
+							<option th:each="game : ${games}" th:value="${game.id}"
+								th:text="${game.name} + ' (' + ${game.minPlayers} + '-' + ${game.maxPlayers} + ' players, ' + ${game.durationMinutes} + ' min)'"
+								th:selected="${gameSession != null and gameSession.game != null and gameSession.game.id == game.id}"
+								style="background: white; color: black;"></option>
+						</select>
+						<div class="form-text games-help-text">
+							<small>Select a game from our library, or leave blank to
+								create a session with your own game.</small>
+						</div>
 
-                <!-- Personal Game Image Section -->
-                <div class="card shadow-sm mb-4" id="personalGameImageSection">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-camera"></i> Personal Game Image</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <!-- Show current custom image if editing and has custom image -->
-                        <div th:if="${editing != null and editing and gameSession != null and gameSession.hasCustomGameImage()}" class="mb-3">
-                            <img th:src="${gameSession.customGameImagePath}" 
-                                 th:alt="'Custom image for ' + ${gameSession.customGameName}"
-                                 class="img-fluid rounded"
-                                 style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border: 2px solid #dee2e6;">
-                            <p class="mt-2"><small class="text-muted">Current custom image</small></p>
-                        </div>
-                        
-                        <!-- Image preview for new uploads -->
-                        <div id="imagePreviewSection" style="display: none;" class="mb-3">
-                            <img id="imagePreview" src="" alt="Image preview" 
-                                 class="img-fluid rounded"
-                                 style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border: 2px solid #198754;">
-                            <p class="mt-2"><small class="text-success">New image selected</small></p>
-                        </div>
-                        
-                        <!-- File input section -->
-                        <div id="fileInputSection">
-                            <input type="file" class="form-control mb-2" id="customGameImage" name="customGameImage" 
-                                   accept="image/*" form="gameSessionForm">
-                            <div class="form-text">
-                                <small>Optional. Max size: 2MB. Formats: JPG, PNG, GIF, WebP</small>
-                            </div>
-                        </div>
-                        
-                        <button type="button" id="removeImageBtn" class="btn btn-outline-danger btn-sm mt-2" style="display: none;">
-                            <i class="bi bi-trash"></i> Remove Selected Image
-                        </button>
-                    </div>
-                </div>
-            </div>
+						<!-- Library Game Preview -->
+						<div id="gamePreview" style="display: none;">
+							<div class="text-center mb-3">
+								<img id="gamePreviewImage" src="/defaults/game-placeholder.jpg"
+									alt="Game preview"
+									class="img-fluid rounded games-photo-preview"
+									style="width: 100%; max-width: 200px; height: 150px; object-fit: fill;">
+							</div>
+							<div id="gameInfo" class="games-info-section">
+								<h5 class="games-info-title">Game Information</h5>
+								<p>Loading game details...</p>
+							</div>
+						</div>
+					</div>
+				</div>
 
-            <!-- Game Session Form -->
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0" 
-                            th:text="${editing != null and editing ? 'Edit Game Session' : 'Create New Game Session'}">Game Session Form</h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="gameSessionForm"
-                              th:action="${editing != null and editing ? '/game-sessions/' + gameSession.id + '/edit' : '/game-sessions/new'}" 
-                              th:object="${gameSession}" method="post" 
-                              enctype="multipart/form-data"
-                              class="needs-validation" novalidate>
-                            
-                            <!-- Basic Information -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="title" class="form-label">Session Title <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="title" th:field="*{title}" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
-                                        Please enter a valid title.
-                                    </div>
-                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('title')}">
-                                        Session title is required.
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="maxPlayers" class="form-label">Maximum Players <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="maxPlayers" th:field="*{maxPlayers}" min="1" max="20" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}">
-                                        Please enter a valid number of players.
-                                    </div>
-                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('maxPlayers')}">
-                                        Maximum players must be between 1 and 20.
-                                    </div>
-                                </div>
-                            </div>
+				<!-- Personal Game Image Section -->
+				<div class="card games-photo-card mb-4"
+					id="personalGameImageSection">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="bi bi-camera"></i> Personal Game Image
+						</h5>
+					</div>
+					<div class="card-body text-center">
+						<!-- Show current custom image if editing and has custom image -->
+						<div
+							th:if="${editing != null and editing and gameSession != null and gameSession.hasCustomGameImage()}"
+							class="mb-3">
+							<img th:src="${gameSession.customGameImagePath}"
+								th:alt="'Custom image for ' + ${gameSession.customGameName}"
+								class="img-fluid rounded games-photo-preview"
+								style="width: 100%; max-width: 200px; height: 150px; object-fit: cover;">
+							<p class="mt-2">
+								<small class="games-help-text">Current custom image</small>
+							</p>
+						</div>
 
-                            <!-- Game Information -->
-                            <div class="mb-3">
-                                <label for="customGameName" class="form-label">Game Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="customGameName" th:field="*{customGameName}" required>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('customGameName')}" th:errors="*{customGameName}">
-                                    Please enter a valid game name.
-                                </div>
-                                <div class="invalid-feedback" th:unless="${#fields.hasErrors('customGameName')}">
-                                    Game name is required.
-                                </div>
-                                <div class="form-text">
-                                    <small>Enter the name of the game you'll be playing.</small>
-                                </div>
-                            </div>
+						<!-- Image preview for new uploads -->
+						<div id="imagePreviewSection" style="display: none;" class="mb-3">
+							<img id="imagePreview" src="" alt="Image preview"
+								class="img-fluid rounded games-photo-preview"
+								style="width: 100%; max-width: 200px; height: 150px; object-fit: cover;">
+							<p class="mt-2">
+								<small class="text-success">New image selected</small>
+							</p>
+						</div>
 
-                            <div class="mb-3">
-                                <label for="customGameDescription" class="form-label">Game Description</label>
-                                <textarea class="form-control" id="customGameDescription" th:field="*{customGameDescription}" rows="3"></textarea>
-                                <div class="form-text">
-                                    <small>Optional. Describe the game, rules, or any special instructions.</small>
-                                </div>
-                            </div>
+						<!-- File input section -->
+						<div id="fileInputSection">
+							<input type="file" class="form-control games-input mb-2"
+								id="customGameImage" name="customGameImage" accept="image/*"
+								form="gameSessionForm">
+							<div class="form-text games-help-text">
+								<small>Optional. Max size: 2MB. Formats: JPG, PNG, GIF,
+									WebP</small>
+							</div>
+						</div>
 
-                            <!-- Date and Time Information -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="startDate" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="startDate" th:field="*{startDate}" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}">
-                                        Please enter a valid start date.
-                                    </div>
-                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('startDate')}">
-                                        Start date is required.
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="startTime" class="form-label">Start Time <span class="text-danger">*</span></label>
-                                    <input type="time" class="form-control" id="startTime" th:field="*{startTime}" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">
-                                        Please enter a valid start time.
-                                    </div>
-                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('startTime')}">
-                                        Start time is required.
-                                    </div>
-                                </div>
-                            </div>
+						<button type="button" id="removeImageBtn"
+							class="btn games-btn-danger btn-sm mt-2" style="display: none;">
+							<i class="bi bi-trash"></i> Remove Selected Image
+						</button>
+					</div>
+				</div>
+			</div>
 
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="endDate" class="form-label">End Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="endDate" th:field="*{endDate}" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}">
-                                        Please enter a valid end date.
-                                    </div>
-                                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('endDate')}">
-                                        End date is required.
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="endTime" class="form-label">End Time</label>
-                                    <input type="time" class="form-control" id="endTime" th:field="*{endTime}">
-                                    <div class="form-text">
-                                        Optional for multi-day sessions. Required for same-day sessions.
-                                    </div>
-                                </div>
-                            </div>
+			<!-- Game Session Form -->
+			<div class="col-md-8">
+				<div class="card games-form-card shadow-sm">
+					<div class="card-header">
+						<h3 class="card-title mb-0" style="color: black"
+							th:text="${editing != null and editing ? 'Edit Game Session' : 'Create New Game Session'}">Game
+							Session Form</h3>
+					</div>
+					<div class="card-body">
+						<form id="gameSessionForm"
+							th:action="${editing != null and editing ? '/game-sessions/' + gameSession.id + '/edit' : '/game-sessions/new'}"
+							th:object="${gameSession}" method="post"
+							enctype="multipart/form-data" class="needs-validation" novalidate>
 
-                            <!-- Session Description -->
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Session Description</label>
-                                <textarea class="form-control" id="description" th:field="*{description}" rows="4"></textarea>
-                                <div class="form-text">
-                                    <small>Optional. Add any additional information about this session (meeting place, special rules, etc.)</small>
-                                </div>
-                            </div>
+							<!-- Basic Information -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="title" class="form-label games-label">Session
+										Title <span class="games-required">*</span>
+									</label> <input type="text" class="form-control games-input" id="title"
+										th:field="*{title}" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+										Please enter a valid title.</div>
+									<div class="invalid-feedback"
+										th:unless="${#fields.hasErrors('title')}">Session title
+										is required.</div>
+								</div>
+								<div class="col-md-6">
+									<label for="maxPlayers" class="form-label games-label">Maximum
+										Players <span class="games-required">*</span>
+									</label> <input type="number" class="form-control games-input"
+										id="maxPlayers" th:field="*{maxPlayers}" min="1" max="20"
+										required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('maxPlayers')}"
+										th:errors="*{maxPlayers}">Please enter a valid number of
+										players.</div>
+									<div class="invalid-feedback"
+										th:unless="${#fields.hasErrors('maxPlayers')}">Maximum
+										players must be between 1 and 20.</div>
+								</div>
+							</div>
 
-                            <div class="d-flex justify-content-end mt-4">
-                                <a href="/game-sessions" class="btn btn-secondary me-2">
-                                    <i class="bi bi-arrow-left"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i> 
-                                    <span th:text="${editing != null and editing ? 'Update Session' : 'Create Session'}">Save</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+							<!-- Game Information -->
+							<div class="mb-3">
+								<label for="customGameName" class="form-label games-label">Game
+									Name <span class="games-required">*</span>
+								</label> <input type="text" class="form-control games-input"
+									id="customGameName" th:field="*{customGameName}" required>
+								<div class="invalid-feedback"
+									th:if="${#fields.hasErrors('customGameName')}"
+									th:errors="*{customGameName}">Please enter a valid game
+									name.</div>
+								<div class="invalid-feedback"
+									th:unless="${#fields.hasErrors('customGameName')}">Game
+									name is required.</div>
+								<div class="form-text games-help-text">
+									<small>Enter the name of the game you'll be playing.</small>
+								</div>
+							</div>
 
-    <footer class="bg-dark text-white py-4 mt-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Reiunio</h5>
-                    <p>Application for managing game libraries and board games.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+							<div class="mb-3">
+								<label for="customGameDescription"
+									class="form-label games-label">Game Description</label>
+								<textarea class="form-control games-input games-textarea"
+									id="customGameDescription" th:field="*{customGameDescription}"
+									rows="3"></textarea>
+								<div class="form-text games-help-text">
+									<small>Optional. Describe the game, rules, or any
+										special instructions.</small>
+								</div>
+							</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/scripts.js"></script>
-    <script src="/js/game-sessions.js"></script>
+							<!-- Date and Time Information -->
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="startDate" class="form-label games-label">Start
+										Date <span class="games-required">*</span>
+									</label> <input type="date" class="form-control games-input"
+										id="startDate" th:field="*{startDate}" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('startDate')}"
+										th:errors="*{startDate}">Please enter a valid start
+										date.</div>
+									<div class="invalid-feedback"
+										th:unless="${#fields.hasErrors('startDate')}">Start date
+										is required.</div>
+								</div>
+								<div class="col-md-6">
+									<label for="startTime" class="form-label games-label">Start
+										Time <span class="games-required">*</span>
+									</label> <input type="time" class="form-control games-input"
+										id="startTime" th:field="*{startTime}" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('startTime')}"
+										th:errors="*{startTime}">Please enter a valid start
+										time.</div>
+									<div class="invalid-feedback"
+										th:unless="${#fields.hasErrors('startTime')}">Start time
+										is required.</div>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="endDate" class="form-label games-label">End
+										Date <span class="games-required">*</span>
+									</label> <input type="date" class="form-control games-input"
+										id="endDate" th:field="*{endDate}" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}">
+										Please enter a valid end date.</div>
+									<div class="invalid-feedback"
+										th:unless="${#fields.hasErrors('endDate')}">End date is
+										required.</div>
+								</div>
+								<div class="col-md-6">
+									<label for="endTime" class="form-label games-label">End
+										Time</label> <input type="time" class="form-control games-input"
+										id="endTime" th:field="*{endTime}">
+									<div class="form-text games-help-text">Optional for
+										multi-day sessions. Required for same-day sessions.</div>
+								</div>
+							</div>
+
+							<!-- Session Description -->
+							<div class="mb-3">
+								<label for="description" class="form-label games-label">Session
+									Description</label>
+								<textarea class="form-control games-input games-textarea"
+									id="description" th:field="*{description}" rows="4"></textarea>
+								<div class="form-text games-help-text">
+									<small>Optional. Add any additional information about
+										this session (meeting place, special rules, etc.)</small>
+								</div>
+							</div>
+
+							<div class="games-form-actions">
+								<a href="/game-sessions"
+									class="btn btn-secondary games-btn-secondary me-2"> <i
+									class="bi bi-arrow-left"></i> Cancel
+								</a>
+								<button type="submit" class="btn btn-primary games-btn-primary">
+									<i class="bi bi-save"></i> <span
+										th:text="${editing != null and editing ? 'Update Session' : 'Create Session'}">Save</span>
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/footer :: footer}"></div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/scripts.js"></script>
+	<script src="/js/game-sessions.js"></script>
 </body>
 </html>

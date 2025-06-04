@@ -1,389 +1,289 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${editing != null and editing and game != null and game.name != null ? 'Edit Game - ' + game.name + ' - Reiunio' : 'New Game - Reiunio'}">Game Form - Reiunio</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title
+	th:text="${editing != null and editing and game != null and game.name != null ? 'Edit Game - ' + game.name + ' - Reiunio' : 'New Game - Reiunio'}">Game
+	Form - Reiunio</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="/css/games.css">
 </head>
 <body>
-  <div th:replace="~{fragments/navbar :: navbar}"></div>
+	<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="container my-4">
-        <!-- SUCCESS/ERROR MESSAGES -->
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill"></i>
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+	<div class="container my-4">
+		<!-- SUCCESS/ERROR MESSAGES -->
+		<div th:if="${message}"
+			class="alert alert-success alert-dismissible fade show" role="alert">
+			<i class="bi bi-check-circle-fill"></i> <span th:text="${message}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+		<div th:if="${error}"
+			class="alert alert-danger alert-dismissible fade show" role="alert">
+			<i class="bi bi-exclamation-triangle-fill"></i> <span
+				th:text="${error}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
-            <span th:text="${warning}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+		<div th:if="${warning}"
+			class="alert alert-warning alert-dismissible fade show" role="alert">
+			<i class="bi bi-exclamation-triangle"></i> <span th:text="${warning}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item"><a href="/games" class="text-decoration-none">Games</a></li>
-                <li class="breadcrumb-item active" aria-current="page" 
-                    th:text="${editing != null and editing and game != null and game.name != null ? 'Edit ' + game.name : 'New Game'}">Game Form</li>
-            </ol>
-        </nav>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb games-breadcrumb">
+				<li class="breadcrumb-item"><a href="/"
+					class="games-breadcrumb-link">Home</a></li>
+				<li class="breadcrumb-item"><a href="/games"
+					class="games-breadcrumb-link">Games</a></li>
+				<li class="breadcrumb-item active games-breadcrumb-active"
+					aria-current="page"
+					th:text="${editing != null and editing and game != null and game.name != null ? 'Edit ' + game.name : 'New Game'}">Game
+					Form</li>
+			</ol>
+		</nav>
 
-        <div class="row">
-            <!-- Game Photo Section -->
-            <div class="col-md-4">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-camera"></i> Game Photo</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <!-- Current Photo Display (for editing) -->
-                        <div th:if="${editing != null and editing}" class="mb-3">
-                            <img th:src="${game.imageUrl}" 
-                                 th:alt="'Photo of ' + ${game.name}"
-                                 id="currentGameImage"
-                                 class="img-fluid game-photo-preview rounded"
-                                 style="width: 100%; max-width: 250px; height: 200px; object-fit: cover; border: 2px solid #dee2e6;">
-                        </div>
-                        
-                        <!-- Preview for new games -->
-                        <div th:unless="${editing != null and editing}" class="mb-3" id="imagePreviewContainer" style="display: none;">
-                            <img id="imagePreview" src="" alt="Image preview" 
-                                 class="img-fluid game-photo-preview rounded"
-                                 style="width: 100%; max-width: 250px; height: 200px; object-fit: cover; border: 2px solid #198754;">
-                        </div>
-                        
-                        <!-- Default placeholder for new games -->
-                        <div th:unless="${editing != null and editing}" class="mb-3" id="placeholderContainer">
-                            <div class="bg-light border rounded d-flex align-items-center justify-content-center"
-                                 style="width: 100%; max-width: 250px; height: 200px; margin: 0 auto;">
-                                <div class="text-center text-muted">
-                                    <i class="bi bi-image" style="font-size: 3rem;"></i>
-                                    <p class="mt-2 mb-0">No image selected</p>
-                                    <small>Upload an image below</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Photo Upload Form (for editing games) -->
-                        <form th:if="${editing != null and editing}" 
-                              th:action="@{/upload/game/{id}/photo(id=${game.id})}" 
-                              method="post" enctype="multipart/form-data" 
-                              class="photo-upload-form" style="display: none;">
-                            <div class="mb-3">
-                                <input type="file" class="form-control" name="photo" 
-                                       accept="image/*" required>
-                                <div class="form-text">Max size: 2MB. Formats: JPG, PNG, GIF, WebP</div>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm me-2">
-                                <i class="bi bi-upload"></i> Upload Photo
-                            </button>
-                            <button type="button" class="btn btn-secondary btn-sm cancel-upload">
-                                Cancel
-                            </button>
-                        </form>
-                        
-                        <!-- File input for new games (integrated into main form) -->
-                        <div th:unless="${editing != null and editing}" class="mb-3">
-                            <input type="file" class="form-control" id="gamePhoto" name="gamePhoto" 
-                                   accept="image/*" form="gameForm">
-                            <div class="form-text">
-                                Optional. Max size: 2MB. Formats: JPG, PNG, GIF, WebP
-                                <br>
-                                <small class="text-muted">You can also add a photo after creating the game.</small>
-                            </div>
-                            <button type="button" id="removeImageBtn" class="btn btn-outline-danger btn-sm mt-2" style="display: none;">
-                                <i class="bi bi-trash"></i> Remove Image
-                            </button>
-                        </div>
-                        
-                        <!-- Photo Action Buttons (for editing) -->
-                        <div th:if="${editing != null and editing}" class="photo-actions">
-                            <button type="button" class="btn btn-outline-primary btn-sm me-2 show-upload">
-                                <i class="bi bi-camera"></i> Change Photo
-                            </button>
-                            <form th:if="${game.hasCustomImage()}" 
-                                  th:action="@{/upload/game/{id}/photo/delete(id=${game.id})}" 
-                                  method="post" class="d-inline">
-                                <button type="submit" class="btn btn-outline-danger btn-sm"
-                                        onclick="return confirm('Are you sure you want to delete the game photo?')">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+		<div class="row">
+			<!-- Game Photo Section -->
+			<div class="col-md-4">
+				<div class="card games-photo-card shadow-sm mb-4">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="bi bi-camera-fill"></i> Game Photo
+						</h5>
+					</div>
+					<div class="card-body text-center">
+						<!-- Current Photo Display (for editing) -->
+						<div th:if="${editing != null and editing}" class="mb-3">
+							<img th:src="${game.imageUrl}"
+								th:alt="'Photo of ' + ${game.name}" id="currentGameImage"
+								class="img-fluid games-photo-preview rounded"
+								style="width: 100%; max-width: 250px; height: 200px; object-fit: cover;">
+						</div>
 
-            <!-- Game Form -->
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0" 
-                            th:text="${editing != null and editing and game != null and game.name != null ? 'Edit Game: ' + game.name : 'New Game'}">Game Form</h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="gameForm"
-                              th:action="${editing != null and editing and game != null and game.id != null ? '/games/' + game.id + '/edit' : '/games/new'}" 
-                              th:object="${game}" method="post" class="needs-validation" 
-                              th:enctype="${editing != null and editing ? 'application/x-www-form-urlencoded' : 'multipart/form-data'}" 
-                              novalidate>
-                            
-                            <!-- If editing, include the ID -->
-                            <input type="hidden" th:if="${editing != null and editing and game != null and game.id != null}" th:field="*{id}">
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" th:field="*{name}" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
-                                        Please enter a valid name.
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="category" th:field="*{category}" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">
-                                        Please enter a valid category.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label for="minPlayers" class="form-label">Minimum players <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="minPlayers" th:field="*{minPlayers}" min="1" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('minPlayers')}" th:errors="*{minPlayers}">
-                                        Please enter a valid minimum number of players.
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="maxPlayers" class="form-label">Maximum players <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="maxPlayers" th:field="*{maxPlayers}" min="1" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('maxPlayers')}" th:errors="*{maxPlayers}">
-                                        Please enter a valid maximum number of players.
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="durationMinutes" class="form-label">Duration (minutes) <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="durationMinutes" th:field="*{durationMinutes}" min="1" required>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('durationMinutes')}" th:errors="*{durationMinutes}">
-                                        Please enter a valid duration.
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="state" class="form-label">Game state <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="state" th:field="*{state}" required>
-                                        <option value="">Select a state</option>
-                                        <option th:each="stateOption : ${states}" 
-                                                th:value="${stateOption}" 
-                                                th:text="${stateOption}">State</option>
-                                    </select>
-                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('state')}" th:errors="*{state}">
-                                        Please select a state.
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="available" class="form-label">Availability</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" id="available" th:field="*{available}">
-                                        <label class="form-check-label" for="available">Game available for loan</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" th:field="*{description}" rows="4"></textarea>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">
-                                    Please enter a valid description.
-                                </div>
-                            </div>
-                            
-                            <div class="d-flex justify-content-end mt-4">
-                                <a href="/games" class="btn btn-secondary me-2">
-                                    <i class="bi bi-arrow-left"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i> 
-                                    <span th:text="${editing != null and editing ? 'Save Changes' : 'Create Game'}">Save</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+						<!-- Preview for new games -->
+						<div th:unless="${editing != null and editing}" class="mb-3"
+							id="imagePreviewContainer" style="display: none;">
+							<img id="imagePreview" src="" alt="Image preview"
+								class="img-fluid games-photo-preview rounded"
+								style="width: 100%; max-width: 250px; height: 200px; object-fit: cover;">
+						</div>
 
-    <footer class="bg-dark text-white py-4 mt-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Reiunio</h5>
-                    <p>Application for managing game libraries and board games.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+						<!-- Default placeholder for new games -->
+						<div th:unless="${editing != null and editing}" class="mb-3"
+							id="placeholderContainer">
+							<div
+								class="games-photo-placeholder d-flex align-items-center justify-content-center"
+								style="width: 100%; max-width: 250px; height: 200px; margin: 0 auto;">
+								<div class="text-center">
+									<i class="bi bi-image games-placeholder-icon"></i>
+									<p class="mt-2 mb-0 games-placeholder-text">No image
+										selected</p>
+									<small class="games-placeholder-hint">Upload an image
+										below</small>
+								</div>
+							</div>
+						</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/scripts.js"></script>
-    <script>
-        // Photo upload functionality for editing
-        document.addEventListener('DOMContentLoaded', function() {
-            const showUploadBtn = document.querySelector('.show-upload');
-            const cancelUploadBtn = document.querySelector('.cancel-upload');
-            const uploadForm = document.querySelector('.photo-upload-form');
-            const photoActions = document.querySelector('.photo-actions');
-            const currentImage = document.getElementById('currentGameImage');
+						<!-- Photo Upload Form (for editing games) -->
+						<form th:if="${editing != null and editing}"
+							th:action="@{/upload/game/{id}/photo(id=${game.id})}"
+							method="post" enctype="multipart/form-data"
+							class="photo-upload-form" style="display: none;">
+							<div class="mb-3">
+								<input type="file" class="form-control games-input" name="photo"
+									accept="image/*" required>
+								<div class="form-text games-help-text">Max size: 2MB.
+									Formats: JPG, PNG, GIF, WebP</div>
+							</div>
+							<button type="submit" class="btn games-btn-primary btn-sm me-2">
+								<i class="bi bi-upload"></i> Upload Photo
+							</button>
+							<button type="button"
+								class="btn games-btn-secondary btn-sm cancel-upload">
+								Cancel</button>
+						</form>
 
-            if (showUploadBtn && uploadForm && photoActions) {
-                showUploadBtn.addEventListener('click', function() {
-                    uploadForm.style.display = 'block';
-                    photoActions.style.display = 'none';
-                });
+						<!-- File input for new games (integrated into main form) -->
+						<div th:unless="${editing != null and editing}" class="mb-3">
+							<input type="file" class="form-control games-input"
+								id="gamePhoto" name="gamePhoto" accept="image/*" form="gameForm">
+							<div class="form-text games-help-text">
+								Optional. Max size: 2MB. Formats: JPG, PNG, GIF, WebP <br>
+								<small class="games-help-small">You can also add a photo
+									after creating the game.</small>
+							</div>
+							<button type="button" id="removeImageBtn"
+								class="btn games-btn-danger btn-sm mt-2" style="display: none;">
+								<i class="bi bi-trash"></i> Remove Image
+							</button>
+						</div>
 
-                cancelUploadBtn.addEventListener('click', function() {
-                    uploadForm.style.display = 'none';
-                    photoActions.style.display = 'block';
-                    uploadForm.querySelector('input[type="file"]').value = '';
-                });
-            }
+						<!-- Photo Action Buttons (for editing) -->
+						<div th:if="${editing != null and editing}" class="photo-actions">
+							<button type="button"
+								class="btn games-btn-outline btn-sm me-2 show-upload">
+								<i class="bi bi-camera"></i> Change Photo
+							</button>
+							<form th:if="${game.hasCustomImage()}"
+								th:action="@{/upload/game/{id}/photo/delete(id=${game.id})}"
+								method="post" class="d-inline">
+								<button type="submit" class="btn games-btn-danger btn-sm"
+									onclick="return confirm('Are you sure you want to delete the game photo?')">
+									<i class="bi bi-trash"></i> Delete
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            // Handle form submission for photo upload (editing mode)
-            const uploadFormElement = document.querySelector('.photo-upload-form');
-            if (uploadFormElement) {
-                uploadFormElement.addEventListener('submit', function(e) {
-                    const fileInput = this.querySelector('input[type="file"]');
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    
-                    if (fileInput.files.length === 0) {
-                        e.preventDefault();
-                        alert('Please select a file to upload.');
-                        return false;
-                    }
-                    
-                    // Validate file
-                    const file = fileInput.files[0];
-                    if (!validateGamePhoto(file)) {
-                        e.preventDefault();
-                        return false;
-                    }
-                    
-                    // Show loading state
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
-                });
-            }
+			<!-- Game Form -->
+			<div class="col-md-8">
+				<div class="card games-form-card shadow-sm">
+					<div class="card-header">
+						<h3 class="card-title mb-0" style="color: black;"
+							th:text="${editing != null and editing and game != null and game.name != null ? 'Edit Game: ' + game.name : 'New Game'}">Game
+							Form</h3>
+					</div>
+					<div class="card-body">
+						<form id="gameForm"
+							th:action="${editing != null and editing and game != null and game.id != null ? '/games/' + game.id + '/edit' : '/games/new'}"
+							th:object="${game}" method="post" class="needs-validation"
+							th:enctype="${editing != null and editing ? 'application/x-www-form-urlencoded' : 'multipart/form-data'}"
+							novalidate>
 
-            // Photo preview functionality for new games
-            const gamePhotoInput = document.getElementById('gamePhoto');
-            const imagePreview = document.getElementById('imagePreview');
-            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-            const placeholderContainer = document.getElementById('placeholderContainer');
-            const removeImageBtn = document.getElementById('removeImageBtn');
+							<!-- If editing, include the ID -->
+							<input type="hidden"
+								th:if="${editing != null and editing and game != null and game.id != null}"
+								th:field="*{id}">
 
-            if (gamePhotoInput) {
-                gamePhotoInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    
-                    if (file) {
-                        // Validate file
-                        if (!validateGamePhoto(file)) {
-                            this.value = '';
-                            return;
-                        }
-                        
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            imagePreview.src = e.target.result;
-                            imagePreviewContainer.style.display = 'block';
-                            if (placeholderContainer) placeholderContainer.style.display = 'none';
-                            removeImageBtn.style.display = 'block';
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="name" class="form-label games-label">Name <span
+										class="games-required">*</span></label> <input type="text"
+										class="form-control games-input" id="name" th:field="*{name}"
+										required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+										Please enter a valid name.</div>
+								</div>
+								<div class="col-md-6">
+									<label for="category" class="form-label games-label">Category
+										<span class="games-required">*</span>
+									</label> <input type="text" class="form-control games-input"
+										id="category" th:field="*{category}" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('category')}"
+										th:errors="*{category}">Please enter a valid category.</div>
+								</div>
+							</div>
 
-                if (removeImageBtn) {
-                    removeImageBtn.addEventListener('click', function() {
-                        gamePhotoInput.value = '';
-                        imagePreview.src = '';
-                        imagePreviewContainer.style.display = 'none';
-                        if (placeholderContainer) placeholderContainer.style.display = 'block';
-                        removeImageBtn.style.display = 'none';
-                    });
-                }
-            }
-        });
+							<div class="row mb-3">
+								<div class="col-md-4">
+									<label for="minPlayers" class="form-label games-label">Minimum
+										players <span class="games-required">*</span>
+									</label> <input type="number" class="form-control games-input"
+										id="minPlayers" th:field="*{minPlayers}" min="1" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('minPlayers')}"
+										th:errors="*{minPlayers}">Please enter a valid minimum
+										number of players.</div>
+								</div>
+								<div class="col-md-4">
+									<label for="maxPlayers" class="form-label games-label">Maximum
+										players <span class="games-required">*</span>
+									</label> <input type="number" class="form-control games-input"
+										id="maxPlayers" th:field="*{maxPlayers}" min="1" required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('maxPlayers')}"
+										th:errors="*{maxPlayers}">Please enter a valid maximum
+										number of players.</div>
+								</div>
+								<div class="col-md-4">
+									<label for="durationMinutes" class="form-label games-label">Duration
+										(minutes) <span class="games-required">*</span>
+									</label> <input type="number" class="form-control games-input"
+										id="durationMinutes" th:field="*{durationMinutes}" min="1"
+										required>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('durationMinutes')}"
+										th:errors="*{durationMinutes}">Please enter a valid
+										duration.</div>
+								</div>
+							</div>
 
-        // Function to validate game photo
-        function validateGamePhoto(file) {
-            // Validate file size (2MB = 2 * 1024 * 1024 bytes)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('File size exceeds 2MB limit. Please choose a smaller image.');
-                return false;
-            }
-            
-            // Validate file type
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Please select a valid image file (JPG, PNG, GIF, or WebP).');
-                return false;
-            }
-            
-            return true;
-        }
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label for="state" class="form-label games-label">Game
+										state <span class="games-required">*</span>
+									</label> <select class="form-select games-input" id="state"
+										th:field="*{state}" required>
+										<option value="">Select a state</option>
+										<option th:each="stateOption : ${states}"
+											th:value="${stateOption}" th:text="${stateOption}">State</option>
+									</select>
+									<div class="invalid-feedback"
+										th:if="${#fields.hasErrors('state')}" th:errors="*{state}">
+										Please select a state.</div>
+								</div>
+								<div class="col-md-6">
+									<label for="available" class="form-label games-label">Availability</label>
+									<div class="games-switch-container">
+										<div class="form-check form-switch games-switch">
+											<input class="form-check-input games-switch-input"
+												type="checkbox" id="available" th:field="*{available}">
+											<label class="form-check-label games-switch-label"
+												for="available">Game available for loan</label>
+										</div>
+									</div>
+								</div>
+							</div>
 
-        // Form validation
-        (function () {
-            'use strict'
-            
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            var forms = document.querySelectorAll('.needs-validation')
-            
-            // Loop over them and prevent submission
-            Array.prototype.slice.call(forms)
-                .forEach(function (form) {
-                    form.addEventListener('submit', function (event) {
-                        // Custom validation
-                        var minPlayers = parseInt(document.getElementById('minPlayers').value);
-                        var maxPlayers = parseInt(document.getElementById('maxPlayers').value);
-                        
-                        if (maxPlayers < minPlayers) {
-                            document.getElementById('maxPlayers').setCustomValidity('Maximum players must be greater than or equal to minimum players');
-                        } else {
-                            document.getElementById('maxPlayers').setCustomValidity('');
-                        }
-                        
-                        if (!form.checkValidity()) {
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }
-                        
-                        form.classList.add('was-validated')
-                    }, false)
-                })
-        })()
-    </script>
+							<div class="mb-3">
+								<label for="description" class="form-label games-label">Description</label>
+								<textarea class="form-control games-input games-textarea"
+									id="description" th:field="*{description}" rows="4"></textarea>
+								<div class="invalid-feedback"
+									th:if="${#fields.hasErrors('description')}"
+									th:errors="*{description}">Please enter a valid
+									description.</div>
+								<div class="form-text games-help-text">Optional
+									description of the game</div>
+							</div>
+
+							<div class="games-form-actions">
+								<a href="/games" class="btn games-btn-secondary me-2"> <i
+									class="bi bi-arrow-left"></i> Cancel
+								</a>
+								<button type="submit" class="btn games-btn-primary">
+									<i class="bi bi-save"></i> <span
+										th:text="${editing != null and editing ? 'Save Changes' : 'Create Game'}">Save</span>
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/footer :: footer}"></div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/scripts.js"></script>
+	<script src="/js/games.js"></script>
 </body>
 </html>

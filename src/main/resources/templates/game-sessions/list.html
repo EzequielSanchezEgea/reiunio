@@ -11,6 +11,7 @@
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="/css/game-sessions.css">
 <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -34,46 +35,59 @@
 
 		<!-- Header -->
 		<div class="d-flex justify-content-between align-items-center mb-4">
-			<h1 th:text="${listTitle != null ? listTitle : 'Game Sessions'}">Game
-				Sessions</h1>
+			<h1 class="games-title"
+				th:text="${listTitle != null ? listTitle : 'Game Sessions'}">
+				<i class="bi bi-calendar-event"></i> Game Sessions
+			</h1>
 			<div>
-				<a href="/game-sessions/new" class="btn btn-primary"> <i
+				<a href="/game-sessions/new"
+					class="btn btn-primary games-btn-primary"> <i
 					class="bi bi-plus-circle"></i> New Session
 				</a>
 			</div>
 		</div>
 
 		<!-- Filter System -->
-		<div class="card mb-4">
+		<div class="card games-filter-card mb-4">
+			<div class="card-header">
+				<h5 class="mb-0">
+					<i class="bi bi-funnel-fill"></i> Session Filters
+				</h5>
+			</div>
 			<div class="card-body">
 				<div class="row text-center">
 					<div class="col-lg col-md-4 col-6 mb-2">
-						<a href="/game-sessions" class="btn w-100"
-							th:classappend="${param.filter == null or param.filter[0] == 'all'} ? 'btn-primary' : 'btn-outline-primary'">
+						<a href="/game-sessions" class="btn w-100 games-btn-outline"
+							th:classappend="${param.filter == null or param.filter[0] == 'all'} ? 'games-btn-primary' : 'games-btn-outline'">
 							<i class="bi bi-calendar-event"></i><br> <span>All</span>
 						</a>
 					</div>
 					<div class="col-lg col-md-4 col-6 mb-2">
-						<a href="/game-sessions?filter=today" class="btn w-100"
-							th:classappend="${param.filter != null and param.filter[0] == 'today'} ? 'btn-primary' : 'btn-outline-primary'">
-							<i class="bi bi-calendar-today"></i><br> <span>Today</span>
+						<a href="/game-sessions?filter=today"
+							class="btn w-100 games-btn-outline"
+							th:classappend="${param.filter != null and param.filter[0] == 'today'} ? 'games-btn-primary' : 'games-btn-outline'">
+							<i class="bi bi-calendar-check"></i><br> <span
+							style="color: #fed001 !important;">Today</span>
 						</a>
 					</div>
 					<div class="col-lg col-md-4 col-6 mb-2">
-						<a href="/game-sessions?filter=upcoming" class="btn w-100"
-							th:classappend="${param.filter != null and param.filter[0] == 'upcoming'} ? 'btn-success' : 'btn-outline-success'">
+						<a href="/game-sessions?filter=upcoming"
+							class="btn w-100 games-btn-outline"
+							th:classappend="${param.filter != null and param.filter[0] == 'upcoming'} ? 'games-btn-success' : 'games-btn-outline'">
 							<i class="bi bi-calendar-plus"></i><br> <span>Upcoming</span>
 						</a>
 					</div>
 					<div class="col-lg col-md-4 col-6 mb-2">
-						<a href="/game-sessions?filter=registered" class="btn w-100"
-							th:classappend="${param.filter != null and param.filter[0] == 'registered'} ? 'btn-info' : 'btn-outline-info'">
+						<a href="/game-sessions?filter=registered"
+							class="btn w-100 games-btn-outline"
+							th:classappend="${param.filter != null and param.filter[0] == 'registered'} ? 'games-btn-warning' : 'games-btn-outline'">
 							<i class="bi bi-person-check"></i><br> <span>Registered</span>
 						</a>
 					</div>
 					<div class="col-lg col-md-4 col-6 mb-2">
-						<a href="/game-sessions?filter=finished" class="btn w-100"
-							th:classappend="${param.filter != null and param.filter[0] == 'finished'} ? 'btn-secondary' : 'btn-outline-secondary'">
+						<a href="/game-sessions?filter=finished"
+							class="btn w-100 games-btn-outline"
+							th:classappend="${param.filter != null and param.filter[0] == 'finished'} ? 'games-btn-secondary' : 'games-btn-outline'">
 							<i class="bi bi-check-circle"></i><br> <span>Finished</span>
 						</a>
 					</div>
@@ -85,17 +99,19 @@
 		<div th:if="${sessionsByDay != null and !sessionsByDay.empty}">
 			<div th:each="dayEntry, dayEntryStat : ${sessionsByDay}" class="mb-5">
 				<!-- Day Header -->
-				<div class="day-header">
-					<div class="d-flex justify-content-between align-items-center">
-						<h3 class="text-primary mb-0">
-							<i class="bi bi-calendar-day"></i> <span
-								th:text="${#temporals.format(dayEntry.key, 'EEEE, dd MMMM yyyy')}">Monday,
-								01 January 2025</span>
-						</h3>
-						<span class="badge bg-primary"> <span
-							th:text="${dayEntry.value.size()}">3</span> session<span
-							th:if="${dayEntry.value.size() > 1}">s</span>
-						</span>
+				<div class="card games-stats-card mb-3">
+					<div class="card-header">
+						<div class="d-flex justify-content-between align-items-center">
+							<h3 class="mb-0">
+								<i class="bi bi-calendar-day"></i> <span
+									th:text="${#temporals.format(dayEntry.key, 'EEEE, dd MMMM yyyy')}">Monday,
+									01 January 2025</span>
+							</h3>
+							<span class="badge games-badge-primary"> <span
+								th:text="${dayEntry.value.size()}">3</span> session<span
+								th:if="${dayEntry.value.size() > 1}">s</span>
+							</span>
+						</div>
 					</div>
 				</div>
 
@@ -106,30 +122,31 @@
 						<div th:each="gameSession : ${dayEntry.value}"
 							class="col-lg-4 col-md-6 mb-3">
 							<div class="session-card">
-								<div class="card h-100 shadow-sm">
+								<div class="card game-card h-100 shadow-sm">
 									<div
-										class="card-header d-flex justify-content-between align-items-center">
-										<h5 class="card-title mb-0" th:text="${gameSession.title}">Session Title</h5>
-										
-										<span class="badge" th:text="${gameSession.status}"
-											th:classappend="${gameSession.status.name() == 'SCHEDULED' ? 'bg-light text-dark' : 
-                                                              gameSession.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 
-                                                              gameSession.status.name() == 'FINISHED' ? 'bg-success' : 'bg-danger'}">
+										class="card-header games-card-header d-flex justify-content-between align-items-center">
+										<h5 class="card-title mb-0" th:text="${gameSession.title}">Session
+											Title</h5>
+
+										<span class="badge games-state-badge"
+											th:text="${gameSession.status}"
+											th:classappend="${gameSession.status.name() == 'SCHEDULED' ? 'games-state-good' : 
+                                                              gameSession.status.name() == 'IN_PROGRESS' ? 'games-state-acceptable' : 
+                                                              gameSession.status.name() == 'FINISHED' ? 'games-state-new' : 'games-state-damaged'}">
 										</span>
-										
+
 									</div>
 
 									<div class="card-body">
 										<div class="row">
 											<!-- Información del juego y sesión (lado izquierdo) -->
 											<div class="col-9">
-												<h6 class="card-subtitle mb-2 text-muted">
+												<h6 class="card-subtitle mb-2 games-info-title">
 													<i class="bi bi-joystick"></i> <span
 														th:if="${gameSession.isLibraryGame()}"> <a
 														th:href="@{/games/{id}(id=${gameSession.game.id})}"
-														th:text="${gameSession.customGameName}"
-														class="text-decoration-none">Game Name</a> <i
-														class="bi bi-bookmark-fill text-primary ms-1"
+														th:text="${gameSession.customGameName}" class="games-link">Game
+															Name</a> <i class="bi bi-bookmark-fill text-primary ms-1"
 														title="Library Game"></i>
 													</span> <span th:unless="${gameSession.isLibraryGame()}"> <span
 														th:text="${gameSession.customGameName}">Game Name</span> <i
@@ -141,8 +158,8 @@
 
 												<!-- Session time -->
 												<div th:if="${!gameSession.isMultiDay()}">
-													<p class="card-text session-time">
-														<i class="bi bi-clock"></i> <span
+													<p class="card-text session-time games-info-item">
+														<i class="bi bi-clock games-info-icon"></i> <span
 															th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
 														<span th:if="${gameSession.endTime}"> - <span
 															th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
@@ -153,7 +170,7 @@
 												<div th:if="${gameSession.isMultiDay()}">
 													<p class="card-text">
 														<i class="bi bi-calendar-range text-warning"></i> <small
-															class="badge bg-warning text-dark">Multi-day
+															class="badge games-state-acceptable">Multi-day
 															event</small>
 													</p>
 													<p class="card-text small">
@@ -165,8 +182,8 @@
 													</p>
 												</div>
 
-												<p class="card-text">
-													<i class="bi bi-people"></i> <span
+												<p class="card-text games-info-item">
+													<i class="bi bi-people games-info-icon"></i> <span
 														th:text="${gameSession.players.size()}">2</span> / <span
 														th:text="${gameSession.maxPlayers}">4</span> players
 												</p>
@@ -203,8 +220,8 @@
 													<a th:href="@{/games/{id}(id=${gameSession.game.id})}">
 														<img th:src="${gameSession.game.getImageUrl()}"
 														th:alt="'Photo of ' + ${gameSession.game.name}"
-														class="rounded img-fluid shadow-sm"
-														style="height: 70px; width: 70px; object-fit: cover; border: 2px solid #0d6efd;"
+														class="rounded img-fluid shadow-sm games-thumbnail"
+														style="height: 70px; width: 70px; object-fit: cover;"
 														onerror="this.src='/defaults/game-placeholder.jpg';">
 													</a>
 												</div>
@@ -215,43 +232,44 @@
 													<img th:if="${gameSession.hasCustomGameImage()}"
 														th:src="${gameSession.customGameImagePath}"
 														th:alt="'Custom image for ' + ${gameSession.customGameName}"
-														class="rounded img-fluid shadow-sm"
-														style="height: 70px; width: 70px; object-fit: cover; border: 2px solid #198754;"
+														class="rounded img-fluid shadow-sm games-thumbnail"
+														style="height: 70px; width: 70px; object-fit: cover;"
 														onerror="this.src='/defaults/game-placeholder.jpg';">
 
 													<!-- Show placeholder if no custom image -->
 													<img th:unless="${gameSession.hasCustomGameImage()}"
 														src="/defaults/game-placeholder.jpg"
 														th:alt="'Image for personal game: ' + ${gameSession.customGameName}"
-														class="rounded img-fluid shadow-sm"
-														style="height: 70px; width: 70px; object-fit: cover; border: 2px solid #198754;">
+														class="rounded img-fluid shadow-sm games-thumbnail"
+														style="height: 70px; width: 70px; object-fit: cover;">
 												</div>
 											</div>
 										</div>
 									</div>
 
-									<div class="card-footer bg-transparent">
-										<div class="d-flex justify-content-between align-items-center">
-											<div class="d-flex align-items-center">
+									<div class="d-flex justify-content-between align-items-center">
+										<div class="d-flex justify-content-center w-100">
+											<div class="btn-group btn-group-sm games-actions">
 												<a th:href="@{/game-sessions/{id}(id=${gameSession.id})}"
-													class="btn btn-primary btn-sm"> <i class="bi bi-eye"></i>
-													View
+													class="btn btn-sm btn-outline-primary games-btn-outline"
+													title="View details"> <i class="bi bi-eye"></i>
 												</a>
 
 												<!-- Edit and Delete buttons for authorized users -->
 												<div
 													th:with="currentUserName=${#authentication.principal.username}"
 													sec:authorize="isAuthenticated()">
+
 													<!-- Admin can edit any session -->
 													<div sec:authorize="hasRole('ADMIN')">
 														<a
 															th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}"
-															class="btn btn-warning btn-sm ms-1"> <i
-															class="bi bi-pencil"></i>
+															class="btn btn-sm btn-warning games-btn-warning ms-1"
+															title="Edit"> <i class="bi bi-pencil"></i>
 														</a>
 														<button type="button"
-															class="btn btn-danger btn-sm ms-1 delete-session-btn"
-															th:data-session-id="${gameSession.id}"
+															class="btn btn-sm btn-danger games-btn-danger ms-1 delete-session-btn"
+															title="Delete" th:data-session-id="${gameSession.id}"
 															th:data-session-title="${gameSession.title}"
 															th:data-is-library-game="${gameSession.isLibraryGame()}"
 															th:data-game-name="${gameSession.isLibraryGame() ? gameSession.game.name : ''}">
@@ -264,12 +282,12 @@
 														th:if="${currentUserName != null and currentUserName == gameSession.creator.username}">
 														<a
 															th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}"
-															class="btn btn-warning btn-sm ms-1"> <i
-															class="bi bi-pencil"></i>
+															class="btn btn-sm btn-warning games-btn-warning ms-1"
+															title="Edit"> <i class="bi bi-pencil"></i>
 														</a>
 														<button type="button"
-															class="btn btn-danger btn-sm ms-1 delete-session-btn"
-															th:data-session-id="${gameSession.id}"
+															class="btn btn-sm btn-danger games-btn-danger ms-1 delete-session-btn"
+															title="Delete" th:data-session-id="${gameSession.id}"
 															th:data-session-title="${gameSession.title}"
 															th:data-is-library-game="${gameSession.isLibraryGame()}"
 															th:data-game-name="${gameSession.isLibraryGame() ? gameSession.game.name : ''}">
@@ -278,18 +296,18 @@
 													</div>
 												</div>
 											</div>
+										</div>
 
-											<!-- User registration indicator -->
-											<div sec:authorize="isAuthenticated()">
-												<div
-													th:with="currentUserName=${#authentication.principal.username}">
-													<div th:each="player : ${gameSession.players}">
-														<span
-															th:if="${player.user != null and player.user.username == currentUserName}"
-															class="badge bg-success"> <i
-															class="bi bi-check-circle-fill"></i> Registered
-														</span>
-													</div>
+										<!-- User registration indicator -->
+										<div sec:authorize="isAuthenticated()">
+											<div
+												th:with="currentUserName=${#authentication.principal.username}">
+												<div th:each="player : ${gameSession.players}">
+													<span
+														th:if="${player.user != null and player.user.username == currentUserName}"
+														class="badge games-state-new"> <i
+														class="bi bi-check-circle-fill"></i> Registered
+													</span>
 												</div>
 											</div>
 										</div>
@@ -299,21 +317,19 @@
 						</div>
 					</div>
 				</div>
-
-				<!-- Separator between days (except for the last day) -->
-				<div th:unless="${dayEntryStat.last}" class="day-separator"></div>
 			</div>
+
 		</div>
 
 		<!-- Empty state -->
 		<div
 			th:if="${(sessionsByDay == null or sessionsByDay.empty) and (gameSessions == null or gameSessions.empty)}">
-			<div class="text-center py-5">
-				<i class="bi bi-calendar-x" style="font-size: 3rem; color: #6c757d;"></i>
-				<h3 class="mt-3 text-muted">No game sessions found</h3>
-				<p class="text-muted">No sessions match your current filter
-					criteria.</p>
-				<a href="/game-sessions/new" class="btn btn-primary"> <i
+			<div class="text-center py-5 games-empty-state">
+				<i class="bi bi-calendar-x games-empty-icon"></i>
+				<h3 class="mt-3 games-empty-title">No game sessions found</h3>
+				<p class="games-empty-text">No sessions match your current
+					filter criteria.</p>
+				<a href="/game-sessions/new" class="btn games-btn-primary"> <i
 					class="bi bi-plus-circle"></i> Create Your First Session
 				</a>
 			</div>
@@ -324,8 +340,8 @@
 	<div class="modal fade" id="deleteSessionModal" tabindex="-1"
 		aria-labelledby="deleteSessionModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header bg-danger text-white">
+			<div class="modal-content games-modal">
+				<div class="modal-header games-modal-header">
 					<h5 class="modal-title" id="deleteSessionModalLabel">Confirm
 						deletion</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"
@@ -346,10 +362,10 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary"
+					<button type="button" class="btn games-btn-secondary"
 						data-bs-dismiss="modal">Cancel</button>
 					<form id="deleteSessionForm" method="post">
-						<button type="submit" class="btn btn-danger">Delete</button>
+						<button type="submit" class="btn games-btn-danger">Delete</button>
 					</form>
 				</div>
 			</div>
@@ -357,27 +373,15 @@
 	</div>
 
 	<!-- Footer -->
-	<footer class="bg-dark text-white py-4 mt-4">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-6">
-					<h5>Reiunio</h5>
-					<p>Application for managing game libraries and board games.</p>
-				</div>
-				<div class="col-md-6 text-md-end">
-					<p>&copy; 2025 Reiunio. All rights reserved.</p>
-				</div>
-			</div>
-		</div>
-	</footer>
+	<div th:replace="~{fragments/footer :: footer}"></div>
 
 	<!-- Scripts -->
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="/js/scripts.js"></script>
 	<script src="/js/game-sessions.js"></script>
-	
 
-	
+
+
 </body>
 </html>

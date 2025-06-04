@@ -7,79 +7,78 @@
     <title>Audit Logs - Reiunio</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/audit-logs.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <div class="container my-4">
-     <!-- Statistics summary -->
-        <div class="row mt-4">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Audit Summary</h5>
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="audit-title">
+                <i class="bi bi-clock-history"></i> Audit Logs
+                <span th:if="${subtitle}" class="text-muted fs-5" th:text="' - ' + ${subtitle}"></span>
+            </h1>
+            <div class="d-flex align-items-center">
+                <span class="badge audit-badge-primary me-2" th:if="${totalElements != null}" th:text="${totalElements + ' records'}"></span>
+                <span class="audit-info-text small" th:if="${currentPage != null and totalPages != null}" 
+                      th:text="'Page ' + ${currentPage + 1} + ' of ' + ${totalPages}"></span>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card audit-stats-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="audit-stat-item">
+                            <i class="bi bi-bar-chart audit-stat-icon"></i>
+                            <div class="audit-stat-number" th:text="${totalElements ?: 0}">0</div>
+                            <div class="audit-stat-label">Total Records</div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-bar-chart fs-1 text-primary me-3"></i>
-                                    <div>
-                                        <h3 class="text-primary" th:text="${totalElements ?: 0}">0</h3>
-                                        <p class="mb-0">Total Records</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-people fs-1 text-info me-3"></i>
-                                    <div>
-                                        <h3 class="text-info" th:text="${auditLogs != null ? #lists.size(#sets.toSet(auditLogs.![user.username])) : 0}">0</h3>
-                                        <p class="mb-0">Active Users</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-calendar-range fs-1 text-success me-3"></i>
-                                    <div>
-                                        <h3 class="text-success" th:text="${totalPages ?: 1}">1</h3>
-                                        <p class="mb-0">Total Pages</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-file-earmark-text fs-1 text-warning me-3"></i>
-                                    <div>
-                                        <h3 class="text-warning" th:text="${pageSize ?: 20}">20</h3>
-                                        <p class="mb-0">Per Page</p>
-                                    </div>
-                                </div>
-                            </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card audit-stats-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="audit-stat-item">
+                            <i class="bi bi-people audit-stat-icon"></i>
+                            <div class="audit-stat-number" th:text="${auditLogs != null ? #lists.size(#sets.toSet(auditLogs.![user.username])) : 0}">0</div>
+                            <div class="audit-stat-label">Active Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card audit-stats-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="audit-stat-item">
+                            <i class="bi bi-calendar-range audit-stat-icon"></i>
+                            <div class="audit-stat-number" th:text="${totalPages ?: 1}">1</div>
+                            <div class="audit-stat-label">Total Pages</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card audit-stats-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="audit-stat-item">
+                            <i class="bi bi-file-earmark-text audit-stat-icon"></i>
+                            <div class="audit-stat-number" th:text="${pageSize ?: 20}">20</div>
+                            <div class="audit-stat-label">Per Page</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-                <i class="bi bi-clock-history"></i> Audit Logs
-                <span th:if="${subtitle}" class="text-muted fs-5" th:text="' - ' + ${subtitle}"></span>
-            </h1>
-            <div class="d-flex align-items-center">
-                <span class="badge bg-info me-2" th:if="${totalElements != null}" th:text="${totalElements + ' total records'}"></span>
-                <span class="text-muted small" th:if="${currentPage != null and totalPages != null}" 
-                      th:text="'Page ' + ${currentPage + 1} + ' of ' + ${totalPages}"></span>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="card mb-4">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Filters</h5>
+        <!-- Filter System -->
+        <div class="card audit-filter-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-funnel-fill"></i> Audit Filters</h5>
             </div>
             <div class="card-body">
                 <form th:action="@{/audit-logs}" method="get" class="filter-form">
@@ -87,10 +86,10 @@
                     <input type="hidden" name="page" value="0">
                     <input type="hidden" name="size" th:value="${pageSize ?: 20}">
                     
-                    <div class="row g-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-3">
-                            <label for="actionType" class="form-label">Action Type</label>
-                            <select class="form-select" id="actionType" name="actionType">
+                            <label for="actionType" class="form-label audit-label">Action Type</label>
+                            <select class="form-select audit-input" id="actionType" name="actionType">
                                 <option value="">All Actions</option>
                                 <option th:each="actionTypeOption : ${actionTypes}" 
                                         th:value="${actionTypeOption}" 
@@ -100,8 +99,8 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="entity" class="form-label">Entity</label>
-                            <select class="form-select" id="entity" name="entity">
+                            <label for="entity" class="form-label audit-label">Entity</label>
+                            <select class="form-select audit-input" id="entity" name="entity">
                                 <option value="">All Entities</option>
                                 <option th:each="entityOption : ${entities}" 
                                         th:value="${entityOption}" 
@@ -111,58 +110,99 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="startDate" class="form-label">From Date</label>
-                            <input type="datetime-local" class="form-control" id="startDate" name="startDate" 
-                                   th:value="${filterStartDate}">
+                            <label for="startDate" class="form-label audit-label">
+                                From Date <small class="text-muted">(optional)</small>
+                            </label>
+                            <input type="datetime-local" 
+                                   class="form-control audit-input" 
+                                   id="startDate" 
+                                   name="startDate" 
+                                   th:value="${filterStartDate != null ? #temporals.format(filterStartDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                                   placeholder="Select start date">
+                            <small class="form-text text-muted">Leave empty to ignore start date</small>
                         </div>
                         <div class="col-md-3">
-                            <label for="endDate" class="form-label">To Date</label>
-                            <input type="datetime-local" class="form-control" id="endDate" name="endDate" 
-                                   th:value="${filterEndDate}">
+                            <label for="endDate" class="form-label audit-label">
+                                To Date <small class="text-muted">(optional)</small>
+                            </label>
+                            <input type="datetime-local" 
+                                   class="form-control audit-input" 
+                                   id="endDate" 
+                                   name="endDate" 
+                                   th:value="${filterEndDate != null ? #temporals.format(filterEndDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                                   placeholder="Select end date">
+                            <small class="form-text text-muted">Leave empty to ignore end date</small>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end mt-3">
-                        <button type="button" class="btn btn-secondary me-2 reset-filters">Clear</button>
-                        <button type="submit" class="btn btn-primary">Filter</button>
+                    
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn audit-btn-secondary me-2 reset-filters">
+                            <i class="bi bi-arrow-clockwise"></i> Clear All
+                        </button>
+                        <button type="submit" class="btn audit-btn-primary">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Quick filter buttons -->
-        <div class="card mb-4">
+        <!-- Quick Navigation Buttons -->
+        <div class="card audit-controls-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> Quick Filters</h5>
+            </div>
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-md-3">
-                        <a href="/audit-logs?actionType=CREATION" class="btn btn-outline-success w-100">
-                            <i class="bi bi-plus-circle"></i><br>
-                            <span>Creations</span>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?actionType=CREATION" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterActionType != null and filterActionType == 'CREATION'} ? 'audit-btn-success' : 'audit-btn-outline'">
+                            <i class="bi bi-plus-circle"></i><br> <span>Creations</span>
                         </a>
                     </div>
-                    <div class="col-md-3">
-                        <a href="/audit-logs?actionType=MODIFICATION" class="btn btn-outline-warning w-100">
-                            <i class="bi bi-pencil"></i><br>
-                            <span>Modifications</span>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?actionType=MODIFICATION" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterActionType != null and filterActionType == 'MODIFICATION'} ? 'audit-btn-warning' : 'audit-btn-outline'">
+                            <i class="bi bi-pencil"></i><br> <span>Modifications</span>
                         </a>
                     </div>
-                    <div class="col-md-3">
-                        <a href="/audit-logs?actionType=DELETION" class="btn btn-outline-danger w-100">
-                            <i class="bi bi-trash"></i><br>
-                            <span>Deletions</span>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?actionType=DELETION" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterActionType != null and filterActionType == 'DELETION'} ? 'audit-btn-danger' : 'audit-btn-outline'">
+                            <i class="bi bi-trash"></i><br> <span>Deletions</span>
                         </a>
                     </div>
-                    <div class="col-md-3">
-                        <a href="/audit-logs/entity?entity=Game" class="btn btn-outline-info w-100">
-                            <i class="bi bi-joystick"></i><br>
-                            <span>Game Changes</span>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?entity=Game" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterEntity != null and filterEntity == 'Game'} ? 'audit-btn-primary' : 'audit-btn-outline'">
+                            <i class="bi bi-joystick"></i><br> <span>Games</span>
+                        </a>
+                    </div>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?entity=User" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterEntity != null and filterEntity == 'User'} ? 'audit-btn-primary' : 'audit-btn-outline'">
+                            <i class="bi bi-people"></i><br> <span>Users</span>
+                        </a>
+                    </div>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?entity=GameSession" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterEntity != null and filterEntity == 'GameSession'} ? 'audit-btn-primary' : 'audit-btn-outline'">
+                            <i class="bi bi-calendar-event"></i><br> <span>Sessions</span>
+                        </a>
+                    </div>
+                    <div class="col-lg col-md-3 col-6 mb-2">
+                        <a href="/audit-logs?entity=Loan" class="btn w-100 audit-btn-outline"
+                           th:classappend="${filterEntity != null and filterEntity == 'Loan'} ? 'audit-btn-primary' : 'audit-btn-outline'">
+                            <i class="bi bi-box"></i><br> <span>Loans</span>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Page size selector -->
-        <div class="card mb-4">
+        <!-- Page Size Control -->
+        <div class="card audit-controls-card mb-4">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-6">
@@ -174,8 +214,8 @@
                             <input type="hidden" name="endDate" th:value="${filterEndDate}">
                             <input type="hidden" name="page" value="0">
                             
-                            <label for="pageSize" class="form-label me-2 mb-0">Records per page:</label>
-                            <select name="size" id="pageSize" class="form-select form-select-sm" 
+                            <label for="pageSize" class="form-label audit-label me-2 mb-0">Records per page:</label>
+                            <select name="size" id="pageSize" class="form-select audit-input me-2" 
                                     onchange="this.form.submit()" style="width: auto;">
                                 <option value="10" th:selected="${pageSize == 10}">10</option>
                                 <option value="20" th:selected="${pageSize == 20 or pageSize == null}">20</option>
@@ -185,7 +225,7 @@
                         </form>
                     </div>
                     <div class="col-md-6 text-end">
-                        <small class="text-muted">
+                        <small class="audit-info-text">
                             Showing <span th:text="${auditLogs != null ? #lists.size(auditLogs) : 0}">0</span> of 
                             <span th:text="${totalElements ?: 0}">0</span> records
                         </small>
@@ -194,41 +234,73 @@
             </div>
         </div>
 
-        <!-- Audit logs table -->
-        <div class="card">
+        <!-- Audit Logs Table -->
+        <div class="card audit-table-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-table"></i> Audit Records</h5>
+            </div>
             <div class="card-body">
                 <div th:if="${auditLogs != null and !auditLogs.empty}">
                     <div class="table-responsive">
-                        <table class="table table-hover table-sm">
-                            <thead class="table-light">
+                        <table class="table audit-table">
+                            <thead>
                                 <tr>
-                                    <th>Date & Time</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Entity</th>
-                                    <th>Description</th>
+                                    <th>
+                                        <i class="bi bi-clock"></i>
+                                        <a href="#" class="audit-sort-link">Date & Time</a>
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-person"></i>
+                                        <a href="#" class="audit-sort-link">User</a>
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-lightning"></i>
+                                        <a href="#" class="audit-sort-link">Action</a>
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-layers"></i>
+                                        <a href="#" class="audit-sort-link">Entity</a>
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-file-text"></i>
+                                        <a href="#" class="audit-sort-link">Description</a>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="log : ${auditLogs}">
+                                <tr th:each="log : ${auditLogs}" class="audit-table-row">
                                     <td>
-                                        <span th:text="${#temporals.format(log.changeDateTime, 'dd/MM/yyyy HH:mm:ss')}">
-                                            01/01/2025 10:30:00
-                                        </span>
+                                        <span class="audit-date" th:text="${#temporals.format(log.changeDateTime, 'dd/MM/yyyy')}">01/01/2025</span>
+                                        <br>
+                                        <small class="audit-time" th:text="${#temporals.format(log.changeDateTime, 'HH:mm:ss')}">10:30:00</small>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="bi bi-person-circle me-2"></i>
+                                            <!-- User profile photo -->
+                                            <div class="me-2">
+                                                <img th:if="${log.user.hasCustomProfilePhoto()}"
+                                                     th:src="${log.user.profilePhotoPath}" 
+                                                     th:alt="'Profile photo of ' + ${log.user.firstName}"
+                                                     class="rounded-circle audit-user-avatar"
+                                                     style="width: 32px; height: 32px; object-fit: cover;"
+                                                     onerror="this.src='/defaults/user-placeholder.jpg';">
+                                                
+                                                <img th:unless="${log.user.hasCustomProfilePhoto()}"
+                                                     src="/defaults/user-placeholder.jpg" 
+                                                     th:alt="'Default photo for ' + ${log.user.firstName}"
+                                                     class="rounded-circle audit-user-avatar"
+                                                     style="width: 32px; height: 32px; object-fit: cover;">
+                                            </div>
                                             <div>
-                                                <div th:text="${log.user.firstName + ' ' + log.user.lastName}">User Name</div>
+                                                <div class="fw-bold" th:text="${log.user.firstName + ' ' + log.user.lastName}">User Name</div>
                                                 <small class="text-muted" th:text="'@' + ${log.user.username}">@username</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge fs-6" th:text="${log.actionType}"
-                                              th:classappend="${log.actionType.name() == 'CREATION' ? 'bg-success' : 
-                                                              log.actionType.name() == 'MODIFICATION' ? 'bg-warning text-dark' : 'bg-danger'}">
+                                        <span class="badge audit-action-badge" th:text="${log.actionType}"
+                                              th:classappend="${log.actionType.name() == 'CREATION' ? 'audit-action-creation' : 
+                                                              log.actionType.name() == 'MODIFICATION' ? 'audit-action-modification' : 'audit-action-deletion'}">
                                         </span>
                                     </td>
                                     <td>
@@ -237,29 +309,29 @@
                                                           log.affectedEntity == 'User' ? 'bi bi-person' : 
                                                           log.affectedEntity == 'Loan' ? 'bi bi-box' : 
                                                           log.affectedEntity == 'GameSession' ? 'bi bi-calendar-event' : 'bi bi-info-circle'}" 
-                                               class="me-2"></i>
+                                               class="audit-entity-icon me-2"></i>
                                             <div>
-                                                <span th:text="${log.affectedEntity}">Entity</span>
+                                                <span class="fw-bold" th:text="${log.affectedEntity}">Entity</span>
                                                 <small th:if="${log.entityId != null}" 
                                                        class="text-muted d-block" th:text="'ID: ' + ${log.entityId}">ID: 123</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span th:text="${log.description}">Description of the action performed</span>
+                                        <span class="audit-description" th:text="${log.description}">Description of the action performed</span>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- PAGINATION ALWAYS VISIBLE (for debugging) -->
-                    <div class="d-flex justify-content-center mt-4">
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-center mt-4" th:if="${totalPages != null and totalPages > 1}">
                         <nav aria-label="Audit logs pagination">
-                            <ul class="pagination">
+                            <ul class="pagination audit-pagination">
                                 <!-- First page -->
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                    <a class="page-link" 
+                                    <a class="page-link audit-page-link" 
                                        th:href="@{/audit-logs(page=0, size=${pageSize}, actionType=${filterActionType}, entity=${filterEntity}, startDate=${filterStartDate}, endDate=${filterEndDate})}"
                                        aria-label="First">
                                         <span aria-hidden="true">&laquo;&laquo;</span>
@@ -268,7 +340,7 @@
                                 
                                 <!-- Previous page -->
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                    <a class="page-link" 
+                                    <a class="page-link audit-page-link" 
                                        th:href="@{/audit-logs(page=${currentPage > 0 ? currentPage - 1 : 0}, size=${pageSize}, actionType=${filterActionType}, entity=${filterEntity}, startDate=${filterStartDate}, endDate=${filterEndDate})}"
                                        aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
@@ -277,12 +349,12 @@
 
                                 <!-- Current page info -->
                                 <li class="page-item active">
-                                    <span class="page-link" th:text="${(currentPage ?: 0) + 1}">1</span>
+                                    <span class="page-link audit-page-link-active" th:text="${(currentPage ?: 0) + 1}">1</span>
                                 </li>
 
                                 <!-- Next page -->
                                 <li class="page-item" th:classappend="${currentPage >= (totalPages ?: 1) - 1} ? 'disabled'">
-                                    <a class="page-link" 
+                                    <a class="page-link audit-page-link" 
                                        th:href="@{/audit-logs(page=${currentPage < (totalPages ?: 1) - 1 ? currentPage + 1 : (totalPages ?: 1) - 1}, size=${pageSize}, actionType=${filterActionType}, entity=${filterEntity}, startDate=${filterStartDate}, endDate=${filterEndDate})}"
                                        aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
@@ -291,7 +363,7 @@
                                 
                                 <!-- Last page -->
                                 <li class="page-item" th:classappend="${currentPage >= (totalPages ?: 1) - 1} ? 'disabled'">
-                                    <a class="page-link" 
+                                    <a class="page-link audit-page-link" 
                                        th:href="@{/audit-logs(page=${(totalPages ?: 1) - 1}, size=${pageSize}, actionType=${filterActionType}, entity=${filterEntity}, startDate=${filterStartDate}, endDate=${filterEndDate})}"
                                        aria-label="Last">
                                         <span aria-hidden="true">&raquo;&raquo;</span>
@@ -303,7 +375,7 @@
 
                     <!-- Pagination info -->
                     <div class="text-center mt-2">
-                        <small class="text-muted">
+                        <small class="audit-info-text">
                             <span th:if="${totalPages != null and totalPages > 1}">
                                 Page <span th:text="${(currentPage ?: 0) + 1}">1</span> of <span th:text="${totalPages}">1</span>
                             </span>
@@ -314,71 +386,20 @@
                     </div>
                 </div>
                 
-                <div th:if="${auditLogs == null or auditLogs.empty}" class="text-center py-5">
-                    <i class="bi bi-clock-history" style="font-size: 3rem; color: #6c757d;"></i>
-                    <h3 class="mt-3 text-muted">No audit logs found</h3>
-                    <p class="text-muted">No logs match your current filter criteria or no actions have been logged yet.</p>
+                <!-- Empty state -->
+                <div th:if="${auditLogs == null or auditLogs.empty}" class="text-center py-5 audit-empty-state">
+                    <i class="bi bi-clock-history audit-empty-icon"></i>
+                    <h3 class="mt-3 audit-empty-title">No audit logs found</h3>
+                    <p class="audit-empty-text">No logs match your current filter criteria or no actions have been logged yet.</p>
                 </div>
             </div>
         </div>
-
-       
     </div>
 
-    <footer class="bg-dark text-white py-4 mt-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Reiunio</h5>
-                    <p>Application for managing game libraries and board games.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/scripts.js"></script>
-    <script>
-        // Set default end date to now and start date to beginning of day
-        document.addEventListener('DOMContentLoaded', function() {
-            const startDateInput = document.getElementById('startDate');
-            const endDateInput = document.getElementById('endDate');
-            
-            // Only set defaults if no values are present
-            if (!startDateInput.value) {
-                const now = new Date();
-                const beginningOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                startDateInput.value = beginningOfDay.toISOString().slice(0, 16);
-            }
-            
-            if (!endDateInput.value) {
-                const now = new Date();
-                endDateInput.value = now.toISOString().slice(0, 16);
-            }
-        });
-
-        // Reset filters functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const resetButton = document.querySelector('.reset-filters');
-            if (resetButton) {
-                resetButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const form = document.querySelector('.filter-form');
-                    const inputs = form.querySelectorAll('input:not([type="hidden"]), select');
-                    inputs.forEach(input => {
-                        if (input.type === 'checkbox') {
-                            input.checked = false;
-                        } else {
-                            input.value = '';
-                        }
-                    });
-                    form.submit();
-                });
-            }
-        });
-    </script>
+    <script src="/js/audit-logs.js"></script>
 </body>
 </html>

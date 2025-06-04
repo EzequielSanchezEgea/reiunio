@@ -1,0 +1,420 @@
+/* Game Sessions CSS - Complemento que se añade al games.css existente */
+
+/* Session Card Specific Styles */
+.session-card .card {
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.1) 0%, rgba(0, 206, 201, 0.1) 100%);
+    border: 1px solid rgba(108, 92, 231, 0.3);
+    transition: all 0.4s ease;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.session-card .card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(108, 92, 231, 0.5);
+    box-shadow: 0 15px 40px rgba(108, 92, 231, 0.2);
+}
+
+.session-card .card-header {
+    background: linear-gradient(135deg, var(--games-primary-yellow) 0%, var(--games-secondary-orange) 100%);
+    color: var(--games-primary-black);
+    border-radius: 15px 15px 0 0;
+    border-bottom: none;
+    font-weight: 700;
+    padding: 1.2rem;
+}
+
+/* Session Time Display */
+.session-time {
+    background: rgba(254, 208, 1, 0.1);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-weight: 600;
+    color: var(--games-primary-yellow);
+    border: 1px solid rgba(254, 208, 1, 0.3);
+}
+
+/* Creator Avatar */
+.creator-avatar {
+    border: 2px solid var(--games-primary-yellow) !important;
+    transition: all 0.3s ease;
+}
+
+.creator-avatar:hover {
+    border-color: var(--games-secondary-orange) !important;
+    transform: scale(1.1);
+}
+
+/* Game Thumbnail in Sessions */
+.session-card .games-thumbnail {
+    border: 2px solid var(--games-primary-yellow);
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.3);
+    transition: all 0.3s ease;
+}
+
+.session-card .games-thumbnail:hover {
+    border-color: var(--games-secondary-orange);
+    box-shadow: 0 6px 20px rgba(254, 208, 1, 0.5);
+    transform: scale(1.1);
+}
+
+/* Multi-day Event Badge */
+.session-multiday-badge {
+    background: linear-gradient(135deg, var(--games-warning) 0%, var(--games-primary-yellow) 100%);
+    color: var(--games-primary-black);
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+}
+
+/* Session Status Badges */
+.session-status-scheduled {
+    background: linear-gradient(135deg, var(--games-accent-teal) 0%, var(--games-accent-emerald) 100%);
+    color: var(--games-white);
+}
+
+.session-status-in-progress {
+    background: linear-gradient(135deg, var(--games-warning) 0%, var(--games-primary-yellow) 100%);
+    color: var(--games-primary-black);
+}
+
+.session-status-finished {
+    background: linear-gradient(135deg, var(--games-accent-emerald) 0%, var(--games-accent-teal) 100%);
+    color: var(--games-white);
+}
+
+.session-status-cancelled {
+    background: linear-gradient(135deg, var(--games-danger) 0%, #d63031 100%);
+    color: var(--games-white);
+}
+
+/* Day Separator Enhancement */
+.day-separator {
+    height: 3px;
+    background: linear-gradient(135deg, var(--games-primary-yellow) 0%, var(--games-secondary-orange) 100%);
+    margin: 2rem 0;
+    border-radius: 2px;
+    box-shadow: 0 2px 10px rgba(254, 208, 1, 0.3);
+}
+
+/* Session Actions Enhancement */
+.session-actions .btn {
+    margin: 0 0.1rem;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.session-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Registration Status */
+.registration-status {
+    background: linear-gradient(135deg, var(--games-accent-emerald) 0%, var(--games-accent-teal) 100%);
+    color: var(--games-white);
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 184, 148, 0.3);
+}
+
+/* Join/Leave Button Enhancements */
+.join-session-btn {
+    background: linear-gradient(135deg, var(--games-accent-emerald) 0%, var(--games-accent-teal) 100%);
+    border: none;
+    color: var(--games-white);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.join-session-btn:hover {
+    background: linear-gradient(135deg, var(--games-accent-teal) 0%, var(--games-accent-emerald) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+}
+
+.leave-session-btn {
+    background: linear-gradient(135deg, var(--games-danger) 0%, #d63031 100%);
+    border: none;
+    color: var(--games-white);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.leave-session-btn:hover {
+    background: linear-gradient(135deg, #d63031 0%, var(--games-danger) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+}
+
+/* Session Detail Page Enhancements */
+.session-detail-header {
+    background: linear-gradient(135deg, rgba(254, 208, 1, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid rgba(254, 208, 1, 0.3);
+    backdrop-filter: blur(15px);
+}
+
+/* Player List Enhancements */
+.player-list-item {
+    background: rgba(254, 208, 1, 0.05);
+    border: 1px solid rgba(254, 208, 1, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.player-list-item:hover {
+    background: rgba(254, 208, 1, 0.1);
+    border-color: rgba(254, 208, 1, 0.4);
+    transform: translateX(5px);
+}
+
+/* Form Enhancement for Session Forms */
+.session-form-section {
+    background: rgba(254, 208, 1, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(254, 208, 1, 0.2);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.session-form-section:hover {
+    background: rgba(254, 208, 1, 0.1);
+    border-color: rgba(254, 208, 1, 0.4);
+}
+
+/* Game Preview in Form */
+.game-preview-card {
+    background: rgba(108, 92, 231, 0.1);
+    border: 2px solid rgba(108, 92, 231, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.game-preview-card:hover {
+    background: rgba(108, 92, 231, 0.15);
+    border-color: rgba(108, 92, 231, 0.5);
+    transform: scale(1.02);
+}
+
+/* Library vs Personal Game Indicators */
+.library-game-indicator {
+    background: linear-gradient(135deg, var(--games-accent-teal) 0%, var(--games-accent-purple) 100%);
+    color: var(--games-white);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.personal-game-indicator {
+    background: linear-gradient(135deg, var(--games-accent-emerald) 0%, var(--games-accent-teal) 100%);
+    color: var(--games-white);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Session Info Icons */
+.session-info-icon {
+    color: var(--games-primary-yellow);
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+    text-shadow: 0 0 10px rgba(254, 208, 1, 0.4);
+}
+
+/* Custom Image Indicator */
+.custom-image-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: linear-gradient(135deg, var(--games-accent-emerald) 0%, var(--games-accent-teal) 100%);
+    color: var(--games-white);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Filter System Enhancements */
+.games-filter-card .btn i {
+    color: #fed001 !important;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(254, 208, 1, 0.4);
+    transition: all 0.3s ease;
+}
+
+.games-filter-card .btn span {
+    color: #fed001 !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-shadow: 0 0 5px rgba(254, 208, 1, 0.3);
+    transition: all 0.3s ease;
+}
+
+.games-filter-card .btn:hover i,
+.games-filter-card .btn:hover span {
+    color: var(--games-primary-black) !important;
+    text-shadow: none;
+}
+
+.games-filter-card .btn.games-btn-primary i,
+.games-filter-card .btn.games-btn-primary span,
+.games-filter-card .btn.games-btn-success i,
+.games-filter-card .btn.games-btn-success span,
+.games-filter-card .btn.games-btn-warning i,
+.games-filter-card .btn.games-btn-warning span,
+.games-filter-card .btn.games-btn-secondary i,
+.games-filter-card .btn.games-btn-secondary span {
+    color: var(--games-primary-black) !important;
+    text-shadow: none;
+}
+
+/* Responsive Design for Sessions */
+@media (max-width: 768px) {
+    .session-card .card-body {
+        padding: 1rem;
+    }
+    
+    .session-card .row {
+        align-items: center;
+    }
+    
+    .session-card .col-9 {
+        flex: 0 0 auto;
+        width: 70%;
+    }
+    
+    .session-card .col-3 {
+        flex: 0 0 auto;
+        width: 30%;
+    }
+    
+    .session-time {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .creator-avatar {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    .session-card .games-thumbnail {
+        height: 50px !important;
+        width: 50px !important;
+    }
+    
+    .session-actions .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        margin: 0.1rem;
+    }
+    
+    .session-detail-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .player-list-item {
+        padding: 0.8rem;
+    }
+    
+    .session-form-section {
+        padding: 1rem;
+    }
+    
+    .games-filter-card .btn i {
+        font-size: 1.2rem;
+    }
+    
+    .games-filter-card .btn span {
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation for session status changes */
+@keyframes session-status-pulse {
+    0% { 
+        box-shadow: 0 0 0 0 rgba(254, 208, 1, 0.7);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 0 10px rgba(254, 208, 1, 0);
+        transform: scale(1.05);
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(254, 208, 1, 0);
+        transform: scale(1);
+    }
+}
+
+.session-status-active {
+    animation: session-status-pulse 2s infinite;
+}
+
+/* Special Effects for Interactive Elements */
+.session-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254, 208, 1, 0.2);
+}
+
+/* Loading States for Sessions */
+.session-loading {
+    position: relative;
+    opacity: 0.7;
+}
+
+.session-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid rgba(254, 208, 1, 0.3);
+    border-top: 3px solid var(--games-primary-yellow);
+    border-radius: 50%;
+    animation: games-spin 1s linear infinite;
+    z-index: 1000;
+}
+
+/* Session Filter Enhancements */
+.session-filter-active {
+    background: linear-gradient(135deg, var(--games-primary-yellow) 0%, var(--games-secondary-orange) 100%) !important;
+    color: var(--games-primary-black) !important;
+    border-color: var(--games-primary-yellow) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.4);
+}
+
+/* Day Header Enhancement */
+.day-header-card {
+    background: linear-gradient(135deg, rgba(254, 208, 1, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+    border: 2px solid rgba(254, 208, 1, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.day-header-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(254, 208, 1, 0.3);
+}

@@ -5,10 +5,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.ezequiel.reiunio.entity.Game;
 import com.ezequiel.reiunio.entity.GameSession;
 import com.ezequiel.reiunio.entity.GameSessionPlayer;
@@ -20,10 +18,29 @@ import com.ezequiel.reiunio.repository.GameSessionPlayerRepository;
 import com.ezequiel.reiunio.repository.GameSessionRepository;
 import com.ezequiel.reiunio.repository.UserRepository;
 import com.ezequiel.reiunio.service.GameSessionService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of the {@link GameSessionService} interface.
+ *
+ * <p>This service handles all business logic related to game sessions,
+ * including creation, retrieval, updating, and deletion operations.
+ * It also manages player participation and ensures session status consistency,
+ * especially for expired sessions.
+ *
+ * <p>Key features:
+ * <ul>
+ *   <li>Automatic finalization of expired sessions</li>
+ *   <li>Support for filtering sessions by date, status, creator, or game</li>
+ *   <li>Player management (add/remove/confirm)</li>
+ *   <li>Multi-day and single-day session handling</li>
+ * </ul>
+ *
+ * @see GameSession
+ * @see GameSessionRepository
+ * @see GameSessionService
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +51,11 @@ public class GameSessionServiceImpl implements GameSessionService {
     private final GameSessionPlayerRepository gameSessionPlayerRepository;
     private final GameRepository gameRepository;
 
+    /**
+     * Retrieves all existing game sessions after checking and automatically finishing any that have expired.
+     *
+     * @return a list of all game sessions
+     */
     @Override
     @Transactional
     public List<GameSession> findAll() {
@@ -42,6 +64,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findAll();
     }
 
+    /**
+     * Retrieves a game session by its unique identifier.
+     *
+     * @param id the ID of the session to retrieve
+     * @return an Optional containing the session if found, or empty otherwise
+     */
     @Override
     @Transactional
     public Optional<GameSession> findById(Long id) {
@@ -50,6 +78,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findById(id);
     }
 
+    /**
+     * Retrieves all game sessions with the specified status.
+     *
+     * @param status the status to filter by
+     * @return a list of matching game sessions
+     */
     @Override
     @Transactional
     public List<GameSession> findByStatus(GameSessionStatus status) {
@@ -58,6 +92,11 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findByStatus(status);
     }
 
+    /**
+     * Retrieves all upcoming game sessions (those scheduled in the future).
+     *
+     * @return a list of upcoming sessions
+     */
     @Override
     @Transactional
     public List<GameSession> findUpcomingSessions() {
@@ -66,6 +105,11 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findUpcomingSessions();
     }
 
+    /**
+     * Retrieves all game sessions scheduled for today.
+     *
+     * @return a list of today's sessions
+     */
     @Override
     @Transactional
     public List<GameSession> findTodaySessions() {
@@ -75,96 +119,99 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     /**
-     * Auto-finaliza sesiones que ya deberían haber terminado
-     * Se ejecuta automáticamente en las consultas principales
+     * Automatically checks and finishes expired sessions based on current date and time.
+     * This method ensures data integrity by updating session statuses accordingly.
      */
     private void autoFinishExpiredSessions() {
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = now.toLocalDate();
         LocalTime currentTime = now.toLocalTime();
-        
-        // Buscar sesiones programadas que deberían haber terminado
         List<GameSession> scheduledSessions = gameSessionRepository.findByStatus(GameSessionStatus.SCHEDULED);
-        
         for (GameSession session : scheduledSessions) {
             if (hasSessionExpired(session, today, currentTime)) {
                 try {
                     session.setStatus(GameSessionStatus.FINISHED);
                     gameSessionRepository.save(session);
-                    log.info("Sesión '{}' finalizada automáticamente por expiración", session.getTitle());
+                    log.info("Session '{}' automatically marked as FINISHED", session.getTitle());
                 } catch (Exception e) {
-                    log.error("Error auto-finalizando sesión {}: {}", session.getId(), e.getMessage());
+                    log.error("Error finalizing session {}: {}", session.getId(), e.getMessage());
                 }
             }
         }
     }
 
     /**
-     * Determina si una sesión ha expirado
+     * Determines whether the given session has expired based on current time.
+     *
+     * @param session the session to check
+     * @param today the current date
+     * @param currentTime the current time
+     * @return true if the session is expired, false otherwise
      */
     private boolean hasSessionExpired(GameSession session, LocalDate today, LocalTime currentTime) {
         LocalDate endDate = session.getEndDate();
         LocalTime endTime = session.getEndTime();
-        
-        // Si la fecha de fin es anterior a hoy
         if (endDate.isBefore(today)) {
             return true;
         }
-        
-        // Si es hoy y hay hora de fin específica
         if (endDate.equals(today) && endTime != null) {
             return currentTime.isAfter(endTime);
         }
-        
-        // Si es hoy pero no tiene hora de fin, considerar que termina al final del día
         if (endDate.equals(today) && endTime == null) {
             return currentTime.isAfter(LocalTime.of(23, 59));
         }
-        
         return false;
     }
 
+    /**
+     * Saves a new or updates an existing game session.
+     *
+     * @param gameSession the session to save or update
+     * @return the saved session
+     */
     @Override
     @Transactional
     public GameSession save(GameSession gameSession) {
         boolean isNewSession = gameSession.getId() == null;
-        
         if (isNewSession) {
-            // Nueva sesión - ya no modificamos la disponibilidad del juego
             gameSession.setStatus(GameSessionStatus.SCHEDULED);
-            log.info("Nueva sesión creada: '{}' para juego: '{}'", 
+            log.info("New session created: '{}' for game '{}'",
                     gameSession.getTitle(), gameSession.getCustomGameName());
-            
             if (gameSession.getGame() != null) {
-                log.info("Sesión usa juego de biblioteca '{}' pero NO se modifica su disponibilidad", 
+                log.info("Session uses library game '{}', availability not changed",
                         gameSession.getGame().getName());
             }
         }
-        
         log.debug("Saving game session: {}", gameSession.getTitle());
         return gameSessionRepository.save(gameSession);
     }
 
+    /**
+     * Deletes a game session by its ID.
+     *
+     * @param id the ID of the session to delete
+     */
     @Override
     @Transactional
     public void deleteById(Long id) {
         log.debug("Deleting game session by id: {}", id);
-        
-        // Ya no necesitamos liberar el juego al eliminar la sesión
         Optional<GameSession> sessionOpt = gameSessionRepository.findById(id);
         if (sessionOpt.isPresent()) {
             GameSession session = sessionOpt.get();
             if (session.getGame() != null) {
-                log.info("Eliminando sesión que usaba juego de biblioteca '{}' - NO se modifica disponibilidad", 
+                log.info("Deleting session with library game '{}', availability not changed",
                         session.getGame().getName());
             }
         }
-        
         gameSessionRepository.deleteById(id);
     }
 
     /**
-     * Cambia el estado de una sesión a FINISHED (ya no modifica disponibilidad de juegos)
+     * Manually marks a session as finished.
+     *
+     * @param sessionId the ID of the session to finish
+     * @return the updated session
+     * @throws IllegalArgumentException if the session is not found
      */
     @Transactional
     public GameSession finishSession(Long sessionId) {
@@ -172,16 +219,19 @@ public class GameSessionServiceImpl implements GameSessionService {
         if (sessionOpt.isPresent()) {
             GameSession session = sessionOpt.get();
             session.setStatus(GameSessionStatus.FINISHED);
-            
             session = gameSessionRepository.save(session);
-            log.info("Sesión '{}' marcada como FINISHED", session.getTitle());
+            log.info("Session '{}' marked as FINISHED", session.getTitle());
             return session;
         }
         throw new IllegalArgumentException("Session not found with ID: " + sessionId);
     }
 
-    // Resto de métodos sin cambios...
-
+    /**
+     * Retrieves all game sessions created by the specified user.
+     *
+     * @param creator the user who created the sessions
+     * @return a list of sessions created by the user
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findByCreator(User creator) {
@@ -189,6 +239,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findByCreator(creator);
     }
 
+    /**
+     * Retrieves all game sessions associated with the specified game.
+     *
+     * @param game the game to search for
+     * @return a list of sessions using the specified game
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findByGame(Game game) {
@@ -196,6 +252,13 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findByGame(game);
     }
 
+    /**
+     * Retrieves all game sessions occurring between two dates.
+     *
+     * @param startDate the start date (inclusive)
+     * @param endDate the end date (inclusive)
+     * @return a list of sessions within the specified date range
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findSessionsBetweenDates(LocalDate startDate, LocalDate endDate) {
@@ -203,6 +266,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findSessionsInDateRange(startDate, endDate);
     }
 
+    /**
+     * Retrieves all game sessions where the specified user is registered as a player.
+     *
+     * @param userId the ID of the user to search for
+     * @return a list of sessions where the user participates
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findSessionsByPlayer(Long userId) {
@@ -210,69 +279,83 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findSessionsByPlayer(userId);
     }
 
+    /**
+     * Adds a player to a game session if there is available space.
+     *
+     * @param sessionId the ID of the session
+     * @param userId the ID of the player
+     * @return true if the player was successfully added, false otherwise
+     */
     @Override
     @Transactional
     public boolean addPlayerToSession(Long sessionId, Long userId) {
         log.debug("Adding player {} to session {}", userId, sessionId);
         Optional<GameSession> optGameSession = gameSessionRepository.findById(sessionId);
         Optional<User> optUser = userRepository.findById(userId);
-        
         if (optGameSession.isPresent() && optUser.isPresent()) {
             GameSession gameSession = optGameSession.get();
             User user = optUser.get();
-            
-            // Check if player is already in the session
             boolean alreadyRegistered = gameSessionPlayerRepository.existsById(
                     new GameSessionPlayerId(sessionId, userId));
             if (alreadyRegistered) {
                 return false;
             }
-            
-            // Check if there's available space
             long confirmedPlayers = gameSessionPlayerRepository.countByGameSession(gameSession);
             if (confirmedPlayers >= gameSession.getMaxPlayers()) {
                 return false;
             }
-            
-            // Add the player with automatic confirmation
             GameSessionPlayer gameSessionPlayer = GameSessionPlayer.builder()
                     .gameSession(gameSession)
                     .user(user)
                     .joinDate(LocalDate.now())
                     .confirmed(true)
                     .build();
-            
             gameSessionPlayerRepository.save(gameSessionPlayer);
             return true;
         }
-        
         return false;
     }
 
+    /**
+     * Removes a player from a game session.
+     *
+     * @param sessionId the ID of the session
+     * @param userId the ID of the player
+     * @return true if the player was removed successfully, false otherwise
+     */
     @Override
     @Transactional
     public boolean removePlayerFromSession(Long sessionId, Long userId) {
         log.debug("Removing player {} from session {}", userId, sessionId);
         Optional<GameSessionPlayer> optGameSessionPlayer = gameSessionPlayerRepository.findById(
                 new GameSessionPlayerId(sessionId, userId));
-        
         if (optGameSessionPlayer.isPresent()) {
             gameSessionPlayerRepository.delete(optGameSessionPlayer.get());
             return true;
         }
-        
         return false;
     }
 
+    /**
+     * Confirms a player's participation in a session.
+     * In this implementation, players are auto-confirmed.
+     *
+     * @param sessionId the ID of the session
+     * @param userId the ID of the player
+     * @return always returns true (auto-confirmation)
+     */
     @Override
     @Transactional
     public boolean confirmPlayerInSession(Long sessionId, Long userId) {
         log.debug("Confirming player {} in session {} (auto-confirmed)", userId, sessionId);
-        return true; // Los jugadores se confirman automáticamente
+        return true;
     }
 
-    // Métodos adicionales
-
+    /**
+     * Retrieves all multi-day game sessions (sessions spanning more than one day).
+     *
+     * @return a list of multi-day sessions
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findMultiDaySessions() {
@@ -280,6 +363,11 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findMultiDaySessions();
     }
 
+    /**
+     * Retrieves all single-day game sessions (sessions starting and ending on the same day).
+     *
+     * @return a list of single-day sessions
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findSingleDaySessions() {
@@ -287,6 +375,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findSingleDaySessions();
     }
 
+    /**
+     * Retrieves game sessions by custom game name (case-insensitive partial match).
+     *
+     * @param gameName the custom game name to search for
+     * @return a list of sessions with matching custom game names
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findByCustomGameName(String gameName) {
@@ -294,6 +388,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findByCustomGameNameContainingIgnoreCase(gameName);
     }
 
+    /**
+     * Retrieves all sessions that start after the specified date.
+     *
+     * @param date the cutoff date
+     * @return a list of sessions starting after the given date
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findSessionsStartingAfter(LocalDate date) {
@@ -301,6 +401,12 @@ public class GameSessionServiceImpl implements GameSessionService {
         return gameSessionRepository.findByStartDateAfterAndStatus(date, GameSessionStatus.SCHEDULED);
     }
 
+    /**
+     * Retrieves all sessions that ended before the specified date.
+     *
+     * @param date the cutoff date
+     * @return a list of sessions ending before the given date
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findSessionsEndingBefore(LocalDate date) {
@@ -310,6 +416,12 @@ public class GameSessionServiceImpl implements GameSessionService {
                 .toList();
     }
 
+    /**
+     * Retrieves all sessions active on the specified date.
+     *
+     * @param date the date to check
+     * @return a list of sessions active on the given date
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSession> findActiveSessionsOnDate(LocalDate date) {

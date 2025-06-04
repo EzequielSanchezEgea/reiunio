@@ -7,6 +7,7 @@
     <title>Loan Details - Reiunio</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/loans.css">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -14,157 +15,268 @@
 
     <div class="container my-4">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item"><a href="/loans" class="text-decoration-none">Loans</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Loan Details</li>
+            <ol class="breadcrumb games-breadcrumb">
+                <li class="breadcrumb-item"><a href="/" class="games-breadcrumb-link">Home</a></li>
+                <li class="breadcrumb-item"><a href="/loans" class="games-breadcrumb-link">Loans</a></li>
+                <li class="breadcrumb-item active games-breadcrumb-active" aria-current="page">Loan Details</li>
             </ol>
         </nav>
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Loan Details</h2>
-                    <span class="badge fs-6" th:text="${loan.status}"
-                          th:classappend="${loan.status.name() == 'ACTIVE' ? 'bg-light text-dark' : 
-                                          loan.status.name() == 'RETURNED' ? 'bg-success' : 'bg-danger'}">
-                    </span>
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Loan Information -->
+                <div class="card games-detail-card shadow-sm">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0 games-detail-title">
+                                <i class="bi bi-box-arrow-right"></i> Loan Details
+                            </h2>
+                            <span class="badge fs-6 games-state-badge" th:text="${loan.status}"
+                                  th:classappend="${loan.status.name() == 'ACTIVE' ? 'games-state-acceptable' : 
+                                                  loan.status.name() == 'RETURNED' ? 'games-state-new' : 'games-state-damaged'}">
+                            </span>
+                        </div>
+                        <div class="games-detail-separator mt-3"></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="games-info-section">
+                                    <h4 class="games-info-title"><i class="bi bi-joystick"></i> Game Information</h4>
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            <!-- Game image -->
+                                            <img th:src="${loan.game.imageUrl}" 
+                                                 th:alt="'Photo of ' + ${loan.game.name}"
+                                                 class="img-fluid rounded games-detail-image"
+                                                 style="width: 100%; max-width: 120px; height: 120px; object-fit: cover;"
+                                                 onerror="this.src='/defaults/game-placeholder.jpg';">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h5 class="card-title">
+                                                <a th:href="@{/games/{id}(id=${loan.game.id})}" 
+                                                   th:text="${loan.game.name}" 
+                                                   class="games-link">Game Name</a>
+                                            </h5>
+                                            <p class="card-text" th:text="${loan.game.description}">Game description</p>
+                                            <ul class="games-info-list small">
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-people games-info-icon"></i> 
+                                                    <strong>Players:</strong> <span th:text="${loan.game.minPlayers + '-' + loan.game.maxPlayers + ' players'}">2-4 players</span>
+                                                </li>
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-clock games-info-icon"></i> 
+                                                    <strong>Duration:</strong> <span th:text="${loan.game.durationMinutes + ' minutes'}">60 minutes</span>
+                                                </li>
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-tag games-info-icon"></i> 
+                                                    <strong>Category:</strong> <span th:text="${loan.game.category}">Strategy</span>
+                                                </li>
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-star games-info-icon"></i> 
+                                                    <strong>State:</strong> 
+                                                    <span class="badge games-state-badge" th:text="${loan.game.state}"
+                                                          th:classappend="${loan.game.state.name() == 'NEW' ? 'games-state-new' : 
+                                                                          loan.game.state.name() == 'GOOD' ? 'games-state-good' : 
+                                                                          loan.game.state.name() == 'ACCEPTABLE' ? 'games-state-acceptable' : 'games-state-damaged'}">
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="games-info-section">
+                                    <h4 class="games-info-title"><i class="bi bi-person"></i> User Information</h4>
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            <!-- User photo -->
+                                            <img th:src="${loan.user.profilePhotoUrl}" 
+                                                 th:alt="'Profile photo of ' + ${loan.user.firstName}"
+                                                 class="rounded-circle img-fluid"
+                                                 style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--games-primary-yellow);"
+                                                 onerror="this.src='/defaults/user-placeholder.jpg';">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h5 class="card-title" th:text="${loan.user.fullName}">User Name</h5>
+                                            <ul class="games-info-list small">
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-person-circle games-info-icon"></i> 
+                                                    <strong>Username:</strong> <span th:text="${loan.user.username}">@username</span>
+                                                </li>
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-envelope games-info-icon"></i> 
+                                                    <strong>Email:</strong> <span th:text="${loan.user.email}">email@example.com</span>
+                                                </li>
+                                                <li class="games-info-item">
+                                                    <i class="bi bi-shield games-info-icon"></i> 
+                                                    <strong>Role:</strong> 
+                                                    <span class="badge games-state-badge" th:text="${loan.user.role}"
+                                                          th:classappend="${loan.user.role.name() == 'ADMIN' ? 'games-state-damaged' : 
+                                                                          loan.user.role.name() == 'EXTENDED_USER' ? 'games-state-acceptable' : 'games-state-good'}">
+                                                    </span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr style="border-color: rgba(254, 208, 1, 0.3);">
+                        
+                        <!-- Loan Timeline -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="games-info-section">
+                                    <h4 class="games-info-title"><i class="bi bi-calendar-plus"></i> Loan Date</h4>
+                                    <p class="fs-5" th:text="${#temporals.format(loan.loanDate, 'EEEE, dd MMMM yyyy')}">Monday, 01 January 2025</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="games-info-section">
+                                    <h4 class="games-info-title"><i class="bi bi-calendar-check"></i> Expected Return</h4>
+                                    <p class="fs-5" th:text="${#temporals.format(loan.estimatedReturnDate, 'EEEE, dd MMMM yyyy')}"
+                                       th:class="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now()) && loan.status.name() == 'ACTIVE'} ? 'text-danger' : ''">
+                                       Monday, 15 January 2025
+                                    </p>
+                                    <div th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now()) && loan.status.name() == 'ACTIVE'}" 
+                                         class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        <strong>Overdue by <span th:text="${loan.calculateDelayDays()}">5</span> day(s)</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="games-info-section">
+                                    <h4 class="games-info-title"><i class="bi bi-calendar-x"></i> Actual Return</h4>
+                                    <p th:if="${loan.actualReturnDate != null}" 
+                                       class="fs-5" th:text="${#temporals.format(loan.actualReturnDate, 'EEEE, dd MMMM yyyy')}">
+                                       Monday, 12 January 2025
+                                    </p>
+                                    <p th:unless="${loan.actualReturnDate != null}" class="fs-5 games-info-text">Not returned yet</p>
+                                    
+                                    <div th:if="${loan.status.name() == 'LATE' && loan.actualReturnDate != null}" 
+                                         class="alert alert-danger">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        <strong>Returned <span th:text="${loan.calculateDelayDays()}">3</span> day(s) late</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h4><i class="bi bi-joystick"></i> Game Information</h4>
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4 text-center">
-                                        <!-- Game image -->
-                                        <img th:src="${loan.game.imageUrl}" 
-                                             th:alt="'Photo of ' + ${loan.game.name}"
-                                             class="img-fluid rounded game-thumbnail mb-2"
-                                             style="width: 100%; max-width: 120px; height: 120px; object-fit: cover; border: 2px solid #dee2e6;">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h5 class="card-title">
-                                            <a th:href="@{/games/{id}(id=${loan.game.id})}" 
-                                               th:text="${loan.game.name}" 
-                                               class="text-decoration-none">Game Name</a>
-                                        </h5>
-                                        <p class="card-text" th:text="${loan.game.description}">Game description</p>
-                                        <ul class="list-unstyled small">
-                                            <li><i class="bi bi-people"></i> 
-                                                <span th:text="${loan.game.minPlayers + '-' + loan.game.maxPlayers + ' players'}">2-4 players</span>
-                                            </li>
-                                            <li><i class="bi bi-clock"></i> 
-                                                <span th:text="${loan.game.durationMinutes + ' minutes'}">60 minutes</span>
-                                            </li>
-                                            <li><i class="bi bi-tag"></i> 
-                                                <span th:text="${loan.game.category}">Strategy</span>
-                                            </li>
-                                            <li><i class="bi bi-star"></i> 
-                                                <span class="badge" th:text="${loan.game.state}"
-                                                      th:classappend="${loan.game.state.name() == 'NEW' ? 'bg-success' : 
-                                                                      loan.game.state.name() == 'GOOD' ? 'bg-info' : 
-                                                                      loan.game.state.name() == 'ACCEPTABLE' ? 'bg-warning' : 'bg-danger'}">
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h4><i class="bi bi-person"></i> User Information</h4>
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4 text-center">
-                                        <!-- User photo -->
-                                        <img th:src="${loan.user.profilePhotoUrl}" 
-                                             th:alt="'Profile photo of ' + ${loan.user.firstName}"
-                                             class="rounded-circle img-fluid user-thumbnail mb-2"
-                                             style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #dee2e6;">
-                                    </div>
-                                    <div class="col-md-8">
-                                        <h5 class="card-title" th:text="${loan.user.fullName}">User Name</h5>
-                                        <ul class="list-unstyled small">
-                                            <li><i class="bi bi-person-circle"></i> 
-                                                <span th:text="${loan.user.username}">@username</span>
-                                            </li>
-                                            <li><i class="bi bi-envelope"></i> 
-                                                <span th:text="${loan.user.email}">email@example.com</span>
-                                            </li>
-                                            <li><i class="bi bi-shield"></i> 
-                                                <span class="badge" th:text="${loan.user.role}"
-                                                      th:classappend="${loan.user.role.name() == 'ADMIN' ? 'bg-danger' : 
-                                                                      loan.user.role.name() == 'EXTENDED_USER' ? 'bg-warning text-dark' : 'bg-info'}">
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <hr>
-                
-                <div class="row">
-                    <div class="col-md-4">
-                        <h4><i class="bi bi-calendar-plus"></i> Loan Date</h4>
-                        <p class="fs-5" th:text="${#temporals.format(loan.loanDate, 'EEEE, dd MMMM yyyy')}">Monday, 01 January 2025</p>
-                    </div>
-                    <div class="col-md-4">
-                        <h4><i class="bi bi-calendar-check"></i> Expected Return</h4>
-                        <p class="fs-5" th:text="${#temporals.format(loan.estimatedReturnDate, 'EEEE, dd MMMM yyyy')}"
-                           th:class="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now()) && loan.status.name() == 'ACTIVE'} ? 'text-danger' : ''">
-                           Monday, 15 January 2025
-                        </p>
-                        <div th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now()) && loan.status.name() == 'ACTIVE'}" 
-                             class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> 
-                            <strong>Overdue by <span th:text="${loan.calculateDelayDays()}">5</span> day(s)</strong>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <h4><i class="bi bi-calendar-x"></i> Actual Return</h4>
-                        <p th:if="${loan.actualReturnDate != null}" 
-                           class="fs-5" th:text="${#temporals.format(loan.actualReturnDate, 'EEEE, dd MMMM yyyy')}">
-                           Monday, 12 January 2025
-                        </p>
-                        <p th:unless="${loan.actualReturnDate != null}" class="fs-5 text-muted">Not returned yet</p>
-                        
-                        <div th:if="${loan.status.name() == 'LATE' && loan.actualReturnDate != null}" 
-                             class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle"></i> 
-                            <strong>Returned <span th:text="${loan.calculateDelayDays()}">3</span> day(s) late</strong>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Action buttons -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-end">
-                            <a href="/loans" class="btn btn-secondary me-2">
-                                <i class="bi bi-arrow-left"></i> Back to Loans
-                            </a>
-                            <div sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')">
-                                <form th:if="${loan.status.name() == 'ACTIVE'}" 
-                                      th:action="@{/loans/{id}/return(id=${loan.id})}" 
-                                      method="post" class="d-inline">
-                                    <button type="button" class="btn btn-success" 
-                                            data-bs-toggle="modal" data-bs-target="#returnModal">
-                                        <i class="bi bi-box-arrow-in-left"></i> Register Return
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+            <div class="col-lg-4">
+               <!-- Action Panel -->
+<div class="card shadow-sm" 
+    style="background: linear-gradient(135deg, var(--loans-primary-black) 0%, rgba(254, 208, 1, 0.05) 100%);
+           border: 2px solid var(--loans-yellow-medium);
+           border-radius: 15px;
+           backdrop-filter: blur(10px);
+           box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);">
+   <div class="card-header" 
+        style="background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%) !important;
+               color: var(--loans-primary-black) !important;
+               border-radius: 15px 15px 0 0;
+               font-weight: 700;
+               border-bottom: none;">
+       <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
+   </div>
+   <div class="card-body">
+       <div class="d-grid gap-2">
+           <a href="/loans" class="btn" 
+              style="background: linear-gradient(135deg, var(--loans-medium-gray) 0%, var(--loans-dark-gray) 100%);
+                     border: 2px solid var(--loans-medium-gray);
+                     color: var(--loans-white);
+                     font-weight: 600;
+                     border-radius: 8px;
+                     transition: all 0.3s ease;
+                     text-decoration: none;"
+              onmouseover="this.style.background='linear-gradient(135deg, var(--loans-dark-gray) 0%, var(--loans-medium-gray) 100%)';
+                           this.style.transform='translateY(-2px)';"
+              onmouseout="this.style.background='linear-gradient(135deg, var(--loans-medium-gray) 0%, var(--loans-dark-gray) 100%)';
+                          this.style.transform='translateY(0px)';">
+               <i class="bi bi-arrow-left"></i> Back to Loans
+           </a>
+           <div sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')">
+               <button th:if="${loan.status.name() == 'ACTIVE'}" 
+                       type="button" class="btn w-100" 
+                       style="background: linear-gradient(135deg, var(--loans-accent-emerald) 0%, var(--loans-accent-teal) 100%);
+                              border: none;
+                              color: var(--loans-white);
+                              font-weight: 600;
+                              border-radius: 8px;
+                              transition: all 0.3s ease;"
+                       onmouseover="this.style.background='linear-gradient(135deg, var(--loans-accent-teal) 0%, var(--loans-accent-emerald) 100%)';
+                                    this.style.transform='translateY(-3px)';"
+                       onmouseout="this.style.background='linear-gradient(135deg, var(--loans-accent-emerald) 0%, var(--loans-accent-teal) 100%)';
+                                   this.style.transform='translateY(0px)';"
+                       data-bs-toggle="modal" data-bs-target="#returnModal">
+                   <i class="bi bi-box-arrow-in-left"></i> Register Return
+               </button>
+           </div>
+       </div>
+   </div>
+</div>
+
+<!-- Game Quick Info Card -->
+<div class="card shadow-sm mt-4" 
+    style="background: linear-gradient(135deg, var(--loans-primary-black) 0%, rgba(254, 208, 1, 0.05) 100%);
+           border: 2px solid var(--loans-yellow-medium);
+           border-radius: 15px;
+           backdrop-filter: blur(10px);
+           box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);">
+   <div class="card-header" 
+        style="background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%) !important;
+               color: var(--loans-primary-black) !important;
+               border-radius: 15px 15px 0 0;
+               font-weight: 700;
+               border-bottom: none;">
+       <h5 class="mb-0"><i class="bi bi-joystick"></i> Game Quick Info</h5>
+   </div>
+   <div class="card-body text-center">
+       <img th:src="${loan.game.imageUrl}" 
+            th:alt="'Photo of ' + ${loan.game.name}"
+            class="img-fluid rounded mb-3"
+            style="height: 120px; width: 120px; object-fit: cover;
+                   border: 3px solid var(--loans-primary-yellow);
+                   box-shadow: 0 8px 25px rgba(254, 208, 1, 0.3);
+                   transition: all 0.3s ease;"
+            onmouseover="this.style.borderColor='var(--loans-secondary-orange)';
+                         this.style.boxShadow='0 12px 35px rgba(254, 208, 1, 0.4)';
+                         this.style.transform='scale(1.02)';"
+            onmouseout="this.style.borderColor='var(--loans-primary-yellow)';
+                        this.style.boxShadow='0 8px 25px rgba(254, 208, 1, 0.3)';
+                        this.style.transform='scale(1)';"
+            onerror="this.src='/defaults/game-placeholder.jpg';">
+       
+       <h6 th:text="${loan.game.name}" style="color: var(--loans-white); font-weight: 600;">Game Name</h6>
+       <p class="small" style="color: rgba(255, 255, 255, 0.7); font-weight: 500;" 
+          th:text="'Code: COD' + ${loan.game.id}">Code: COD123</p>
+       
+       <a th:href="@{/games/{id}(id=${loan.game.id})}" class="btn btn-sm"
+          style="border: 2px solid var(--loans-primary-yellow);
+                 color: var(--loans-primary-yellow);
+                 background: transparent;
+                 font-weight: 600;
+                 border-radius: 8px;
+                 transition: all 0.3s ease;
+                 text-decoration: none;"
+          onmouseover="this.style.background='linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%)';
+                       this.style.color='var(--loans-primary-black)';
+                       this.style.borderColor='var(--loans-primary-yellow)';
+                       this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.background='transparent';
+                      this.style.color='var(--loans-primary-yellow)';
+                      this.style.borderColor='var(--loans-primary-yellow)';
+                      this.style.transform='translateY(0px)';">
+           <i class="bi bi-eye"></i> View Game Details
+       </a>
+   </div>
+</div>
             </div>
         </div>
 
@@ -172,32 +284,38 @@
         <div sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')" 
              class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="returnModalLabel">Register Return</h5>
+                <div class="modal-content games-modal">
+                    <div class="modal-header games-modal-header">
+                        <h5 class="modal-title" id="returnModalLabel">
+                            <i class="bi bi-box-arrow-in-left"></i> Register Return
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form th:action="@{/loans/{id}/return(id=${loan.id})}" method="post">
                         <div class="modal-body">
-                            <p>Register the return of <strong th:text="${loan.game.name}">Game Name</strong> 
-                               from <strong th:text="${loan.user.fullName}">User Name</strong>?</p>
-                            
-                            <div class="mb-3">
-                                <label for="returnDate" class="form-label">Return Date</label>
-                                <input type="date" class="form-control" id="returnDate" name="returnDate" 
-                                       th:value="${T(java.time.LocalDate).now()}" required>
-                                <div class="form-text">Leave as today's date or adjust if needed.</div>
-                            </div>
-                            
-                            <div th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}" 
-                                 class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle"></i> 
-                                This loan is overdue by <span th:text="${loan.calculateDelayDays()}">3</span> day(s).
+                            <div class="games-modal-content">
+                                <p>Register the return of <strong th:text="${loan.game.name}">Game Name</strong> 
+                                   from <strong th:text="${loan.user.fullName}">User Name</strong>?</p>
+                                
+                                <div class="mb-3">
+                                    <label for="returnDate" class="form-label games-label">Return Date</label>
+                                    <input type="date" class="form-control games-input" id="returnDate" name="returnDate" 
+                                           th:value="${T(java.time.LocalDate).now()}" required>
+                                    <div class="form-text games-help-text">Leave as today's date or adjust if needed.</div>
+                                </div>
+                                
+                                <div th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}" 
+                                     class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> 
+                                    This loan is overdue by <span th:text="${loan.calculateDelayDays()}">3</span> day(s).
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success">Register Return</button>
+                            <button type="button" class="btn games-btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn games-btn-success">
+                                <i class="bi bi-check-circle"></i> Register Return
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -205,19 +323,7 @@
         </div>
     </div>
 
-    <footer class="bg-dark text-white py-4 mt-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Reiunio</h5>
-                    <p>Application for managing game libraries and board games.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/scripts.js"></script>

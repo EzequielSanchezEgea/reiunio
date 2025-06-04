@@ -1,482 +1,604 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${gameSession.title} + ' - Reiunio'">Session Details - Reiunio</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="${gameSession.title} + ' - Reiunio'">Session
+	Details - Reiunio</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="/css/game-sessions.css">
+<link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <div th:replace="~{fragments/navbar :: navbar}"></div>
+	<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="container my-4">
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+	<div class="container my-4">
+		<div th:if="${message}"
+			class="alert alert-success alert-dismissible fade show" role="alert">
+			<span th:text="${message}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+		<div th:if="${error}"
+			class="alert alert-danger alert-dismissible fade show" role="alert">
+			<span th:text="${error}"></span>
+			<button type="button" class="btn-close" data-bs-dismiss="alert"
+				aria-label="Close"></button>
+		</div>
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item"><a href="/game-sessions" class="text-decoration-none">Sessions</a></li>
-                <li class="breadcrumb-item active" aria-current="page" th:text="${gameSession.title}">Session Details</li>
-            </ol>
-        </nav>
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb games-breadcrumb">
+				<li class="breadcrumb-item"><a href="/"
+					class="games-breadcrumb-link">Home</a></li>
+				<li class="breadcrumb-item"><a href="/game-sessions"
+					class="games-breadcrumb-link">Sessions</a></li>
+				<li class="breadcrumb-item active games-breadcrumb-active"
+					aria-current="page" th:text="${gameSession.title}">Session
+					Details</li>
+			</ol>
+		</nav>
 
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h2 class="mb-0" th:text="${gameSession.title}">Session Title</h2>
-                            <span class="badge fs-6" th:text="${gameSession.status}"
-                                  th:classappend="${gameSession.status.name() == 'SCHEDULED' ? 'bg-light text-dark' : 
-                                                  gameSession.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 
-                                                  gameSession.status.name() == 'FINISHED' ? 'bg-success' : 'bg-danger'}">
-                            </span>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4><i class="bi bi-joystick"></i> Game</h4>
-                                <div class="mb-3">
-                                    <h5 th:text="${gameSession.customGameName}">Game Name</h5>
-                                    <div th:if="${gameSession.customGameDescription}" class="text-muted mb-2">
-                                        <p th:text="${gameSession.customGameDescription}">Game description</p>
-                                    </div>
-                                    
-                                    <!-- Library game info if available -->
-                                    <div th:if="${gameSession.isLibraryGame()}" class="alert alert-info persistent">
-                                        <h6><i class="bi bi-bookmark persistent"></i> From Our Library</h6>
-                                        <p class="mb-1 persistent">
-                                            <a th:href="@{/games/{id}(id=${gameSession.game.id})}" 
-                                               th:text="${gameSession.game.name}" 
-                                               class="text-decoration-none fw-bold">Library Game Name</a>
-                                        </p>
-                                        <small class="text-muted" th:text="${gameSession.game.description}">Library game description</small>
-                                        <div class="mt-2">
-                                            <span class="badge bg-secondary me-1" th:text="${gameSession.game.category}">Category</span>
-                                            <span class="badge bg-secondary me-1" th:text="${gameSession.game.minPlayers + '-' + gameSession.game.maxPlayers + ' players'}">2-4 players</span>
-                                            <span class="badge bg-secondary" th:text="${gameSession.game.durationMinutes + ' min'}">60 min</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Personal game indicator -->
-                                    <div th:unless="${gameSession.isLibraryGame()}" class="alert alert-success persistent">
-                                        <h6><i class="bi bi-person-check"></i> Personal Game</h6>
-                                        <p class="mb-1">This is a personal game brought by the organizer or participants.</p>
-                                        <div th:if="${gameSession.hasCustomGameImage()}" class="mt-2">
-                                            <small class="badge bg-success">
-                                                <i class="bi bi-image-fill"></i> Custom Image Uploaded
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h4><i class="bi bi-calendar3"></i> Schedule</h4>
-                                <div class="mb-3">
-                                    <!-- Single day session -->
-                                    <div th:if="${!gameSession.isMultiDay()}">
-                                        <p class="fs-5 mb-1" th:text="${#temporals.format(gameSession.startDate, 'EEEE, dd MMMM yyyy')}">Monday, 01 January 2025</p>
-                                        <p class="text-muted">
-                                            <i class="bi bi-clock"></i> 
-                                            <span th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
-                                            <span th:if="${gameSession.endTime}">
-                                                - <span th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
-                                            </span>
-                                        </p>
-                                    </div>
-                                    
-                                    <!-- Multi-day session -->
-                                    <div th:if="${gameSession.isMultiDay()}">
-                                        <div class="alert alert-warning">
-                                            <h6><i class="bi bi-calendar-range"></i> Multi-Day Session</h6>
-                                        </div>
-                                        <p><strong>Starts:</strong> 
-                                            <span th:text="${#temporals.format(gameSession.startDate, 'EEEE, dd MMMM yyyy')}">Monday, 01 January 2025</span>
-                                            at <span th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
-                                        </p>
-                                        <p><strong>Ends:</strong> 
-                                            <span th:text="${#temporals.format(gameSession.endDate, 'EEEE, dd MMMM yyyy')}">Friday, 05 January 2025</span>
-                                            <span th:if="${gameSession.endTime}">
-                                                at <span th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">18:00</span>
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <hr>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4><i class="bi bi-people"></i> Players</h4>
-                                <p class="lead">
-                                    <span th:text="${gameSession.players.size()}">2</span>
-                                    / 
-                                    <span th:text="${gameSession.maxPlayers}">4</span>
-                                    registered players
-                                </p>
-                            </div>
-                            <div class="col-md-6">
-                                <h4><i class="bi bi-person-badge"></i> Created by</h4>
-                                <p class="lead" th:text="${gameSession.creator.firstName + ' ' + gameSession.creator.lastName}">John Doe</p>
-                                <small class="text-muted" th:text="'@' + ${gameSession.creator.username}">@admin</small>
-                            </div>
-                        </div>
-                        
-                        <div th:if="${gameSession.description}">
-                            <hr>
-                            <h4><i class="bi bi-chat-text"></i> Description</h4>
-                            <p th:text="${gameSession.description}">Session description</p>
-                        </div>
-                    </div>
-                </div>
+		<div class="row">
+			<div class="col-lg-8">
+				<div class="card games-detail-card shadow-sm">
+					<div class="card-header">
+						<div class="d-flex justify-content-between align-items-center">
+							<h2 class="mb-0 games-detail-title"
+								th:text="${gameSession.title}">Session Title</h2>
+							<span class="badge fs-6 games-state-badge"
+								th:text="${gameSession.status}"
+								th:classappend="${gameSession.status.name() == 'SCHEDULED' ? 'games-state-good' : 
+                                                  gameSession.status.name() == 'IN_PROGRESS' ? 'games-state-acceptable' : 
+                                                  gameSession.status.name() == 'FINISHED' ? 'games-state-new' : 'games-state-damaged'}">
+							</span>
+						</div>
+						<div class="games-detail-separator mt-3"></div>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="games-info-section">
+									<h4 class="games-info-title">
+										<i class="bi bi-joystick"></i> Game
+									</h4>
+									<div class="mb-3">
+										<h5 th:text="${gameSession.customGameName}">Game Name</h5>
+										<div th:if="${gameSession.customGameDescription}"
+											class="text-muted mb-2">
+											<p th:text="${gameSession.customGameDescription}">Game
+												description</p>
+										</div>
 
-                <!-- Players List -->
-                <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-people"></i> Players List</h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:if="${gameSession.players != null and !gameSession.players.empty}">
-                            <div class="list-group">
-                                <div th:each="player : ${gameSession.players}" 
-                                     class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <!-- User profile photo -->
-                                        <div class="me-3">
-                                            <!-- Show custom profile photo if user has one -->
-                                            <img th:if="${player.user.hasCustomProfilePhoto()}"
-                                                 th:src="${player.user.profilePhotoPath}" 
-                                                 th:alt="'Profile photo of ' + ${player.user.firstName}"
-                                                 class="rounded-circle"
-                                                 style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #dee2e6;"
-                                                 onerror="this.src='/defaults/user-placeholder.jpg';">
-                                            
-                                            <!-- Show default photo if no custom photo -->
-                                            <img th:unless="${player.user.hasCustomProfilePhoto()}"
-                                                 src="/defaults/user-placeholder.jpg" 
-                                                 th:alt="'Default photo for ' + ${player.user.firstName}"
-                                                 class="rounded-circle"
-                                                 style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #dee2e6;">
-                                        </div>
-                                        
-                                        <div>
-                                            <div>
-                                                <span class="fw-bold" th:text="${player.user.firstName + ' ' + player.user.lastName}">Player Name</span>
-                                                <small class="text-muted ms-2" th:text="'@' + ${player.user.username}">@username</small>
-                                            </div>
-                                            <div th:if="${player.user.id == gameSession.creator.id}">
-                                                <small class="badge bg-warning text-dark">
-                                                    <i class="bi bi-star-fill"></i> Creator
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-end">
-                                        <div>
-                                            <span class="badge bg-success">
-                                                <i class="bi bi-check-circle"></i> Registered
-                                            </span>
-                                        </div>
-                                        <small class="text-muted" 
-                                               th:text="'Joined: ' + ${#temporals.format(player.joinDate, 'dd/MM/yyyy')}"></small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div th:if="${gameSession.players == null or gameSession.players.empty}" 
-                             class="text-center py-3">
-                            <i class="bi bi-people" style="font-size: 2rem; color: #6c757d;"></i>
-                            <p class="text-muted mt-2">No players have joined yet.</p>
-                            <p class="text-muted">Be the first to join this session!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+										<!-- Library game info if available -->
+										<div th:if="${gameSession.isLibraryGame()}"
+											class="alert alert-info persistent">
+											<h6>
+												<i class="bi bi-bookmark"></i> From Our Library
+											</h6>
+											<p class="mb-1">
+												<a th:href="@{/games/{id}(id=${gameSession.game.id})}"
+													th:text="${gameSession.game.name}"
+													class="games-link fw-bold">Library Game Name</a>
+											</p>
+											<small class="text-muted"
+												th:text="${gameSession.game.description}">Library
+												game description</small>
+											<div class="mt-2">
+												<span class="badge games-state-good me-1"
+													th:text="${gameSession.game.category}">Category</span> <span
+													class="badge games-state-good me-1"
+													th:text="${gameSession.game.minPlayers + '-' + gameSession.game.maxPlayers + ' players'}">2-4
+													players</span> <span class="badge games-state-good"
+													th:text="${gameSession.game.durationMinutes + ' min'}">60
+													min</span>
+											</div>
+										</div>
 
-            <div class="col-lg-4">
-                <!-- Action Panel -->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- User participation buttons -->
-                        <div sec:authorize="isAuthenticated()">
-                            <!-- Join button -->
-                            <div th:if="${!userRegistered}">
-                                <form th:action="@{/game-sessions/{id}/join(id=${gameSession.id})}" method="post">
-                                    <button type="submit" class="btn btn-success w-100 mb-2"
-                                            th:disabled="${gameSession.isFull() or gameSession.status.name() != 'SCHEDULED'}">
-                                        <i class="bi bi-plus-circle"></i> Join Session
-                                    </button>
-                                </form>
-                            </div>
-                            
-                            <!-- Leave button with registered indicator -->
-                            <div th:if="${userRegistered}">
-                                <div class="d-flex justify-content-between align-items-center mb-2 leave-button-container">
-                                    <form th:action="@{/game-sessions/{id}/leave(id=${gameSession.id})}" method="post" class="flex-grow-1 me-2">
-                                        <button type="submit" class="btn btn-outline-danger w-100"
-                                                th:disabled="${gameSession.status.name() == 'FINISHED'}">
-                                            <i class="bi bi-x-circle"></i> Leave Session
-                                        </button>
-                                    </form>
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle-fill"></i> Registered
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+										<!-- Personal game indicator -->
+										<div th:unless="${gameSession.isLibraryGame()}"
+											class="alert alert-success">
+											<h6>
+												<i class="bi bi-person-check"></i> Personal Game
+											</h6>
+											<p class="mb-1">This is a personal game brought by the
+												organizer or participants.</p>
+											<div th:if="${gameSession.hasCustomGameImage()}" class="mt-2">
+												<small class="badge games-state-new"> <i
+													class="bi bi-image-fill"></i> Custom Image Uploaded
+												</small>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="games-info-section">
+									<h4 class="games-info-title">
+										<i class="bi bi-calendar3"></i> Schedule
+									</h4>
+									<div class="mb-3">
+										<!-- Single day session -->
+										<div th:if="${!gameSession.isMultiDay()}">
+											<p class="fs-5 mb-1"
+												th:text="${#temporals.format(gameSession.startDate, 'EEEE, dd MMMM yyyy')}">Monday,
+												01 January 2025</p>
+											<p class="text-muted">
+												<i class="bi bi-clock"></i> <span
+													th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+												<span th:if="${gameSession.endTime}"> - <span
+													th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
+												</span>
+											</p>
+										</div>
 
-                        <hr>
+										<!-- Multi-day session -->
+										<div th:if="${gameSession.isMultiDay()}">
+											<div class="alert alert-warning">
+												<h6>
+													<i class="bi bi-calendar-range"></i> Multi-Day Session
+												</h6>
+											</div>
+											<p>
+												<strong>Starts:</strong> <span
+													th:text="${#temporals.format(gameSession.startDate, 'EEEE, dd MMMM yyyy')}">Monday,
+													01 January 2025</span> at <span
+													th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+											</p>
+											<p>
+												<strong>Ends:</strong> <span
+													th:text="${#temporals.format(gameSession.endDate, 'EEEE, dd MMMM yyyy')}">Friday,
+													05 January 2025</span> <span th:if="${gameSession.endTime}">
+													at <span
+													th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">18:00</span>
+												</span>
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 
-                        <!-- Admin/Creator actions -->
-                        <div sec:authorize="hasRole('ADMIN')">
-                            <div class="d-grid gap-2">
-                                <a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}" 
-                                   class="btn btn-warning">
-                                    <i class="bi bi-pencil"></i> Edit Session
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <!-- Extended user actions -->
-                        <div sec:authorize="hasRole('EXTENDED_USER')" th:with="currentUserName=${#authentication.principal.username}">
-                            <div th:if="${currentUserName == gameSession.creator.username}">
-                                <div class="d-grid gap-2">
-                                    <a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}" 
-                                       class="btn btn-warning">
-                                        <i class="bi bi-pencil"></i> Edit Session
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Basic user creator actions -->
-                        <div sec:authorize="hasRole('BASIC_USER')" th:with="currentUserName=${#authentication.principal.username}">
-                            <div th:if="${currentUserName == gameSession.creator.username}">
-                                <div class="d-grid gap-2">
-                                    <a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}" 
-                                       class="btn btn-warning">
-                                        <i class="bi bi-pencil"></i> Edit Session
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+						<hr style="border-color: rgba(254, 208, 1, 0.3);">
 
-                        <!-- Delete button (only admin or creator) -->
-                        <div sec:authorize="hasRole('ADMIN')">
-                            <hr>
-                            <button type="button" class="btn btn-danger w-100" 
-                                    data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="bi bi-trash"></i> Delete Session
-                            </button>
-                        </div>
-                        
-                        <!-- Delete for creator (non-admin) -->
-                        <div sec:authorize="!hasRole('ADMIN')" th:with="currentUserName=${#authentication.principal.username}">
-                            <div th:if="${currentUserName == gameSession.creator.username}">
-                                <hr>
-                                <button type="button" class="btn btn-danger w-100" 
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                    <i class="bi bi-trash"></i> Delete Session
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="games-info-section">
+									<h4 class="games-info-title">
+										<i class="bi bi-people"></i> Players
+									</h4>
+									<p class="lead">
+										<span th:text="${gameSession.players.size()}">2</span> / <span
+											th:text="${gameSession.maxPlayers}">4</span> registered
+										players
+									</p>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="games-info-section">
+									<h4 class="games-info-title">
+										<i class="bi bi-person-badge"></i> Created by
+									</h4>
+									<p class="lead"
+										th:text="${gameSession.creator.firstName + ' ' + gameSession.creator.lastName}">John
+										Doe</p>
+									<small class="text-muted"
+										th:text="'@' + ${gameSession.creator.username}">@admin</small>
+								</div>
+							</div>
+						</div>
 
-                <!-- Game Info Card -->
-                <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Game Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center mb-3">
-                            <!-- Library game image -->
-                            <div th:if="${gameSession.isLibraryGame()}">
-                                <a th:href="@{/games/{id}(id=${gameSession.game.id})}">
-                                    <img th:src="${gameSession.game.getImageUrl()}" 
-                                         th:alt="'Photo of ' + ${gameSession.game.name}"
-                                         class="rounded img-fluid"
-                                         style="height: 150px; width: 150px; object-fit: cover; border: 2px solid #0d6efd;"
-                                         onerror="this.src='/defaults/game-placeholder.jpg';">
-                                </a>
-                            </div>
-                            
-                            <!-- Personal game image -->
-                            <div th:unless="${gameSession.isLibraryGame()}">
-                                <!-- Show custom image if available -->
-                                <img th:if="${gameSession.hasCustomGameImage()}" 
-                                     th:src="${gameSession.customGameImagePath}" 
-                                     th:alt="'Custom image for ' + ${gameSession.customGameName}"
-                                     class="rounded img-fluid"
-                                     style="height: 150px; width: 150px; object-fit: cover; border: 2px solid #198754;"
-                                     onerror="this.src='/defaults/game-placeholder.jpg';">
-                                
-                                <!-- Show placeholder if no custom image -->
-                                <img th:unless="${gameSession.hasCustomGameImage()}" 
-                                     src="/defaults/game-placeholder.jpg" 
-                                     th:alt="'Image for personal game: ' + ${gameSession.customGameName}"
-                                     class="rounded img-fluid"
-                                     style="height: 150px; width: 150px; object-fit: cover; border: 2px solid #198754;">
-                            </div>
-                        </div>
-                        
-                        <h6 th:text="${gameSession.customGameName}">Game Name</h6>
-                        <p class="text-muted small" th:if="${gameSession.customGameDescription}" 
-                           th:text="${gameSession.customGameDescription}">Game description</p>
-                        
-                        <!-- Library game details -->
-                        <div th:if="${gameSession.isLibraryGame()}">
-                            <ul class="list-unstyled small">
-                                <li><i class="bi bi-bookmark-fill text-primary"></i> 
-                                    <span class="fw-bold">Library Game</span>
-                                </li>
-                                <li><i class="bi bi-people"></i> 
-                                    <span th:text="${gameSession.game.minPlayers + '-' + gameSession.game.maxPlayers + ' players'}">2-4 players</span>
-                                </li>
-                                <li><i class="bi bi-clock"></i> 
-                                    <span th:text="${gameSession.game.durationMinutes + ' minutes'}">60 minutes</span>
-                                </li>
-                                <li><i class="bi bi-tag"></i> 
-                                    <span th:text="${gameSession.game.category}">Strategy</span>
-                                </li>
-                                <li><i class="bi bi-star"></i> 
-                                    <span class="badge" th:text="${gameSession.game.state}"
-                                          th:classappend="${gameSession.game.state.name() == 'NEW' ? 'bg-success' : 
-                                                          gameSession.game.state.name() == 'GOOD' ? 'bg-info' : 
-                                                          gameSession.game.state.name() == 'ACCEPTABLE' ? 'bg-warning text-dark' : 'bg-danger'}">
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
-                        
-                        <!-- Personal game details -->
-                        <div th:unless="${gameSession.isLibraryGame()}">
-                            <ul class="list-unstyled small">
-                                <li><i class="bi bi-person-check-fill text-success"></i> 
-                                    <span class="fw-bold">Personal Game</span>
-                                </li>
-                                <li><i class="bi bi-people"></i> 
-                                    <span th:text="${gameSession.maxPlayers + ' max players'}">4 max players</span>
-                                </li>
-                                <li th:if="${gameSession.hasCustomGameImage()}">
-                                    <i class="bi bi-image-fill text-success"></i> 
-                                    <span class="fw-bold">Custom Image Uploaded</span>
-                                </li>
-                            </ul>
-                            <div class="alert alert-success persistent mt-2">
-                                <small><i class="bi bi-person-check"></i> This is a personal game brought by the organizer or participants.</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+						<div th:if="${gameSession.description}">
+							<hr style="border-color: rgba(254, 208, 1, 0.3);">
+							<div class="games-description-section">
+								<h4 class="games-info-title">
+									<i class="bi bi-chat-text"></i> Description
+								</h4>
+								<div class="games-description-content">
+									<p th:text="${gameSession.description}">Session description</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                <!-- Session Duration Info -->
-                <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-calendar-range"></i> Duration</h5>
-                    </div>
-                    <div class="card-body">
-                        <div th:if="${!gameSession.isMultiDay()}">
-                            <div class="text-center">
-                                <i class="bi bi-calendar-day" style="font-size: 2rem; color: #0d6efd;"></i>
-                                <h6 class="mt-2">Single Day Session</h6>
-                                <p class="text-muted small">
-                                    <span th:text="${#temporals.format(gameSession.startDate, 'dd/MM/yyyy')}">01/01/2025</span>
-                                    <br>
-                                    <span th:if="${gameSession.endTime}">
-                                        Duration: <span th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span> - 
-                                        <span th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
-                                    </span>
-                                    <span th:unless="${gameSession.endTime}">
-                                        Starts at: <span th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div th:if="${gameSession.isMultiDay()}">
-                            <div class="text-center">
-                                <i class="bi bi-calendar-range" style="font-size: 2rem; color: #fd7e14;"></i>
-                                <h6 class="mt-2">Multi-Day Event</h6>
-                                <p class="text-muted small">
-                                    <strong>From:</strong> <span th:text="${#temporals.format(gameSession.startDate, 'dd/MM/yyyy')}">01/01/2025</span>
-                                    <br>
-                                    <strong>To:</strong> <span th:text="${#temporals.format(gameSession.endDate, 'dd/MM/yyyy')}">05/01/2025</span>
-                                    <br>
-                                    <span th:with="days=${T(java.time.temporal.ChronoUnit).DAYS.between(gameSession.startDate, gameSession.endDate) + 1}">
-                                        <span th:text="${days + ' day' + (days > 1 ? 's' : '')}">5 days</span> total
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+				<!-- Players List -->
+				<div class="card games-detail-card shadow-sm mt-4">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="bi bi-people"></i> Players List
+						</h5>
+					</div>
+					<div class="card-body">
+						<div
+							th:if="${gameSession.players != null and !gameSession.players.empty}">
+							<div class="list-group">
+								<div th:each="player : ${gameSession.players}"
+									class="list-group-item games-info-item d-flex justify-content-between align-items-center">
+									<div class="d-flex align-items-center">
+										<!-- User profile photo -->
+										<div class="me-3">
+											<!-- Show custom profile photo if user has one -->
+											<img th:if="${player.user.hasCustomProfilePhoto()}"
+												th:src="${player.user.profilePhotoPath}"
+												th:alt="'Profile photo of ' + ${player.user.firstName}"
+												class="rounded-circle"
+												style="width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--games-primary-yellow);"
+												onerror="this.src='/defaults/user-placeholder.jpg';">
 
-        <!-- Delete confirmation modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="deleteModalLabel">Confirm deletion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete the session <strong th:text="${gameSession.title}"></strong>?</p>
-                        <p class="text-danger">This action cannot be undone and all player registrations will be lost.</p>
-                        <div th:if="${gameSession.isLibraryGame()}" class="alert alert-info">
-                            <i class="bi bi-info-circle"></i>
-                            The library game "<span th:text="${gameSession.game.name}">Game Name</span>" will become available for loans again.
-                        </div>
-                        <div th:if="${gameSession.hasCustomGameImage()}" class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            The custom game image will also be permanently deleted.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form th:action="@{/game-sessions/{id}/delete(id=${gameSession.id})}" method="post">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+											<!-- Show default photo if no custom photo -->
+											<img th:unless="${player.user.hasCustomProfilePhoto()}"
+												src="/defaults/user-placeholder.jpg"
+												th:alt="'Default photo for ' + ${player.user.firstName}"
+												class="rounded-circle"
+												style="width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--games-primary-yellow);">
+										</div>
 
-    <footer class="bg-dark text-white py-4 mt-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Reiunio</h5>
-                    <p>Application for managing game libraries and board games.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>&copy; 2025 Reiunio. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+										<div>
+											<div>
+												<span class="fw-bold"
+													th:text="${player.user.firstName + ' ' + player.user.lastName}">Player
+													Name</span> <small class="text-muted ms-2"
+													th:text="'@' + ${player.user.username}">@username</small>
+											</div>
+											<div th:if="${player.user.id == gameSession.creator.id}">
+												<small class="badge games-state-acceptable"> <i
+													class="bi bi-star-fill"></i> Creator
+												</small>
+											</div>
+										</div>
+									</div>
+									<div class="text-end">
+										<div>
+											<span class="badge games-state-new"> <i
+												class="bi bi-check-circle"></i> Registered
+											</span>
+										</div>
+										<small class="text-muted"
+											th:text="'Joined: ' + ${#temporals.format(player.joinDate, 'dd/MM/yyyy')}"></small>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div
+							th:if="${gameSession.players == null or gameSession.players.empty}"
+							class="text-center py-3 games-empty-state">
+							<i class="bi bi-people games-empty-icon"></i>
+							<p class="games-empty-text mt-2">No players have joined yet.</p>
+							<p class="games-empty-text">Be the first to join this
+								session!</p>
+						</div>
+					</div>
+				</div>
+			</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/scripts.js"></script>
+			<div class="col-lg-4">
+				<!-- Action Panel -->
+				<div class="card games-detail-card shadow-sm">
+					<div
+						class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="mb-0">
+							<i class="bi bi-gear"></i> Actions
+						</h5>
+						<!-- Registered indicator moved to header right -->
+						<div sec:authorize="isAuthenticated()" th:if="${userRegistered}">
+							<span class="badge games-state-new"> <i
+								class="bi bi-check-circle-fill"></i> Registered
+							</span>
+						</div>
+					</div>
+					<div class="card-body">
+						<!-- User participation buttons -->
+						<div sec:authorize="isAuthenticated()">
+							<!-- Join button -->
+							<div th:if="${!userRegistered}">
+								<form
+									th:action="@{/game-sessions/{id}/join(id=${gameSession.id})}"
+									method="post">
+									<button type="submit" class="btn w-100 mb-2"
+										style="background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); border: none; color: #ffffff; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);"
+										onmouseover="this.style.background='linear-gradient(135deg, #00cec9 0%, #00b894 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0, 184, 148, 0.4)';"
+										onmouseout="this.style.background='linear-gradient(135deg, #00b894 0%, #00cec9 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(0, 184, 148, 0.3)';"
+										th:disabled="${gameSession.isFull() or gameSession.status.name() != 'SCHEDULED'}">
+										<i class="bi bi-plus-circle"></i> Join Session
+									</button>
+								</form>
+							</div>
+
+							<!-- Leave button -->
+							<div th:if="${userRegistered}">
+								<form
+									th:action="@{/game-sessions/{id}/leave(id=${gameSession.id})}"
+									method="post">
+									<button type="submit" class="btn w-100 mb-2"
+										style="background: linear-gradient(135deg, #e17055 0%, #d63031 100%); border: none; color: #ffffff; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);"
+										onmouseover="this.style.background='linear-gradient(135deg, #d63031 0%, #e17055 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(231, 76, 60, 0.4)';"
+										onmouseout="this.style.background='linear-gradient(135deg, #e17055 0%, #d63031 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.3)';"
+										th:disabled="${gameSession.status.name() == 'FINISHED'}">
+										<i class="bi bi-x-circle"></i> Leave Session
+									</button>
+								</form>
+							</div>
+						</div>
+
+						<hr style="border-color: rgba(254, 208, 1, 0.3);">
+
+						<!-- Admin/Creator actions -->
+						<div sec:authorize="hasRole('ADMIN')">
+							<div class="d-grid gap-2">
+								<a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}"
+									class="btn"
+									style="background: linear-gradient(135deg, #fdcb6e 0%, #fed001 100%); border: none; color: #1e201d; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3); text-decoration: none;"
+									onmouseover="this.style.background='linear-gradient(135deg, #fed001 0%, #fdcb6e 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(253, 203, 110, 0.4)';"
+									onmouseout="this.style.background='linear-gradient(135deg, #fdcb6e 0%, #fed001 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(253, 203, 110, 0.3)';">
+									<i class="bi bi-pencil"></i> Edit Session
+								</a>
+							</div>
+						</div>
+
+						<!-- Extended user actions -->
+						<div sec:authorize="hasRole('EXTENDED_USER')"
+							th:with="currentUserName=${#authentication.principal.username}">
+							<div th:if="${currentUserName == gameSession.creator.username}">
+								<div class="d-grid gap-2">
+									<a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}"
+										class="btn"
+										style="background: linear-gradient(135deg, #fdcb6e 0%, #fed001 100%); border: none; color: #1e201d; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3); text-decoration: none;"
+										onmouseover="this.style.background='linear-gradient(135deg, #fed001 0%, #fdcb6e 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(253, 203, 110, 0.4)';"
+										onmouseout="this.style.background='linear-gradient(135deg, #fdcb6e 0%, #fed001 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(253, 203, 110, 0.3)';">
+										<i class="bi bi-pencil"></i> Edit Session
+									</a>
+								</div>
+							</div>
+						</div>
+
+						<!-- Basic user creator actions -->
+						<div sec:authorize="hasRole('BASIC_USER')"
+							th:with="currentUserName=${#authentication.principal.username}">
+							<div th:if="${currentUserName == gameSession.creator.username}">
+								<div class="d-grid gap-2">
+									<a th:href="@{/game-sessions/{id}/edit(id=${gameSession.id})}"
+										class="btn"
+										style="background: linear-gradient(135deg, #fdcb6e 0%, #fed001 100%); border: none; color: #1e201d; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3); text-decoration: none;"
+										onmouseover="this.style.background='linear-gradient(135deg, #fed001 0%, #fdcb6e 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(253, 203, 110, 0.4)';"
+										onmouseout="this.style.background='linear-gradient(135deg, #fdcb6e 0%, #fed001 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(253, 203, 110, 0.3)';">
+										<i class="bi bi-pencil"></i> Edit Session
+									</a>
+								</div>
+							</div>
+						</div>
+
+						<!-- Delete button (only admin or creator) -->
+						<div sec:authorize="hasRole('ADMIN')">
+							<hr style="border-color: rgba(254, 208, 1, 0.3);">
+							<button type="button" class="btn w-100"
+								style="background: linear-gradient(135deg, #e17055 0%, #d63031 100%); border: none; color: #ffffff; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);"
+								onmouseover="this.style.background='linear-gradient(135deg, #d63031 0%, #e17055 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(231, 76, 60, 0.4)';"
+								onmouseout="this.style.background='linear-gradient(135deg, #e17055 0%, #d63031 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.3)';"
+								data-bs-toggle="modal" data-bs-target="#deleteModal">
+								<i class="bi bi-trash"></i> Delete Session
+							</button>
+						</div>
+
+						<!-- Delete for creator (non-admin) -->
+						<div sec:authorize="!hasRole('ADMIN')"
+							th:with="currentUserName=${#authentication.principal.username}">
+							<div th:if="${currentUserName == gameSession.creator.username}">
+								<hr style="border-color: rgba(254, 208, 1, 0.3);">
+								<button type="button" class="btn w-100"
+									style="background: linear-gradient(135deg, #e17055 0%, #d63031 100%); border: none; color: #ffffff; font-weight: 600; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);"
+									onmouseover="this.style.background='linear-gradient(135deg, #d63031 0%, #e17055 100%)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(231, 76, 60, 0.4)';"
+									onmouseout="this.style.background='linear-gradient(135deg, #e17055 0%, #d63031 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.3)';"
+									data-bs-toggle="modal" data-bs-target="#deleteModal">
+									<i class="bi bi-trash"></i> Delete Session
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Game Info Card -->
+				<div class="card games-detail-card shadow-sm mt-4">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="bi bi-info-circle"></i> Game Information
+						</h5>
+					</div>
+					<div class="card-body">
+						<div class="d-flex justify-content-center mb-3">
+							<!-- Library game image -->
+							<div th:if="${gameSession.isLibraryGame()}">
+								<a th:href="@{/games/{id}(id=${gameSession.game.id})}"> <img
+									th:src="${gameSession.game.getImageUrl()}"
+									th:alt="'Photo of ' + ${gameSession.game.name}"
+									class="rounded img-fluid games-detail-image"
+									style="height: 150px; width: 150px; object-fit: cover;"
+									onerror="this.src='/defaults/game-placeholder.jpg';">
+								</a>
+							</div>
+
+							<!-- Personal game image -->
+							<div th:unless="${gameSession.isLibraryGame()}">
+								<!-- Show custom image if available -->
+								<img th:if="${gameSession.hasCustomGameImage()}"
+									th:src="${gameSession.customGameImagePath}"
+									th:alt="'Custom image for ' + ${gameSession.customGameName}"
+									class="rounded img-fluid games-detail-image"
+									style="height: 150px; width: 150px; object-fit: cover;"
+									onerror="this.src='/defaults/game-placeholder.jpg';">
+
+								<!-- Show placeholder if no custom image -->
+								<img th:unless="${gameSession.hasCustomGameImage()}"
+									src="/defaults/game-placeholder.jpg"
+									th:alt="'Image for personal game: ' + ${gameSession.customGameName}"
+									class="rounded img-fluid games-detail-image"
+									style="height: 150px; width: 150px; object-fit: cover;">
+							</div>
+						</div>
+
+						<h6 th:text="${gameSession.customGameName}">Game Name</h6>
+						<p class="text-muted small"
+							th:if="${gameSession.customGameDescription}"
+							th:text="${gameSession.customGameDescription}">Game
+							description</p>
+
+						<!-- Library game details -->
+						<div th:if="${gameSession.isLibraryGame()}">
+							<ul class="games-info-list small">
+								<li class="games-info-item"><i
+									class="bi bi-bookmark-fill games-info-icon"></i> <span
+									class="fw-bold">Library Game</span></li>
+								<li class="games-info-item"><i
+									class="bi bi-people games-info-icon"></i> <span
+									th:text="${gameSession.game.minPlayers + '-' + gameSession.game.maxPlayers + ' players'}">2-4
+										players</span></li>
+								<li class="games-info-item"><i
+									class="bi bi-clock games-info-icon"></i> <span
+									th:text="${gameSession.game.durationMinutes + ' minutes'}">60
+										minutes</span></li>
+								<li class="games-info-item"><i
+									class="bi bi-tag games-info-icon"></i> <span
+									th:text="${gameSession.game.category}">Strategy</span></li>
+								<li class="games-info-item"><i
+									class="bi bi-star games-info-icon"></i> <span
+									class="badge games-state-badge"
+									th:text="${gameSession.game.state}"
+									th:classappend="${gameSession.game.state.name() == 'NEW' ? 'games-state-new' : 
+                                                          gameSession.game.state.name() == 'GOOD' ? 'games-state-good' : 
+                                                          gameSession.game.state.name() == 'ACCEPTABLE' ? 'games-state-acceptable' : 'games-state-damaged'}">
+								</span></li>
+							</ul>
+						</div>
+
+						<!-- Personal game details -->
+						<div th:unless="${gameSession.isLibraryGame()}">
+							<ul class="games-info-list small">
+								<li class="games-info-item"><i
+									class="bi bi-person-check-fill games-info-icon"></i> <span
+									class="fw-bold">Personal Game</span></li>
+								<li class="games-info-item"><i
+									class="bi bi-people games-info-icon"></i> <span
+									th:text="${gameSession.maxPlayers + ' max players'}">4
+										max players</span></li>
+								<li th:if="${gameSession.hasCustomGameImage()}"
+									class="games-info-item"><i
+									class="bi bi-image-fill games-info-icon"></i> <span
+									class="fw-bold">Custom Image Uploaded</span></li>
+							</ul>
+							<div class="alert alert-success mt-2">
+								<small><i class="bi bi-person-check"></i> This is a
+									personal game brought by the organizer or participants.</small>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Session Duration Info -->
+				<div class="card games-detail-card shadow-sm mt-4">
+					<div class="card-header">
+						<h5 class="mb-0">
+							<i class="bi bi-calendar-range"></i> Duration
+						</h5>
+					</div>
+					<div class="card-body">
+						<div th:if="${!gameSession.isMultiDay()}">
+							<div class="text-center">
+								<i class="bi bi-calendar-day games-empty-icon"></i>
+								<h6 class="mt-2">Single Day Session</h6>
+								<p class="text-muted small">
+									<span
+										th:text="${#temporals.format(gameSession.startDate, 'dd/MM/yyyy')}">01/01/2025</span>
+									<br> <span th:if="${gameSession.endTime}">
+										Duration: <span
+										th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+										- <span
+										th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
+									</span> <span th:unless="${gameSession.endTime}"> Starts at: <span
+										th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+									</span>
+								</p>
+							</div>
+						</div>
+
+						<div th:if="${gameSession.isMultiDay()}">
+							<div class="text-center">
+								<i class="bi bi-calendar-range games-empty-icon"></i>
+								<h6 class="mt-2">Multi-Day Event</h6>
+								<p class="small" style="color: #fed001; font-weight: 600;">
+									<strong>From:</strong> <span
+										th:text="${#temporals.format(gameSession.startDate, 'dd/MM/yyyy')}">01/01/2025</span>
+									<br> <strong>To:</strong> <span
+										th:text="${#temporals.format(gameSession.endDate, 'dd/MM/yyyy')}">05/01/2025</span>
+									<br> <span
+										th:with="days=${T(java.time.temporal.ChronoUnit).DAYS.between(gameSession.startDate, gameSession.endDate) + 1}">
+										<span th:text="${days + ' day' + (days > 1 ? 's' : '')}">5
+											days</span> total
+									</span>
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Delete confirmation modal -->
+		<div class="modal fade" id="deleteModal" tabindex="-1"
+			aria-labelledby="deleteModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content games-modal">
+					<div class="modal-header games-modal-header">
+						<h5 class="modal-title" id="deleteModalLabel">Confirm
+							deletion</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<div class="games-modal-content">
+							<div class="games-modal-warning">
+								<i class="bi bi-exclamation-triangle-fill"></i>
+								<p>
+									Are you sure you want to delete the session <strong
+										th:text="${gameSession.title}"></strong>?
+								</p>
+							</div>
+							<p class="games-modal-danger">This action cannot be undone
+								and all player registrations will be lost.</p>
+							<div th:if="${gameSession.isLibraryGame()}"
+								class="alert alert-info">
+								<i class="bi bi-info-circle"></i> The library game "<span
+									th:text="${gameSession.game.name}">Game Name</span>" will
+								become available for loans again.
+							</div>
+							<div th:if="${gameSession.hasCustomGameImage()}"
+								class="alert alert-warning">
+								<i class="bi bi-exclamation-triangle"></i> The custom game image
+								will also be permanently deleted.
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn games-btn-secondary"
+							data-bs-dismiss="modal">Cancel</button>
+						<form
+							th:action="@{/game-sessions/{id}/delete(id=${gameSession.id})}"
+							method="post">
+							<button type="submit" class="btn games-btn-danger">Delete</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:replace="~{fragments/footer :: footer}"></div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/scripts.js"></script>
 </body>
 </html>

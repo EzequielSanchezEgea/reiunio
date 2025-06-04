@@ -12,8 +12,7 @@ import com.ezequiel.reiunio.entity.User;
 import com.ezequiel.reiunio.enums.ActionType;
 
 public interface AuditLogService {
-    
-    // Existing methods (non-paginated)
+
     List<AuditLog> findAll();
     
     Optional<AuditLog> findById(Long id);
@@ -30,10 +29,9 @@ public interface AuditLogService {
     
     List<AuditLog> findBetweenDates(LocalDateTime start, LocalDateTime end);
     
-    void logChange(User user, ActionType actionType, String affectedEntity, 
-                   Long entityId, String description);
+    void logChange(User user, ActionType actionType, String affectedEntity, Long entityId, String description);
     
-    // New paginated methods
+    // Paginated methods
     Page<AuditLog> findAll(Pageable pageable);
     
     Page<AuditLog> findByUser(User user, Pageable pageable);
@@ -45,4 +43,18 @@ public interface AuditLogService {
     Page<AuditLog> findByAffectedEntityAndId(String affectedEntity, Long entityId, Pageable pageable);
     
     Page<AuditLog> findBetweenDates(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    
+    /**
+     * Finds audit logs with combined filters - supports any combination of filters.
+     *
+     * @param actionType the action type to filter by (optional)
+     * @param affectedEntity the affected entity name to filter by (optional)
+     * @param startDate the start date and time to filter by (optional)
+     * @param endDate the end date and time to filter by (optional)
+     * @param pageable pagination information
+     * @return a page of audit logs matching the combined filters
+     */
+    Page<AuditLog> findWithCombinedFilters(ActionType actionType, String affectedEntity, 
+                                          LocalDateTime startDate, LocalDateTime endDate, 
+                                          Pageable pageable);
 }

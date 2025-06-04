@@ -1,6 +1,7 @@
 package com.ezequiel.reiunio.service.impl;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +26,9 @@ import com.ezequiel.reiunio.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service implementation for managing game loans.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +38,11 @@ public class LoanServiceImpl implements LoanService {
     private final GameRepository gameRepository;
     private final GameSessionRepository gameSessionRepository;
 
+    /**
+     * Retrieves all loans.
+     *
+     * @return a list of all loans
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Loan> findAll() {
@@ -41,6 +50,12 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findAll();
     }
 
+    /**
+     * Retrieves all loans with pagination support.
+     *
+     * @param pageable the pagination information
+     * @return a paginated list of loans
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<Loan> findAllPaginated(Pageable pageable) {
@@ -48,6 +63,12 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findAll(pageable);
     }
 
+    /**
+     * Finds a loan by its ID.
+     *
+     * @param id the ID of the loan
+     * @return an optional loan
+     */
     @Override
     @Transactional(readOnly = true)
     public Optional<Loan> findById(Long id) {
@@ -55,6 +76,12 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findById(id);
     }
 
+    /**
+     * Saves a loan entity.
+     *
+     * @param loan the loan to save
+     * @return the persisted loan
+     */
     @Override
     @Transactional
     public Loan save(Loan loan) {
@@ -62,6 +89,11 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.save(loan);
     }
 
+    /**
+     * Deletes a loan by ID.
+     *
+     * @param id the ID of the loan to delete
+     */
     @Override
     @Transactional
     public void deleteById(Long id) {
@@ -69,6 +101,12 @@ public class LoanServiceImpl implements LoanService {
         loanRepository.deleteById(id);
     }
 
+    /**
+     * Finds loans by user.
+     *
+     * @param user the user
+     * @return a list of loans for the specified user
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Loan> findByUser(User user) {
@@ -76,6 +114,13 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findByUser(user);
     }
 
+    /**
+     * Finds loans by user with pagination.
+     *
+     * @param user     the user
+     * @param pageable the pagination information
+     * @return a paginated list of loans
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<Loan> findByUserPaginated(User user, Pageable pageable) {
@@ -83,6 +128,12 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findByUser(user, pageable);
     }
 
+    /**
+     * Finds loans for a specific game.
+     *
+     * @param game the game
+     * @return a list of loans for the game
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Loan> findByGame(Game game) {
@@ -90,6 +141,12 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findByGame(game);
     }
 
+    /**
+     * Finds loans by status.
+     *
+     * @param status the loan status
+     * @return a list of loans with the given status
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Loan> findByStatus(LoanStatus status) {
@@ -97,6 +154,13 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findByStatus(status);
     }
 
+    /**
+     * Finds loans by status with pagination.
+     *
+     * @param status   the loan status
+     * @param pageable the pagination information
+     * @return a paginated list of loans
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<Loan> findByStatusPaginated(LoanStatus status, Pageable pageable) {
@@ -104,34 +168,36 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findByStatus(status, pageable);
     }
 
+    /**
+     * Creates a new loan for a game and user, checking availability and conflicts.
+     *
+     * @param user                the user
+     * @param game                the game
+     * @param estimatedReturnDate the estimated return date
+     * @return the created loan
+     */
     @Override
     @Transactional
     public Loan createLoan(User user, Game game, LocalDate estimatedReturnDate) {
         log.debug("Creating loan: game {} for user {}", game.getName(), user.getUsername());
-        
-        // Verificar que el juego esté disponible para préstamos
+
         if (!game.getAvailable()) {
-            throw new IllegalStateException("Game '" + game.getName() + "' is not available for loans");
+            throw new IllegalStateException("Game is not available for loans");
         }
-        
-        // Verificar que el usuario no tenga un préstamo activo de este juego
+
         List<Loan> activeLoansForGame = loanRepository.findByGameAndStatus(game, LoanStatus.ACTIVE);
         Optional<Loan> userActiveLoan = activeLoansForGame.stream()
                 .filter(loan -> loan.getUser().getId().equals(user.getId()))
                 .findFirst();
-        
+
         if (userActiveLoan.isPresent()) {
-            throw new IllegalStateException("User '" + user.getUsername() + "' already has an active loan for game '" + game.getName() + "'");
+            throw new IllegalStateException("User already has an active loan for this game");
         }
-        
-        // Verificar si hay otros préstamos activos para este juego
+
         if (!activeLoansForGame.isEmpty()) {
-            Loan existingLoan = activeLoansForGame.get(0);
-            throw new IllegalStateException("Game '" + game.getName() + "' is already on loan to user '" + 
-                    existingLoan.getUser().getUsername() + "' until " + 
-                    existingLoan.getEstimatedReturnDate());
+            throw new IllegalStateException("Game is already loaned to another user");
         }
-        
+
         Loan loan = Loan.builder()
                 .user(user)
                 .game(game)
@@ -139,16 +205,20 @@ public class LoanServiceImpl implements LoanService {
                 .estimatedReturnDate(estimatedReturnDate)
                 .status(LoanStatus.ACTIVE)
                 .build();
-        
-        // Marcar el juego como no disponible para préstamos
+
         game.setAvailable(false);
         gameRepository.save(game);
-        
-        log.info("Loan created for game '{}' - game marked as unavailable for loans", game.getName());
-        
+
         return loanRepository.save(loan);
     }
 
+    /**
+     * Registers the return of a loan and updates the loan status accordingly.
+     *
+     * @param loanId     the ID of the loan
+     * @param returnDate the actual return date
+     * @return the updated loan
+     */
     @Override
     @Transactional
     public Loan registerReturn(Long loanId, LocalDate returnDate) {
@@ -156,36 +226,29 @@ public class LoanServiceImpl implements LoanService {
         Optional<Loan> optLoan = loanRepository.findById(loanId);
         if (optLoan.isPresent()) {
             Loan loan = optLoan.get();
-            
-            // Verify that the loan is active
+
             if (loan.getStatus() != LoanStatus.ACTIVE) {
-                throw new IllegalStateException("Loan is not active, cannot register return");
+                throw new IllegalStateException("Loan is not active");
             }
-            
-            // Register the return
+
             loan.setActualReturnDate(returnDate);
-            
-            // Determine if there's a delay
-            if (returnDate.isAfter(loan.getEstimatedReturnDate())) {
-                loan.setStatus(LoanStatus.LATE);
-            } else {
-                loan.setStatus(LoanStatus.RETURNED);
-            }
-            
-            // Marcar el juego como disponible para préstamos nuevamente
+            loan.setStatus(returnDate.isAfter(loan.getEstimatedReturnDate()) ? LoanStatus.LATE : LoanStatus.RETURNED);
+
             Game game = loan.getGame();
             game.setAvailable(true);
             gameRepository.save(game);
-            
-            log.info("Loan returned for game '{}' - game marked as available for loans", 
-                    game.getName());
-            
+
             return loanRepository.save(loan);
         } else {
-            throw new IllegalArgumentException("Loan not found with ID: " + loanId);
+            throw new IllegalArgumentException("Loan not found");
         }
     }
 
+    /**
+     * Finds all overdue loans.
+     *
+     * @return a list of overdue loans
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Loan> findOverdueLoans() {
@@ -193,6 +256,12 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findOverdueLoans();
     }
 
+    /**
+     * Finds overdue loans with pagination.
+     *
+     * @param pageable pagination info
+     * @return a paginated list of overdue loans
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<Loan> findOverdueLoansPaginated(Pageable pageable) {
@@ -200,133 +269,98 @@ public class LoanServiceImpl implements LoanService {
         return loanRepository.findOverdueLoans(pageable);
     }
 
+    /**
+     * Finds upcoming scheduled sessions for a specific game.
+     *
+     * @param game the game
+     * @return a list of upcoming game sessions
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GameSessionInfo> findUpcomingSessionsForGame(Game game) {
         log.debug("Finding upcoming sessions for game: {}", game.getName());
-        
+
         LocalDate today = LocalDate.now();
-        
-        // Buscar sesiones programadas que usan este juego y empiezan hoy o en el futuro
-        List<GameSession> upcomingSessions = gameSessionRepository.findByGame(game)
-                .stream()
+
+        return gameSessionRepository.findByGame(game).stream()
                 .filter(session -> session.getStatus() == GameSessionStatus.SCHEDULED)
                 .filter(session -> !session.getStartDate().isBefore(today))
-                .sorted((s1, s2) -> s1.getStartDate().compareTo(s2.getStartDate()))
-                .collect(Collectors.toList());
-        
-        return upcomingSessions.stream()
+                .sorted(Comparator.comparing(GameSession::getStartDate))
                 .map(this::convertToGameSessionInfo)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Suggests a return date based on upcoming sessions for the game.
+     *
+     * @param game               the game
+     * @param proposedReturnDate the proposed return date
+     * @return a suggested return date
+     */
     @Override
     @Transactional(readOnly = true)
     public LocalDate suggestReturnDate(Game game, LocalDate proposedReturnDate) {
-        log.debug("Suggesting return date for game: {} with proposed date: {}", 
-                 game.getName(), proposedReturnDate);
-        
+        log.debug("Suggesting return date for game: {} with proposed date: {}", game.getName(), proposedReturnDate);
+
         List<GameSessionInfo> upcomingSessions = findUpcomingSessionsForGame(game);
-        
-        if (upcomingSessions.isEmpty()) {
-            // No hay sesiones programadas, la fecha propuesta está bien
-            return proposedReturnDate;
-        }
-        
-        // Buscar la primera sesión que conflicte con el período de préstamo
-        for (GameSessionInfo session : upcomingSessions) {
-            LocalDate sessionStart = session.getStartDate();
-            LocalDate sessionEnd = session.getEndDate();
-            
-            // Si la fecha propuesta de devolución está durante una sesión, sugerir antes
-            if (!proposedReturnDate.isBefore(sessionStart) && !proposedReturnDate.isAfter(sessionEnd)) {
-                // Sugerir el día antes del inicio de la sesión
-                LocalDate suggestedDate = sessionStart.minusDays(1);
-                
-                // Si la fecha sugerida es antes de hoy, mantener el día propuesto
-                if (suggestedDate.isBefore(LocalDate.now())) {
-                    return proposedReturnDate;
-                }
-                
-                log.info("Suggesting return date {} (day before session starting {}) instead of {}", 
-                        suggestedDate, sessionStart, proposedReturnDate);
-                return suggestedDate;
-            }
-            
-            // Si hay una sesión que empieza antes de la fecha propuesta pero termina después
-            if (sessionStart.isBefore(proposedReturnDate) && sessionEnd.isAfter(proposedReturnDate)) {
-                // Sugerir el día antes del inicio de la sesión
-                LocalDate suggestedDate = sessionStart.minusDays(1);
-                
-                if (suggestedDate.isBefore(LocalDate.now())) {
-                    return proposedReturnDate;
-                }
-                
-                log.info("Suggesting return date {} (avoiding session conflict) instead of {}", 
-                        suggestedDate, proposedReturnDate);
-                return suggestedDate;
-            }
-        }
-        
-        // No hay conflictos, mantener fecha propuesta
-        return proposedReturnDate;
+
+        if (upcomingSessions.isEmpty()) return proposedReturnDate;
+
+        return upcomingSessions.stream()
+                .map(GameSessionInfo::getStartDate)
+                .filter(date -> !date.isAfter(proposedReturnDate))
+                .min(LocalDate::compareTo)
+                .map(conflictDate -> {
+                    LocalDate suggestion = conflictDate.minusDays(1);
+                    return suggestion.isBefore(LocalDate.now().plusDays(1)) ? LocalDate.now().plusDays(1) : suggestion;
+                })
+                .orElse(proposedReturnDate);
     }
 
     /**
-     * Verifica si un juego está programado para ser usado en sesiones próximas
+     * Checks if a game is scheduled for any upcoming sessions.
+     *
+     * @param game the game
+     * @return true if the game is scheduled, false otherwise
      */
     @Override
     @Transactional(readOnly = true)
     public boolean isGameScheduledForUpcomingSessions(Game game) {
-        List<GameSessionInfo> upcomingSessions = findUpcomingSessionsForGame(game);
-        return !upcomingSessions.isEmpty();
+        return !findUpcomingSessionsForGame(game).isEmpty();
     }
 
     /**
-     * Obtiene información detallada sobre conflictos potenciales de un préstamo
+     * Checks for scheduling conflicts between a proposed loan return date and future sessions.
+     *
+     * @param game               the game
+     * @param proposedReturnDate the proposed return date
+     * @return a LoanConflictInfo object describing any conflicts
      */
     @Override
     @Transactional(readOnly = true)
     public LoanConflictInfo checkLoanConflicts(Game game, LocalDate proposedReturnDate) {
-        List<GameSessionInfo> upcomingSessions = findUpcomingSessionsForGame(game);
-        
-        if (upcomingSessions.isEmpty()) {
-            return new LoanConflictInfo(false, null, proposedReturnDate, "No upcoming sessions scheduled for this game.");
+        List<GameSessionInfo> sessions = findUpcomingSessionsForGame(game);
+        if (sessions.isEmpty()) {
+            return new LoanConflictInfo(false, null, proposedReturnDate, "No upcoming sessions for this game.");
         }
-        
-        // Buscar sesiones que conflicten con el período de préstamo
-        List<GameSessionInfo> conflictingSessions = upcomingSessions.stream()
-                .filter(session -> {
-                    LocalDate sessionStart = session.getStartDate();
-                    LocalDate sessionEnd = session.getEndDate();
-                    
-                    // Verificar si la fecha de devolución propuesta cae durante una sesión
-                    return !proposedReturnDate.isBefore(sessionStart) && !proposedReturnDate.isAfter(sessionEnd);
-                })
-                .collect(Collectors.toList());
-        
-        if (conflictingSessions.isEmpty()) {
-            return new LoanConflictInfo(false, upcomingSessions, proposedReturnDate, 
-                    "No conflicts with upcoming sessions.");
+
+        GameSessionInfo first = sessions.stream()
+                .min(Comparator.comparing(GameSessionInfo::getStartDate))
+                .orElse(sessions.get(0));
+
+        LocalDate suggestion = first.getStartDate().minusDays(1);
+        if (suggestion.isBefore(LocalDate.now().plusDays(1))) {
+            suggestion = LocalDate.now().plusDays(1);
         }
-        
-        // Hay conflictos, sugerir nueva fecha
-        GameSessionInfo firstConflict = conflictingSessions.get(0);
-        LocalDate suggestedDate = firstConflict.getStartDate().minusDays(1);
-        
-        if (suggestedDate.isBefore(LocalDate.now())) {
-            suggestedDate = proposedReturnDate; // Mantener fecha original si no se puede sugerir antes
-        }
-        
-        String warningMessage = String.format(
-                "Warning: The proposed return date conflicts with the session '%s' on %s. " +
-                "Consider returning the game by %s to avoid conflicts.",
-                firstConflict.getSessionTitle(),
-                firstConflict.getFormattedDateRange(),
-                suggestedDate
+
+        String warning = String.format(
+                "This game is scheduled for an upcoming session: '%s' on %s. Please return it by %s.",
+                first.getSessionTitle(),
+                first.getStartDate(),
+                suggestion
         );
-        
-        return new LoanConflictInfo(true, upcomingSessions, suggestedDate, warningMessage);
+
+        return new LoanConflictInfo(true, sessions, suggestion, warning);
     }
 
     private GameSessionInfo convertToGameSessionInfo(GameSession session) {
@@ -344,7 +378,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     /**
-     * Clase para encapsular información sobre conflictos de préstamos
+     * Contains details about potential loan conflicts with upcoming game sessions.
      */
     public static class LoanConflictInfo {
         private final boolean hasConflicts;
@@ -352,8 +386,8 @@ public class LoanServiceImpl implements LoanService {
         private final LocalDate suggestedReturnDate;
         private final String warningMessage;
 
-        public LoanConflictInfo(boolean hasConflicts, List<GameSessionInfo> upcomingSessions, 
-                               LocalDate suggestedReturnDate, String warningMessage) {
+        public LoanConflictInfo(boolean hasConflicts, List<GameSessionInfo> upcomingSessions,
+                                LocalDate suggestedReturnDate, String warningMessage) {
             this.hasConflicts = hasConflicts;
             this.upcomingSessions = upcomingSessions;
             this.suggestedReturnDate = suggestedReturnDate;

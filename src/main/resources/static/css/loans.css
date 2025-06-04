@@ -1,195 +1,426 @@
-/* Loans-specific styles */
+/* Loans CSS - Updated with Black & Yellow Theme */
 
-/* Loan cards */
+:root {
+    --loans-primary-black: #1e201d;
+    --loans-primary-yellow: rgba(254, 208, 1, 1);
+    --loans-yellow-light: rgba(254, 208, 1, 0.1);
+    --loans-yellow-medium: rgba(254, 208, 1, 0.3);
+    --loans-yellow-dark: rgba(200, 165, 0, 1);
+    --loans-secondary-orange: #ff6b35;
+    --loans-dark-gray: #2d3436;
+    --loans-medium-gray: #636e72;
+    --loans-light-gray: rgba(255, 255, 255, 0.1);
+    --loans-white: #ffffff;
+    --loans-success: #00b894;
+    --loans-warning: #fdcb6e;
+    --loans-danger: #e17055;
+    --loans-accent-teal: #00cec9;
+    --loans-accent-emerald: #00b894;
+}
+
+/* Loan Cards */
 .loan-card {
-    transition: all 0.3s ease;
-    border-radius: 10px;
+    transition: all 0.4s ease;
+    border-radius: 15px;
     overflow: hidden;
     height: 100%;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--loans-light-gray) 0%, rgba(254, 208, 1, 0.05) 100%);
+    border: 2px solid var(--loans-yellow-medium);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .loan-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(254, 208, 1, 0.3);
+    border-color: var(--loans-primary-yellow);
 }
 
 .loan-card-header {
-    background-color: rgba(13, 110, 253, 0.1);
-    padding: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%);
+    padding: 1.2rem;
+    border-bottom: 1px solid rgba(254, 208, 1, 0.3);
+    color: var(--loans-primary-black);
+    font-weight: 700;
 }
 
 /* Loan status badges */
-.status-active,
+.loan-status-active,
 .badge.bg-primary {
-    background-color: #0d6efd !important;
-    color: white !important;
+    background: linear-gradient(135deg, var(--loans-warning) 0%, var(--loans-primary-yellow) 100%) !important;
+    color: var(--loans-primary-black) !important;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
 }
 
-.status-returned,
+.loan-status-returned,
 .badge.bg-success {
-    background-color: #198754 !important;
-    color: white !important;
+    background: linear-gradient(135deg, var(--loans-accent-emerald) 0%, var(--loans-accent-teal) 100%) !important;
+    color: var(--loans-white) !important;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
 }
 
-.status-late,
+.loan-status-late,
 .badge.bg-danger {
-    background-color: #dc3545 !important;
-    color: white !important;
+    background: linear-gradient(135deg, var(--loans-danger) 0%, #d63031 100%) !important;
+    color: var(--loans-white) !important;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
 }
 
-.status-overdue {
-    background-color: #fd7e14 !important;
-    color: white !important;
+.loan-status-overdue {
+    background: linear-gradient(135deg, var(--loans-warning) 0%, var(--loans-secondary-orange) 100%) !important;
+    color: var(--loans-primary-black) !important;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.5rem 0.8rem;
 }
 
 /* Overdue indicators */
 .overdue-warning {
-    color: #dc3545;
+    color: var(--loans-danger);
     font-weight: bold;
 }
 
 .overdue-days {
-    background-color: #dc3545;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
+    background: linear-gradient(135deg, var(--loans-danger) 0%, #d63031 100%);
+    color: var(--loans-white);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
     font-size: 0.75rem;
-    font-weight: bold;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
 }
 
 /* Loan table specific styles */
 .table-loans {
-    background: #fff;
+    background: transparent;
+    color: var(--loans-white);
+    border-radius: 15px;
+    overflow: hidden;
 }
 
 .table-loans th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    border-bottom: 2px solid #dee2e6;
-    color: #495057;
+    background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%);
+    color: var(--loans-primary-black);
+    font-weight: 700;
+    border-bottom: 2px solid rgba(254, 208, 1, 0.3);
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     letter-spacing: 0.5px;
+    padding: 1.2rem 0.8rem;
+    border: none;
 }
 
 .table-loans td {
     vertical-align: middle;
-    padding: 1rem 0.75rem;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem 0.8rem;
+    border-bottom: 1px solid rgba(254, 208, 1, 0.2);
+    border: none;
+    color: var(--loans-white);
 }
 
 .table-loans tbody tr {
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(254, 208, 1, 0.1);
 }
 
 .table-loans tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
+    background: rgba(254, 208, 1, 0.1);
     transform: scale(1.01);
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.2);
 }
 
 /* Loan detail styles */
 .loan-detail-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(254, 208, 1, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+    border-radius: 15px;
     padding: 2rem;
     margin-bottom: 2rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(254, 208, 1, 0.3);
+    backdrop-filter: blur(15px);
 }
 
 .loan-info-card {
-    background-color: #f8f9fa;
-    border-radius: 8px;
+    background: linear-gradient(135deg, var(--loans-primary-black) 0%, rgba(254, 208, 1, 0.05) 100%);
+    border-radius: 15px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(254, 208, 1, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
 }
 
 .loan-info-card h5 {
-    color: #495057;
+    color: var(--loans-primary-yellow);
     margin-bottom: 1rem;
+    font-weight: 700;
 }
 
 /* Date highlighting */
 .date-normal {
-    color: #495057;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .date-warning {
-    color: #fd7e14;
+    color: var(--loans-warning);
     font-weight: 600;
 }
 
 .date-danger {
-    color: #dc3545;
+    color: var(--loans-danger);
     font-weight: 700;
 }
 
 /* Loan form styles */
 .loan-form-section {
-    background-color: #f8f9fa;
+    background: rgba(254, 208, 1, 0.05);
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(254, 208, 1, 0.2);
+    transition: all 0.3s ease;
+}
+
+.loan-form-section:hover {
+    background: rgba(254, 208, 1, 0.1);
+    border-color: rgba(254, 208, 1, 0.4);
 }
 
 /* Preview sections in form */
 .preview-section {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
+    background: rgba(254, 208, 1, 0.05);
+    border: 1px solid rgba(254, 208, 1, 0.2);
+    border-radius: 12px;
     padding: 1rem;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
 }
 
 .preview-section:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(254, 208, 1, 0.1);
+    border-color: rgba(254, 208, 1, 0.4);
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.2);
 }
 
 /* Return modal styles */
 .return-modal .modal-content {
-    border-radius: 10px;
-    border: none;
+    background: linear-gradient(135deg, var(--loans-primary-black) 0%, var(--loans-dark-gray) 100%);
+    border: 2px solid rgba(254, 208, 1, 0.3);
+    border-radius: 15px;
+    color: var(--loans-white);
+    backdrop-filter: blur(20px);
 }
 
 .return-modal .modal-header {
-    background-color: #198754;
-    color: white;
-    border-radius: 10px 10px 0 0;
+    background: linear-gradient(135deg, var(--loans-accent-emerald) 0%, var(--loans-accent-teal) 100%);
+    color: var(--loans-white);
+    border-radius: 15px 15px 0 0;
+    border-bottom: none;
 }
 
 /* Quick navigation buttons */
 .loan-nav-buttons .btn {
     margin: 5px;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.3s ease;
+    font-weight: 600;
 }
 
 .loan-nav-buttons .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(254, 208, 1, 0.4);
 }
 
 /* Loan statistics */
 .loan-stats-card {
-    background: #fff;
-    border-radius: 8px;
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--loans-primary-black) 0%, rgba(254, 208, 1, 0.05) 100%);
+    border: 2px solid rgba(254, 208, 1, 0.2);
+    border-radius: 15px;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
 }
 
 .loan-stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(254, 208, 1, 0.3);
+    border-color: rgba(254, 208, 1, 0.5);
 }
 
 .loan-stats-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
+    color: var(--loans-primary-yellow);
+    text-shadow: 0 0 15px rgba(254, 208, 1, 0.4);
+}
+
+/* Game and User info in loans */
+.user-info-mini {
+    display: flex;
+    align-items: center;
+}
+
+.user-info-mini .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(254, 208, 1, 0.1);
+    border: 2px solid var(--loans-primary-yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.user-info-mini .user-avatar:hover {
+    border-color: var(--loans-secondary-orange);
+    transform: scale(1.1);
+}
+
+.user-info-mini .user-details .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--loans-white);
+}
+
+.user-info-mini .user-details .user-username {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.game-info-mini {
+    display: flex;
+    align-items: center;
+}
+
+.game-info-mini .game-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: rgba(254, 208, 1, 0.1);
+    border: 2px solid var(--loans-primary-yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.game-info-mini .game-icon:hover {
+    border-color: var(--loans-secondary-orange);
+    transform: scale(1.1);
+}
+
+.game-info-mini .game-details .game-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--loans-white);
+}
+
+.game-info-mini .game-details .game-category {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Enhanced Buttons for Loans */
+.loans-btn-primary {
+    background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%);
+    border: none;
+    color: var(--loans-primary-black);
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.7rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.3);
+}
+
+.loans-btn-primary:hover {
+    background: linear-gradient(135deg, var(--loans-secondary-orange) 0%, var(--loans-primary-yellow) 100%);
+    color: var(--loans-primary-black);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(254, 208, 1, 0.4);
+}
+
+.loans-btn-success {
+    background: linear-gradient(135deg, var(--loans-accent-emerald) 0%, var(--loans-accent-teal) 100%);
+    border: none;
+    color: var(--loans-white);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.loans-btn-success:hover {
+    background: linear-gradient(135deg, var(--loans-accent-teal) 0%, var(--loans-accent-emerald) 100%);
+    color: var(--loans-white);
+    transform: translateY(-3px);
+}
+
+.loans-btn-warning {
+    background: linear-gradient(135deg, var(--loans-warning) 0%, var(--loans-primary-yellow) 100%);
+    border: none;
+    color: var(--loans-primary-black);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.loans-btn-warning:hover {
+    background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-warning) 100%);
+    color: var(--loans-primary-black);
+    transform: translateY(-3px);
+}
+
+.loans-btn-danger {
+    background: linear-gradient(135deg, var(--loans-danger) 0%, #d63031 100%);
+    border: none;
+    color: var(--loans-white);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.loans-btn-danger:hover {
+    background: linear-gradient(135deg, #d63031 0%, var(--loans-danger) 100%);
+    color: var(--loans-white);
+    transform: translateY(-3px);
+}
+
+.loans-btn-secondary {
+    background: linear-gradient(135deg, var(--loans-medium-gray) 0%, var(--loans-dark-gray) 100%);
+    border: 2px solid var(--loans-medium-gray);
+    color: var(--loans-white);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.loans-btn-secondary:hover {
+    background: linear-gradient(135deg, var(--loans-dark-gray) 0%, var(--loans-medium-gray) 100%);
+    color: var(--loans-white);
+    transform: translateY(-3px);
+}
+
+.loans-btn-outline {
+    border: 2px solid var(--loans-primary-yellow);
+    color: var(--loans-primary-yellow);
+    background: transparent;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.loans-btn-outline:hover {
+    background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%);
+    color: var(--loans-primary-black);
+    border-color: var(--loans-primary-yellow);
+    transform: translateY(-3px);
 }
 
 /* Responsive design for loans */
@@ -214,69 +445,129 @@
         width: 100%;
         margin: 5px 0;
     }
+    
+    .user-info-mini,
+    .game-info-mini {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .user-info-mini .user-avatar,
+    .game-info-mini .game-icon {
+        margin-bottom: 0.3rem;
+        margin-right: 0;
+    }
 }
 
 /* Animation for status changes */
-@keyframes status-change {
+@keyframes loan-status-change {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
 
-.status-change {
-    animation: status-change 0.5s ease;
+.loan-status-change {
+    animation: loan-status-change 0.5s ease;
 }
 
-/* User info in loans */
-.user-info-mini {
-    display: flex;
-    align-items: center;
+/* Animation for loan status updates */
+@keyframes loan-status-pulse {
+    0% { 
+        box-shadow: 0 0 0 0 rgba(254, 208, 1, 0.7);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 0 10px rgba(254, 208, 1, 0);
+        transform: scale(1.05);
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(254, 208, 1, 0);
+        transform: scale(1);
+    }
 }
 
-.user-info-mini .user-avatar {
-    width: 32px;
-    height: 32px;
+.loan-status-active {
+    animation: loan-status-pulse 2s infinite;
+}
+
+/* Special Effects for Interactive Elements */
+.loan-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254, 208, 1, 0.2);
+}
+
+/* Loading States for Loans */
+.loan-loading {
+    position: relative;
+    opacity: 0.7;
+}
+
+.loan-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid rgba(254, 208, 1, 0.3);
+    border-top: 3px solid var(--loans-primary-yellow);
     border-radius: 50%;
-    background-color: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
+    animation: loans-spin 1s linear infinite;
+    z-index: 1000;
 }
 
-.user-info-mini .user-details .user-name {
-    font-weight: 600;
-    font-size: 0.9rem;
+@keyframes loans-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.user-info-mini .user-details .user-username {
-    font-size: 0.75rem;
-    color: #6c757d;
+/* Enhanced thumbnails for loans */
+.loans-thumbnail {
+    border: 2px solid var(--loans-primary-yellow);
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.3);
+    transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
-/* Game info in loans */
-.game-info-mini {
-    display: flex;
-    align-items: center;
+.loans-thumbnail:hover {
+    border-color: var(--loans-secondary-orange);
+    box-shadow: 0 6px 20px rgba(254, 208, 1, 0.5);
+    transform: scale(1.1);
 }
 
-.game-info-mini .game-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    background-color: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
+/* Filter enhancement */
+.loans-filter-active {
+    background: linear-gradient(135deg, var(--loans-primary-yellow) 0%, var(--loans-secondary-orange) 100%) !important;
+    color: var(--loans-primary-black) !important;
+    border-color: var(--loans-primary-yellow) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(254, 208, 1, 0.4);
 }
 
-.game-info-mini .game-details .game-name {
-    font-weight: 600;
-    font-size: 0.9rem;
+/* Empty State Enhancement */
+.loans-empty-state {
+    background: rgba(254, 208, 1, 0.05);
+    border-radius: 15px;
+    border: 2px dashed rgba(254, 208, 1, 0.3);
+    padding: 3rem 2rem;
+    text-align: center;
 }
 
-.game-info-mini .game-details .game-category {
-    font-size: 0.75rem;
-    color: #6c757d;
+.loans-empty-icon {
+    font-size: 4rem;
+    color: var(--loans-primary-yellow);
+    text-shadow: 0 0 20px rgba(254, 208, 1, 0.4);
+}
+
+.loans-empty-title {
+    color: var(--loans-primary-yellow);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.loans-empty-text {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
 }

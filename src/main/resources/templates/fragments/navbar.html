@@ -58,6 +58,7 @@
                                 <th:block th:if="${#authentication.principal.class.simpleName == 'CustomUserPrincipal'}">
                                     <!-- Show custom profile photo or default -->
                                     <img th:if="${#authentication.principal.user.hasCustomProfilePhoto()}"
+                                         id="navbar-user-avatar"
                                          th:src="${#authentication.principal.user.profilePhotoPath}" 
                                          th:alt="'Profile photo'"
                                          class="rounded-circle me-2" 
@@ -66,6 +67,7 @@
                                     
                                     <!-- Show default photo if no custom photo -->
                                     <img th:unless="${#authentication.principal.user.hasCustomProfilePhoto()}"
+                                         id="navbar-user-avatar"
                                          src="/defaults/user-placeholder.jpg" 
                                          alt="Default profile photo"
                                          class="rounded-circle me-2" 
@@ -119,5 +121,46 @@
             </div>
         </div>
     </nav>
+    
+    <!-- JavaScript to update navbar avatar after photo upload -->
+    <script>
+        // Function to update navbar avatar
+        function updateNavbarAvatar(newPhotoUrl) {
+            const navbarAvatar = document.getElementById('navbar-user-avatar');
+            if (navbarAvatar && newPhotoUrl) {
+                navbarAvatar.src = newPhotoUrl;
+                console.log('Navbar avatar updated to:', newPhotoUrl);
+            }
+        }
+        
+        // Listen for custom events to update avatar
+        document.addEventListener('userPhotoUpdated', function(event) {
+            if (event.detail && event.detail.photoUrl) {
+                updateNavbarAvatar(event.detail.photoUrl);
+            }
+        });
+        
+        // Add cache-busting to avoid browser cache issues
+        function refreshNavbarAvatar() {
+            const navbarAvatar = document.getElementById('navbar-user-avatar');
+            if (navbarAvatar) {
+                const currentSrc = navbarAvatar.src;
+                const timestamp = new Date().getTime();
+                
+                // Add timestamp to force refresh
+                if (currentSrc.includes('?')) {
+                    navbarAvatar.src = currentSrc.split('?')[0] + '?t=' + timestamp;
+                } else {
+                    navbarAvatar.src = currentSrc + '?t=' + timestamp;
+                }
+                
+                console.log('Navbar avatar refreshed with cache-busting');
+            }
+        }
+        
+        // Expose function globally for use in other scripts
+        window.refreshNavbarAvatar = refreshNavbarAvatar;
+        window.updateNavbarAvatar = updateNavbarAvatar;
+    </script>
 </body>
 </html>

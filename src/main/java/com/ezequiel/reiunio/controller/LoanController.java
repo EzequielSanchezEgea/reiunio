@@ -37,6 +37,13 @@ import com.ezequiel.reiunio.service.impl.LoanServiceImpl.LoanConflictInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Controller for managing all loan operations in the application.
+ * 
+ * <p>Handles the creation, viewing, and management of game loans, including
+ * conflict detection with game sessions. Provides separate views for administrators
+ * and regular users, with appropriate security checks for each operation.</p>
+ */
 @Controller
 @RequestMapping("/loans")
 @RequiredArgsConstructor
@@ -48,6 +55,15 @@ public class LoanController {
     private final UserService userService;
     private final AuditLogService auditLogService;
 
+    /**
+     * Displays a paginated list of loans with optional status filtering.
+     * 
+     * @param model the Spring MVC model to populate with loan data
+     * @param status optional filter parameter for loan status
+     * @param page the page number for pagination (0-based)
+     * @param size the number of items per page
+     * @return the view name for displaying the loan list
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER')")
     public String listLoans(Model model, 
@@ -55,7 +71,6 @@ public class LoanController {
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "20") int size) {
         
-        // Configurar paginación con ordenamiento por fecha de préstamo descendente
         Pageable pageable = PageRequest.of(page, size, Sort.by("loanDate").descending());
         Page<Loan> loanPage;
         
@@ -74,9 +89,8 @@ public class LoanController {
         model.addAttribute("loanPage", loanPage);
         model.addAttribute("loans", loanPage.getContent());
         model.addAttribute("statuses", LoanStatus.values());
-        model.addAttribute("currentUrl", "/loans"); // Para paginación
+        model.addAttribute("currentUrl", "/loans");
         
-        // Agregar información de paginación
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", loanPage.getTotalPages());
         model.addAttribute("totalElements", loanPage.getTotalElements());
@@ -85,6 +99,13 @@ public class LoanController {
         return "loans/list";
     }
 
+    /**
+     * Displays detailed information about a specific loan.
+     * 
+     * @param id the ID of the loan to view
+     * @param model the Spring MVC model to populate with loan details
+     * @return the view name for loan details or redirect to loan list if not found
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER') or @securityUtils.isUserLoan(#id, principal.username)")
     public String viewLoan(@PathVariable Long id, Model model) {
@@ -98,6 +119,13 @@ public class LoanController {
         }
     }
 
+    /**
+     * Displays the form for creating a new loan.
+     * 
+     * @param model the Spring MVC model to populate with form data
+     * @param gameId optional parameter to pre-select a specific game
+     * @return the view name for the loan creation form
+     */
     @GetMapping("/new")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER')")
     public String newLoan(Model model, @RequestParam(required = false) Long gameId) {
@@ -107,26 +135,20 @@ public class LoanController {
         model.addAttribute("users", users);
         model.addAttribute("games", availableGames);
         
-        // Calcular fecha sugerida de devolución (una semana por defecto)
         LocalDate defaultReturnDate = LocalDate.now().plusWeeks(1);
         model.addAttribute("suggestedReturnDate", defaultReturnDate);
         
-        // Si se especifica un juego, obtener información adicional
         if (gameId != null) {
             Optional<Game> selectedGameOpt = gameService.findById(gameId);
             if (selectedGameOpt.isPresent()) {
                 Game selectedGame = selectedGameOpt.get();
                 
-                // Verificar que el juego esté disponible
                 if (!selectedGame.getAvailable()) {
                     model.addAttribute("error", "The selected game '" + selectedGame.getName() + "' is not available for loans.");
                     return "loans/form";
                 }
                 
-                // Obtener sesiones próximas
                 List<GameSessionInfo> upcomingSessions = loanService.findUpcomingSessionsForGame(selectedGame);
-                
-                // Verificar conflictos con sesiones pero NO bloquear el préstamo
                 LoanConflictInfo conflictInfo = loanService.checkLoanConflicts(selectedGame, defaultReturnDate);
                 
                 model.addAttribute("selectedGame", selectedGame);
@@ -134,20 +156,31 @@ public class LoanController {
                 model.addAttribute("suggestedReturnDate", conflictInfo.getSuggestedReturnDate());
                 model.addAttribute("hasSessionConflict", conflictInfo.hasConflicts());
                 
-                // Agregar mensaje informativo si hay conflictos (pero no bloquear)
                 if (conflictInfo.hasConflicts()) {
-                    model.addAttribute("warning", "Info: There are upcoming sessions for this game. " +
-                        "Consider the suggested return date to avoid conflicts, but you can still proceed with your preferred date.");
+                    model.addAttribute("warning", "Scheduling conflict detected: " + conflictInfo.getWarningMessage());
+                } else if (!upcomingSessions.isEmpty()) {
+                    model.addAttribute("info", "Info: There are upcoming sessions for this game, but no conflicts detected with the proposed return date.");
                 }
                 
-                log.debug("Game {} has {} upcoming sessions, conflicts: {}", 
-                         selectedGame.getName(), upcomingSessions.size(), conflictInfo.hasConflicts());
+                log.debug("Game {} has {} upcoming sessions, conflicts: {}, suggested date: {}", 
+                         selectedGame.getName(), upcomingSessions.size(), conflictInfo.hasConflicts(), 
+                         conflictInfo.getSuggestedReturnDate());
             }
         }
         
         return "loans/form";
     }
 
+    /**
+     * Processes the creation of a new loan.
+     * 
+     * @param userId the ID of the user borrowing the game
+     * @param gameId the ID of the game being loaned
+     * @param estimatedReturnDate the expected return date for the loan
+     * @param redirectAttributes for passing flash messages after redirect
+     * @param principal the authenticated user creating the loan
+     * @return redirect to loan list or back to form with errors
+     */
     @PostMapping("/new")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER')")
     public String createLoan(@RequestParam Long userId,
@@ -172,27 +205,21 @@ public class LoanController {
         try {
             Game selectedGame = game.get();
             
-            // Verificar disponibilidad del juego
             if (!selectedGame.getAvailable()) {
                 redirectAttributes.addFlashAttribute("error", 
                     "Game '" + selectedGame.getName() + "' is not available for loans");
                 return "redirect:/loans/new?gameId=" + gameId;
             }
             
-            // Verificar que la fecha de devolución no sea en el pasado
             if (estimatedReturnDate.isBefore(LocalDate.now()) || estimatedReturnDate.isEqual(LocalDate.now())) {
                 redirectAttributes.addFlashAttribute("error", 
                     "Return date must be after today");
                 return "redirect:/loans/new?gameId=" + gameId;
             }
             
-            // Obtener información sobre conflictos para mostrar advertencia (pero NO bloquear)
             LoanConflictInfo conflictInfo = loanService.checkLoanConflicts(selectedGame, estimatedReturnDate);
-            
-            // Crear el préstamo independientemente de los conflictos
             Loan loan = loanService.createLoan(user.get(), selectedGame, estimatedReturnDate);
             
-            // Log the action
             userService.findByUsername(principal.getName()).ifPresent(adminUser -> 
                 auditLogService.logChange(adminUser, ActionType.CREATION, "Loan", loan.getId(),
                     "Loan of game " + selectedGame.getName() + " to user " + user.get().getUsername() +
@@ -218,6 +245,15 @@ public class LoanController {
         }
     }
 
+    /**
+     * Processes the return of a loaned game.
+     * 
+     * @param id the ID of the loan being returned
+     * @param returnDate optional return date (defaults to current date)
+     * @param redirectAttributes for passing flash messages after redirect
+     * @param principal the authenticated user processing the return
+     * @return redirect to loan list with success/error message
+     */
     @PostMapping("/{id}/return")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER')")
     public String registerReturn(@PathVariable Long id,
@@ -232,7 +268,6 @@ public class LoanController {
         try {
             Loan loan = loanService.registerReturn(id, returnDate);
             
-            // Log the action
             userService.findByUsername(principal.getName()).ifPresent(adminUser -> 
                 auditLogService.logChange(adminUser, ActionType.MODIFICATION, "Loan", loan.getId(),
                     "Return of game " + loan.getGame().getName() + " by user " + loan.getUser().getUsername())
@@ -246,22 +281,28 @@ public class LoanController {
         return "redirect:/loans";
     }
 
+    /**
+     * Displays a paginated list of overdue loans.
+     * 
+     * @param model the Spring MVC model to populate with overdue loan data
+     * @param page the page number for pagination (0-based)
+     * @param size the number of items per page
+     * @return the view name for displaying overdue loans
+     */
     @GetMapping("/overdue")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER')")
     public String viewOverdueLoans(Model model,
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "20") int size) {
         
-        // Configurar paginación para préstamos vencidos
         Pageable pageable = PageRequest.of(page, size, Sort.by("loanDate").descending());
         Page<Loan> overdueLoanPage = loanService.findOverdueLoansPaginated(pageable);
         
         model.addAttribute("loanPage", overdueLoanPage);
         model.addAttribute("loans", overdueLoanPage.getContent());
         model.addAttribute("listTitle", "Overdue Loans");
-        model.addAttribute("currentUrl", "/loans/overdue"); // Para paginación
+        model.addAttribute("currentUrl", "/loans/overdue");
         
-        // Agregar información de paginación
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", overdueLoanPage.getTotalPages());
         model.addAttribute("totalElements", overdueLoanPage.getTotalElements());
@@ -270,22 +311,29 @@ public class LoanController {
         return "loans/list";
     }
 
+    /**
+     * Displays a paginated list of loans for the currently authenticated user.
+     * 
+     * @param model the Spring MVC model to populate with user's loan data
+     * @param principal the authenticated user
+     * @param page the page number for pagination (0-based)
+     * @param size the number of items per page
+     * @return the view name for displaying the user's loans
+     */
     @GetMapping("/my-loans")
     public String viewMyLoans(Model model, Principal principal,
                              @RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "20") int size) {
         
         userService.findByUsername(principal.getName()).ifPresent(user -> {
-            // Configurar paginación para los préstamos del usuario
             Pageable pageable = PageRequest.of(page, size, Sort.by("loanDate").descending());
             Page<Loan> userLoanPage = loanService.findByUserPaginated(user, pageable);
             
             model.addAttribute("loanPage", userLoanPage);
             model.addAttribute("loans", userLoanPage.getContent());
             model.addAttribute("listTitle", "My Loans");
-            model.addAttribute("currentUrl", "/loans/my-loans"); // Para paginación
+            model.addAttribute("currentUrl", "/loans/my-loans");
             
-            // Agregar información de paginación
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", userLoanPage.getTotalPages());
             model.addAttribute("totalElements", userLoanPage.getTotalElements());
@@ -296,7 +344,10 @@ public class LoanController {
     }
     
     /**
-     * AJAX endpoint para obtener información de juego y sesiones
+     * AJAX endpoint to retrieve game information including availability and session conflicts.
+     * 
+     * @param gameId the ID of the game to get information for
+     * @return ResponseEntity containing game information or error message
      */
     @GetMapping("/api/game-info/{gameId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTENDED_USER')")
@@ -315,13 +366,8 @@ public class LoanController {
                 return ResponseEntity.ok(new GameInfoResponse(false, "This game is currently on loan and not available", game, null, null, false, "Game is not available for loans"));
             }
             
-            // Obtener sesiones próximas
             List<GameSessionInfo> upcomingSessions = loanService.findUpcomingSessionsForGame(game);
-            
-            // Calcular fecha sugerida de devolución (una semana por defecto)
             LocalDate defaultReturnDate = LocalDate.now().plusWeeks(1);
-            
-            // Verificar conflictos con sesiones
             LoanConflictInfo conflictInfo = loanService.checkLoanConflicts(game, defaultReturnDate);
             
             return ResponseEntity.ok(new GameInfoResponse(
@@ -341,7 +387,10 @@ public class LoanController {
     }
     
     /**
-     * Response class for game info AJAX requests
+     * Response class for game information AJAX requests.
+     * 
+     * <p>Contains all relevant information about a game's availability,
+     * upcoming sessions, and potential loan conflicts.</p>
      */
     public static class GameInfoResponse {
         private boolean success;
@@ -363,7 +412,6 @@ public class LoanController {
             this.conflictMessage = conflictMessage;
         }
         
-        // Getters
         public boolean isSuccess() { return success; }
         public String getMessage() { return message; }
         public Game getGame() { return game; }
