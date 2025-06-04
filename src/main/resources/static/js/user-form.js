@@ -114,7 +114,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Basic pattern validation
             if (!validateUsernamePattern(username)) {
-                return; // Pattern validation will handle the error
+                this.classList.add('is-invalid');
+                this.setCustomValidity('Username must be 3-50 characters and contain only letters, numbers, dots, hyphens and underscores');
+                return;
             }
             
             // Clear timeout for previous request
@@ -134,11 +136,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const username = this.value.trim();
             if (username && !validateUsernamePattern(username)) {
                 this.classList.add('is-invalid');
+                this.setCustomValidity('Username must be 3-50 characters and contain only letters, numbers, dots, hyphens and underscores');
             }
         });
     }
     
-    // Email validation - simplified and non-blocking
+    // Email validation - FIXED: Now works for all cases including new users
     if (emailInput) {
         let emailTimeout;
         
@@ -155,18 +158,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Basic email pattern validation
             if (!validateEmailPattern(email)) {
-                return; // Pattern validation will handle the error
+                this.classList.add('is-invalid');
+                this.setCustomValidity('Please enter a valid email address');
+                return;
             }
             
             // Clear timeout for previous request
             clearTimeout(emailTimeout);
             
-            // Set timeout for API check (debounce) - only for editing or profile
-            if (isEditing || isProfileForm) {
-                emailTimeout = setTimeout(() => {
-                    checkEmailAvailability(email, this);
-                }, 500);
-            }
+            // Set timeout for API check (debounce) - NOW FOR ALL CASES INCLUDING NEW USERS
+            emailTimeout = setTimeout(() => {
+                checkEmailAvailability(email, this);
+            }, 500);
         });
         
         emailInput.addEventListener('focus', function() {
@@ -177,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = this.value.trim();
             if (email && !validateEmailPattern(email)) {
                 this.classList.add('is-invalid');
+                this.setCustomValidity('Please enter a valid email address');
             }
         });
     }
@@ -421,9 +425,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!namePattern.test(name)) {
             element.setCustomValidity(`${fieldName} can only contain letters and spaces`);
+            element.classList.add('is-invalid');
             return false;
         } else {
             element.setCustomValidity('');
+            element.classList.remove('is-invalid');
+            element.classList.add('is-valid');
             return true;
         }
     }
