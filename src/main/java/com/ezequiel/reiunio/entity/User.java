@@ -69,22 +69,22 @@ public class User {
     private String profilePhotoPath;
 
     /** List of loans made by the user. */
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private List<Loan> loans = new ArrayList<>();
 
     /** List of game sessions created by the user. */
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<GameSession> createdGameSessions = new ArrayList<>();
 
     /** List of participations in game sessions. */
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<GameSessionPlayer> gameSessionParticipations = new ArrayList<>();
 
     /** List of audit logs associated with the user. */
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<AuditLog> auditLogs = new ArrayList<>();
 

@@ -39,7 +39,7 @@ public class GameSession {
     /**
      * User who created the game session.
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
