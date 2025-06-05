@@ -119,14 +119,13 @@
 				<!-- Sessions for this day in rows of 3 -->
 				<div class="sessions-for-day">
 					<div class="row">
-						<!-- OPTIMIZADO: Un solo bucle para todas las sesiones del día -->
 						<div th:each="gameSession : ${dayEntry.value}"
 							class="col-lg-4 col-md-6 mb-3">
 							<div class="session-card">
 								<div class="card game-card h-100 shadow-sm">
 									<div
 										class="card-header games-card-header d-flex justify-content-between align-items-center">
-										<h5 class="card-title mb-0" th:text="${gameSession.title}">Session
+										<h5 class="card-title mb-0" style="color:var(--dark-gray)" th:text="${gameSession.title}">Session
 											Title</h5>
 
 										<span class="badge games-state-badge"
