@@ -2,10 +2,12 @@ package com.ezequiel.reiunio.controller;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +32,7 @@ import com.ezequiel.reiunio.entity.GameSession;
 import com.ezequiel.reiunio.entity.Loan;
 import com.ezequiel.reiunio.entity.User;
 import com.ezequiel.reiunio.enums.ActionType;
+import com.ezequiel.reiunio.enums.GameSessionStatus;
 import com.ezequiel.reiunio.enums.LoanStatus;
 import com.ezequiel.reiunio.enums.Role;
 import com.ezequiel.reiunio.service.AuditLogService;
@@ -1285,25 +1288,52 @@ public class UserController {
      *
      */
     @GetMapping("/profile")
-    public String showProfile(Authentication authentication, Model model) {
-        // Obtener usuario actual
-        User currentUser = getCurrentUser(authentication);
+    public String showProfile(Model model, Principal principal) {
+        String username = principal.getName();
+        User user = userService.findByUsername(username)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        // Datos básicos del usuario
+        model.addAttribute("user", user);
+        
+        // ===== PRÉSTAMOS ACTIVOS =====
+        List<Loan> userLoans = loanService.findByUser(user);
+        List<Loan> activeLoans = userLoans.stream()
+            .filter(loan -> loan.getStatus() == LoanStatus.ACTIVE)
+            .sorted((l1, l2) -> l1.getEstimatedReturnDate().compareTo(l2.getEstimatedReturnDate()))
+            .collect(Collectors.toList());
+        
+        model.addAttribute("activeLoans", activeLoans);
+        
 
-        // Obtener estadísticas
-        List<GameSession> sessionsJoined = gameSessionService.findSessionsByPlayer(currentUser.getId());
-        List<GameSession> sessionsCreated = gameSessionService.findByCreator(currentUser);
-        List<Loan> userLoans = loanService.findByUser(currentUser);
+        List<GameSession> sessionsAsPlayer = gameSessionService.findSessionsByPlayer(user.getId());
+        model.addAttribute("sessionsJoinedCount", sessionsAsPlayer.size());
+        
 
-        // Calcular conteos
-        int sessionsJoinedCount = sessionsJoined.size();
-        int sessionsCreatedCount = sessionsCreated.size();
-        int gamesBorrowedCount = userLoans.size();
+        List<GameSession> sessionsCreated = gameSessionService.findByCreator(user);
+        model.addAttribute("sessionsCreatedCount", sessionsCreated.size());
+        
 
-        model.addAttribute("user", currentUser);
-        model.addAttribute("sessionsJoinedCount", sessionsJoinedCount);
-        model.addAttribute("sessionsCreatedCount", sessionsCreatedCount);
-        model.addAttribute("gamesBorrowedCount", gamesBorrowedCount);
+        model.addAttribute("gamesBorrowedCount", userLoans.size());
+        
 
+        long overdueLoans = activeLoans.stream()
+            .filter(loan -> loan.getEstimatedReturnDate().isBefore(LocalDate.now()))
+            .count();
+        model.addAttribute("overdueLoansCount", overdueLoans);
+        
+
+        LocalDate nextWeek = LocalDate.now().plusDays(7);
+        long upcomingSessions = sessionsAsPlayer.stream()
+            .filter(session -> session.getStatus() == GameSessionStatus.SCHEDULED)
+            .filter(session -> session.getStartDate().isAfter(LocalDate.now()) && 
+                              session.getStartDate().isBefore(nextWeek))
+            .count();
+        model.addAttribute("upcomingSessionsCount", upcomingSessions);
+        
+        long daysAsMember = ChronoUnit.DAYS.between(user.getRegistrationDate(), LocalDate.now());
+        model.addAttribute("daysAsMember", daysAsMember);
+        
         return "users/profile";
     }
 
