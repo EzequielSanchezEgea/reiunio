@@ -24,13 +24,7 @@
 					<p class="hero-subtitle mb-4">The complete platform for
 						managing game libraries and organizing unforgettable gaming
 						sessions.</p>
-					<div class="d-flex gap-3 flex-wrap">
-						<a href="/game-sessions" class="btn btn-primary btn-lg"> <i
-							class="bi bi-calendar-event"></i> Browse Sessions
-						</a> <a href="/games" class="btn btn-outline-primary btn-lg"> <i
-							class="bi bi-joystick"></i> Explore Games
-						</a>
-					</div>
+					
 				</div>
 				<div class="col-lg-4 text-center">
 					<img src="/images/logo-reiunio.jpg" alt="Reiunio Logo"
@@ -40,330 +34,195 @@
 			</div>
 		</div>
 
-		<div class="row">
-			<div class="col-lg-8">
-				<!-- Today's Sessions -->
-				<h2 class="section-title">
-					<i class="bi bi-calendar-day"></i> Today's Sessions
-				</h2>
-				<div th:if="${todaySessions != null and !todaySessions.empty}">
-					<div class="row">
-						<div class="col-md-6 mb-4"
-							th:each="gameSession : ${todaySessions}">
-							<div class="session-card">
-								<div class="card h-100">
-									<div
-										class="card-header d-flex justify-content-between align-items-center">
-										<h5 class="card-title mb-0" style="color:black" th:text="${gameSession.title}">Session
-											Title</h5>
-										<span class="badge bg-info"> <i class="bi bi-clock"></i>
-											Today
-										</span>
-									</div>
-									<div class="card-body">
-										<div class="row">
-											<div class="col-8">
-												<h6 class="card-subtitle mb-3">
-													<i class="bi bi-joystick"></i> <span
-														th:text="${gameSession.customGameName}">Game</span> <i
-														th:if="${gameSession.isLibraryGame()}"
-														class="bi bi-bookmark-fill text-warning ms-1"
-														title="Library Game"></i> <i
-														th:unless="${gameSession.isLibraryGame()}"
-														class="bi bi-person-check-fill text-success ms-1"
-														title="Personal Game"></i>
-												</h6>
-
-												<!-- Single day session -->
-												<div th:if="${!gameSession.isMultiDay()}">
-													<p class="card-text mb-2">
-														<i class="bi bi-clock text-warning"></i> <span
-															th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
-														<span th:if="${gameSession.endTime}"> - <span
-															th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
-														</span>
-													</p>
-												</div>
-
-												<!-- Multi-day session -->
-												<div th:if="${gameSession.isMultiDay()}">
-													<p class="card-text mb-2">
-														<span class="badge bg-warning"> <i
-															class="bi bi-calendar-range"></i> Multi-day
-														</span>
-													</p>
-												</div>
-
-												<p class="card-text mb-3">
-													<i class="bi bi-people text-info"></i> <span
-														th:text="${gameSession.getConfirmedPlayersCount()}">2</span>/<span
-														th:text="${gameSession.maxPlayers}">4</span> players
-												</p>
-
-												<a th:href="@{/game-sessions/{id}(id=${gameSession.id})}"
-													class="btn btn-primary btn-sm"> <i class="bi bi-eye"></i>
-													View Details
-												</a>
-											</div>
-											<div class="col-4 text-center">
-												<!-- Library game image -->
-												<div th:if="${gameSession.isLibraryGame()}">
-													<img th:src="${gameSession.game.getImageUrl()}"
-														th:alt="'Photo of ' + ${gameSession.game.name}"
-														class="rounded img-fluid shadow-sm"
-														style="height: 80px; width: 80px; object-fit: cover; border: 2px solid var(--accent-teal);"
-														onerror="this.src='/defaults/game-placeholder.jpg';">
-												</div>
-
-												<!-- Personal game image -->
-												<div th:unless="${gameSession.isLibraryGame()}">
-													<img th:if="${gameSession.hasCustomGameImage()}"
-														th:src="${gameSession.customGameImagePath}"
-														th:alt="'Custom image for ' + ${gameSession.customGameName}"
-														class="rounded img-fluid shadow-sm"
-														style="height: 80px; width: 80px; object-fit: cover; border: 2px solid var(--accent-emerald);"
-														onerror="this.src='/defaults/game-placeholder.jpg';">
-
-													<img th:unless="${gameSession.hasCustomGameImage()}"
-														src="/defaults/game-placeholder.jpg"
-														th:alt="'Image for personal game: ' + ${gameSession.customGameName}"
-														class="rounded img-fluid shadow-sm"
-														style="height: 80px; width: 80px; object-fit: cover; border: 2px solid var(--accent-emerald);">
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
+		<!-- Today's Sessions -->
+		<h2 class="section-title">
+			<i class="bi bi-calendar-day"></i> Today's Sessions
+		</h2>
+		<div th:if="${todaySessions != null and !todaySessions.empty}">
+			<div class="row">
+				<div class="col-lg-6 col-md-6 col-sm-12 mb-4"
+					th:each="gameSession : ${todaySessions}">
+					<div class="session-card">
+						<div class="card h-100">
+							<div
+								class="card-header d-flex justify-content-between align-items-center">
+								<h5 class="card-title mb-0" style="color:black" th:text="${gameSession.title}">Session
+									Title</h5>
+								<span class="badge bg-info"> <i class="bi bi-clock"></i>
+									Today
+								</span>
 							</div>
-						</div>
-					</div>
-				</div>
-				<div th:if="${todaySessions == null or todaySessions.empty}"
-					class="alert alert-info">
-					<i class="bi bi-calendar-x"></i> <strong>No sessions today</strong>
-					- Why not create one? <a href="/game-sessions/new"
-						class="btn btn-outline-primary btn-sm ms-3"> <i
-						class="bi bi-plus-circle"></i> Create Session
-					</a>
-				</div>
+							<div class="card-body">
+								<div class="row">
+									<div class="col-8">
+										<h6 class="card-subtitle mb-3">
+											<i class="bi bi-joystick"></i> <span
+												th:text="${gameSession.customGameName}">Game</span> <i
+												th:if="${gameSession.isLibraryGame()}"
+												class="bi bi-bookmark-fill text-warning ms-1"
+												title="Library Game"></i> <i
+												th:unless="${gameSession.isLibraryGame()}"
+												class="bi bi-person-check-fill text-success ms-1"
+												title="Personal Game"></i>
+										</h6>
 
-				<!-- Upcoming Sessions -->
-				<h2 class="section-title mt-5">
-					<i class="bi bi-calendar-plus"></i> Upcoming Sessions
-				</h2>
-				<div th:if="${upcomingSessions != null and !upcomingSessions.empty}">
-					<div class="row">
-						<div class="col-12"
-							th:each="gameSession, iterStat : ${upcomingSessions}"
-							th:if="${iterStat.index < 5}">
-							<div class="card mb-3 session-card">
-								<div class="card-body">
-									<div class="row align-items-center">
-										<div class="col-md-6">
-											<h5 class="card-title mb-2" th:text="${gameSession.title}">Session
-												Title</h5>
-											<h6 class="card-subtitle mb-2">
-												<i class="bi bi-joystick"></i> <span
-													th:text="${gameSession.customGameName}">Game</span> <i
-													th:if="${gameSession.isLibraryGame()}"
-													class="bi bi-bookmark-fill text-warning ms-1"
-													title="Library Game"></i> <i
-													th:unless="${gameSession.isLibraryGame()}"
-													class="bi bi-person-check-fill text-success ms-1"
-													title="Personal Game"></i>
-											</h6>
+										<!-- Single day session -->
+										<div th:if="${!gameSession.isMultiDay()}">
+											<p class="card-text mb-2">
+												<i class="bi bi-clock text-warning"></i> <span
+													th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+												<span th:if="${gameSession.endTime}"> - <span
+													th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
+												</span>
+											</p>
 										</div>
-										<div class="col-md-3 text-center">
-											<div th:if="${!gameSession.isMultiDay()}">
-												<span class="badge bg-info fs-6"
-													th:text="${#temporals.format(gameSession.startDate, 'dd/MM/yyyy')}">Date</span>
-												<div class="mt-1">
-													<small class="text-muted"> <i class="bi bi-clock"></i>
-														<span
-														th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
-														<span th:if="${gameSession.endTime}"> - <span
-															th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
-													</span>
-													</small>
-												</div>
-											</div>
-											<div th:if="${gameSession.isMultiDay()}">
-												<span class="badge bg-warning fs-6"> <i
+
+										<!-- Multi-day session -->
+										<div th:if="${gameSession.isMultiDay()}">
+											<p class="card-text mb-2">
+												<span class="badge bg-warning"> <i
 													class="bi bi-calendar-range"></i> Multi-day
 												</span>
-												<div class="mt-1">
-													<small class="text-muted"
-														th:text="${#temporals.format(gameSession.startDate, 'dd/MM')} + ' - ' + ${#temporals.format(gameSession.endDate, 'dd/MM')}">01/01
-														- 05/01</small>
-												</div>
-											</div>
+											</p>
 										</div>
-										<div class="col-md-2 text-center">
-											<span class="badge bg-success"> <i
-												class="bi bi-people"></i> <span
+
+										<p class="card-text mb-3">
+											<i class="bi bi-people text-info"></i> <span
 												th:text="${gameSession.getConfirmedPlayersCount()}">2</span>/<span
-												th:text="${gameSession.maxPlayers}">4</span>
+												th:text="${gameSession.maxPlayers}">4</span> players
+										</p>
+
+										<a th:href="@{/game-sessions/{id}(id=${gameSession.id})}"
+											class="btn btn-primary btn-sm"> <i class="bi bi-eye"></i>
+											View Details
+										</a>
+									</div>
+									<div class="col-4 text-center">
+										<!-- Library game image -->
+										<div th:if="${gameSession.isLibraryGame()}">
+											<img th:src="${gameSession.game.getImageUrl()}"
+												th:alt="'Photo of ' + ${gameSession.game.name}"
+												class="rounded img-fluid shadow-sm"
+												style="height: 80px; width: 80px; object-fit: cover; border: 2px solid var(--accent-teal);"
+												onerror="this.src='/defaults/game-placeholder.jpg';">
+										</div>
+
+										<!-- Personal game image -->
+										<div th:unless="${gameSession.isLibraryGame()}">
+											<img th:if="${gameSession.hasCustomGameImage()}"
+												th:src="${gameSession.customGameImagePath}"
+												th:alt="'Custom image for ' + ${gameSession.customGameName}"
+												class="rounded img-fluid shadow-sm"
+												style="height: 80px; width: 80px; object-fit: cover; border: 2px solid var(--accent-emerald);"
+												onerror="this.src='/defaults/game-placeholder.jpg';">
+
+											<img th:unless="${gameSession.hasCustomGameImage()}"
+												src="/defaults/game-placeholder.jpg"
+												th:alt="'Image for personal game: ' + ${gameSession.customGameName}"
+												class="rounded img-fluid shadow-sm"
+												style="height: 80px; width: 80px; object-fit: cover; border: 2px solid var(--accent-emerald);">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div th:if="${todaySessions == null or todaySessions.empty}"
+			class="alert alert-info">
+			<i class="bi bi-calendar-x"></i> <strong>No sessions today</strong>
+			- Why not create one? <a href="/game-sessions/new"
+				class="btn btn-outline-primary btn-sm ms-3"> <i
+				class="bi bi-plus-circle"></i> Create Session
+			</a>
+		</div>
+
+		<!-- Upcoming Sessions -->
+		<h2 class="section-title mt-5">
+			<i class="bi bi-calendar-plus"></i> Upcoming Sessions
+		</h2>
+		<div th:if="${upcomingSessions != null and !upcomingSessions.empty}">
+			<div class="row">
+				<div class="col-12"
+					th:each="gameSession, iterStat : ${upcomingSessions}"
+					th:if="${iterStat.index < 5}">
+					<div class="card mb-3 session-card">
+						<div class="card-body">
+							<div class="row align-items-center">
+								<div class="col-md-6">
+									<h5 class="card-title mb-2" th:text="${gameSession.title}">Session
+										Title</h5>
+									<h6 class="card-subtitle mb-2">
+										<i class="bi bi-joystick"></i> <span
+											th:text="${gameSession.customGameName}">Game</span> <i
+											th:if="${gameSession.isLibraryGame()}"
+											class="bi bi-bookmark-fill text-warning ms-1"
+											title="Library Game"></i> <i
+											th:unless="${gameSession.isLibraryGame()}"
+											class="bi bi-person-check-fill text-success ms-1"
+											title="Personal Game"></i>
+									</h6>
+								</div>
+								<div class="col-md-3 text-center">
+									<div th:if="${!gameSession.isMultiDay()}">
+										<span class="badge bg-info fs-6"
+											th:text="${#temporals.format(gameSession.startDate, 'dd/MM/yyyy')}">Date</span>
+										<div class="mt-1">
+											<small class="text-muted"> <i class="bi bi-clock"></i>
+												<span
+												th:text="${#temporals.format(gameSession.startTime, 'HH:mm')}">10:00</span>
+												<span th:if="${gameSession.endTime}"> - <span
+													th:text="${#temporals.format(gameSession.endTime, 'HH:mm')}">12:00</span>
 											</span>
+											</small>
 										</div>
-										<div class="col-md-1 text-end">
-											<a th:href="@{/game-sessions/{id}(id=${gameSession.id})}"
-												class="btn btn-outline-primary btn-sm"> <i
-												class="bi bi-arrow-right"></i>
-											</a>
+									</div>
+									<div th:if="${gameSession.isMultiDay()}">
+										<span class="badge bg-warning fs-6"> <i
+											class="bi bi-calendar-range"></i> Multi-day
+										</span>
+										<div class="mt-1">
+											<small class="text-muted"
+												th:text="${#temporals.format(gameSession.startDate, 'dd/MM')} + ' - ' + ${#temporals.format(gameSession.endDate, 'dd/MM')}">01/01
+												- 05/01</small>
 										</div>
 									</div>
 								</div>
+								<div class="col-md-2 text-center">
+									<span class="badge bg-success"> <i
+										class="bi bi-people"></i> <span
+										th:text="${gameSession.getConfirmedPlayersCount()}">2</span>/<span
+										th:text="${gameSession.maxPlayers}">4</span>
+									</span>
+								</div>
+								<div class="col-md-1 text-end">
+									<a th:href="@{/game-sessions/{id}(id=${gameSession.id})}"
+										class="btn btn-outline-primary btn-sm"> <i
+										class="bi bi-arrow-right"></i>
+									</a>
+								</div>
 							</div>
 						</div>
 					</div>
-					<div class="text-center mt-4">
-						<a href="/game-sessions?filter=upcoming"
-							class="btn btn-outline-success btn-lg"> <i
-							class="bi bi-calendar-event"></i> View All Upcoming Sessions
-						</a>
-					</div>
-				</div>
-				<div th:if="${upcomingSessions == null or upcomingSessions.empty}"
-					class="alert alert-info">
-					<i class="bi bi-calendar-x"></i> <strong>No upcoming
-						sessions</strong> - Be the first to organize one! <a
-						href="/game-sessions/new"
-						class="btn btn-outline-primary btn-sm ms-3"> <i
-						class="bi bi-plus-circle"></i> Create Session
-					</a>
 				</div>
 			</div>
-
-			<div class="col-lg-4">
-				<!-- User Info (if authenticated) -->
-				<!-- User Info (if authenticated) -->
-				<div sec:authorize="isAuthenticated()" class="card mb-4">
-					<div class="card-header">
-						<h5 class="mb-0">
-							<i class="bi bi-person-circle"></i> Welcome back, <span
-								sec:authentication="name"></span>!
-						</h5>
-					</div>
-					<div class="card-body">
-						<div class="row text-center mb-4">
-							<div class="col-4">
-								<div class="stat-card p-3 rounded">
-									<div class="stat-number"
-										style="font-size: 1.2rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-orange) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"
-										th:text="${mySessions != null ? mySessions.size() : 0}">0</div>
-									<div class="stat-label" style="font-size: 0.75rem;">My
-										Sessions</div>
-								</div>
-							</div>
-							<div class="col-4">
-								<div class="stat-card p-2 rounded">
-									<div class="stat-number"
-										style="font-size: 1.2rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-orange) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">4.5</div>
-									<div class="stat-label" style="font-size: 0.75rem;">Avg.
-										Rating</div>
-								</div>
-							</div>
-							<div class="col-4">
-								<div class="stat-card p-2 rounded">
-									<div class="stat-number"
-										style="font-size: 1.2rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--secondary-orange) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">15</div>
-									<div class="stat-label" style="font-size: 0.75rem;">Games
-										Played</div>
-								</div>
-							</div>
-						</div>
-						<div class="d-grid gap-3">
-							<a href="/game-sessions/new" class="btn btn-primary"> <i
-								class="bi bi-calendar-plus"></i> Create New Session
-							</a> <a href="/users/profile" class="btn btn-outline-primary"> <i
-								class="bi bi-person-gear"></i> My Profile
-							</a> <a sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')"
-								href="/loans/my-loans" class="btn btn-outline-warning"> <i
-								class="bi bi-box"></i> My Loans
-							</a>
-						</div>
-					</div>
-				</div>
-
-				<!-- Quick Actions for Non-Authenticated Users -->
-				<div sec:authorize="!isAuthenticated()" class="card mb-4">
-					<div class="card-header">
-						<h5 class="mb-0">
-							<i class="bi bi-rocket-takeoff"></i> Get Started
-						</h5>
-					</div>
-					<div class="card-body text-center">
-						<p class="mb-4">Join our gaming community to organize sessions
-							and borrow games!</p>
-						<div class="d-grid gap-2">
-							<a href="/login" class="btn btn-primary"> <i
-								class="bi bi-box-arrow-in-right"></i> Login
-							</a> <a href="/users/register" class="btn btn-outline-primary"> <i
-								class="bi bi-person-plus"></i> Register
-							</a>
-						</div>
-					</div>
-				</div>
-
-				<!-- Available Games -->
-				<div class="card">
-					<div class="card-header">
-						<h5 class="mb-0">
-							<i class="bi bi-joystick"></i> Featured Games
-						</h5>
-					</div>
-					<div class="card-body">
-						<div th:if="${availableGames != null and !availableGames.empty}">
-							<div class="row">
-								<div class="col-6 mb-3"
-									th:each="game, iterStat : ${availableGames}"
-									th:if="${iterStat.index < 6}">
-									<div class="game-card">
-										<div class="card bg-transparent border-0">
-											<div class="text-center">
-												<img th:src="${game.imageUrl}"
-													th:alt="'Photo of ' + ${game.name}"
-													class="rounded img-fluid mb-2"
-													style="height: 60px; width: 60px; object-fit: cover; border: 2px solid var(--accent-emerald);"
-													onerror="this.src='/defaults/game-placeholder.jpg';">
-											</div>
-											<div class="card-body p-2 text-center">
-												<h6 class="card-title mb-1 text-truncate"
-													th:text="${game.name}">Game</h6>
-												<small class="text-muted"> <i class="bi bi-people"></i>
-													<span th:text="${game.minPlayers}">2</span>-<span
-													th:text="${game.maxPlayers}">4</span> players
-												</small>
-												<div class="mt-2">
-													<span class="badge bg-success" th:text="${game.state}">NEW</span>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="text-center mt-3">
-								<a href="/games" class="btn btn-outline-success"> <i
-									class="bi bi-grid-3x3-gap"></i> Explore All Games
-								</a>
-							</div>
-						</div>
-						<div th:if="${availableGames == null or availableGames.empty}"
-							class="text-center">
-							<div class="py-4">
-								<i class="bi bi-joystick"
-									style="font-size: 3rem; color: var(--medium-gray);"></i>
-								<p class="text-muted mt-3 mb-3">No games available at the
-									moment</p>
-								<a href="/games" class="btn btn-outline-primary"> <i
-									class="bi bi-search"></i> Browse Games
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-
+			<div class="text-center mt-4">
+				<a href="/game-sessions?filter=upcoming"
+					class="btn btn-outline-success btn-lg"> <i
+					class="bi bi-calendar-event"></i> View All Upcoming Sessions
+				</a>
 			</div>
+		</div>
+		<div th:if="${upcomingSessions == null or upcomingSessions.empty}"
+			class="alert alert-info">
+			<i class="bi bi-calendar-x"></i> <strong>No upcoming
+				sessions</strong> - Be the first to organize one! <a
+				href="/game-sessions/new"
+				class="btn btn-outline-primary btn-sm ms-3"> <i
+				class="bi bi-plus-circle"></i> Create Session
+			</a>
 		</div>
 	</div>
 	<div th:replace="~{../templates/fragments/footer :: footer}"></div>
