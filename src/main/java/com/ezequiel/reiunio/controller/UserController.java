@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,12 +26,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.ezequiel.reiunio.entity.GameSession;
 import com.ezequiel.reiunio.entity.Loan;
 import com.ezequiel.reiunio.entity.User;
 import com.ezequiel.reiunio.enums.ActionType;
 import com.ezequiel.reiunio.enums.LoanStatus;
 import com.ezequiel.reiunio.enums.Role;
 import com.ezequiel.reiunio.service.AuditLogService;
+import com.ezequiel.reiunio.service.GameSessionService;
+import com.ezequiel.reiunio.service.LoanService;
 import com.ezequiel.reiunio.service.UserService;
 
 import jakarta.validation.Valid;
@@ -76,8 +80,15 @@ public class UserController {
     /** Service for user-related operations and data management */
     private final UserService userService;
     
+    /** Service for game session operations */
+    private final GameSessionService gameSessionService;
+    
+    /** Service for loan operations */
+    private final LoanService loanService;
+    
     /** Service for logging audit events and user actions */
     private final AuditLogService auditLogService;
+    
 
     /**
      * Displays a paginated and filtered list of users with comprehensive statistics.
@@ -455,26 +466,8 @@ public class UserController {
         }
     }
 
-    /**
-     * Displays the current user's profile page.
-     * This endpoint shows the authenticated user's profile information in a read-only
-     * format with options to edit specific fields.
-     * 
-     * @param model the Spring MVC model for passing data to the view
-     * @param principal the currently authenticated user's security principal
-     * @return the name of the user profile view template, or redirect to home if user not found
-     */
-    @GetMapping("/profile")
-    public String userProfile(Model model, Principal principal) {
-        Optional<User> user = userService.findByUsername(principal.getName());
-        
-        if (user.isPresent()) {
-            model.addAttribute("user", user.get());
-            return "users/profile";
-        } else {
-            return "redirect:/";
-        }
-    }
+
+
 
     /**
      * Displays the form for editing an existing user by an administrator.
@@ -1253,6 +1246,90 @@ public class UserController {
         if (!hasNumberOrSymbol) {
             result.rejectValue("password", "error.user", 
                 "Password must contain at least one number or symbol");
+        }
+    }
+    /**
+     * Displays the current user's profile page with comprehensive statistics and account information.
+     * 
+     * <p>This endpoint provides a read-only view of the authenticated user's profile, including:
+     * <ul>
+     *   <li>Personal information (name, username, email, role)</li>
+     *   <li>Profile photo with upload/change capabilities</li>
+     *   <li>Account statistics (sessions joined/created, games borrowed)</li>
+     *   <li>Role-specific privileges and permissions</li>
+     *   <li>Quick action links for common operations</li>
+     * </ul>
+     * 
+     * <p>The profile page serves as a central hub for users to:
+     * <ul>
+     *   <li>View and edit their personal information</li>
+     *   <li>Upload or change their profile photo</li>
+     *   <li>Access quick links to create sessions, browse games, and manage loans</li>
+     *   <li>Monitor their activity statistics and account status</li>
+     * </ul>
+     * 
+     * <p><strong>Security:</strong> This endpoint requires authentication. Only the authenticated 
+     * user can access their own profile page.
+     * 
+     * <p><strong>Statistics calculated:</strong>
+     * <ul>
+     *   <li><code>sessionsJoinedCount</code> - Total game sessions the user has participated in</li>
+     *   <li><code>sessionsCreatedCount</code> - Total game sessions created by the user</li>
+     *   <li><code>gamesBorrowedCount</code> - Total games borrowed by the user (all loan statuses)</li>
+     * </ul>
+     * 
+     * @param authentication the Spring Security authentication object containing the current user's credentials
+     * @param model the Spring MVC model for passing data to the view template
+     * @return the name of the user profile view template ("users/profile")
+     * @throws RuntimeException if the authenticated user cannot be found in the database
+     *
+     */
+    @GetMapping("/profile")
+    public String showProfile(Authentication authentication, Model model) {
+        // Obtener usuario actual
+        User currentUser = getCurrentUser(authentication);
+
+        // Obtener estadísticas
+        List<GameSession> sessionsJoined = gameSessionService.findSessionsByPlayer(currentUser.getId());
+        List<GameSession> sessionsCreated = gameSessionService.findByCreator(currentUser);
+        List<Loan> userLoans = loanService.findByUser(currentUser);
+
+        // Calcular conteos
+        int sessionsJoinedCount = sessionsJoined.size();
+        int sessionsCreatedCount = sessionsCreated.size();
+        int gamesBorrowedCount = userLoans.size();
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("sessionsJoinedCount", sessionsJoinedCount);
+        model.addAttribute("sessionsCreatedCount", sessionsCreatedCount);
+        model.addAttribute("gamesBorrowedCount", gamesBorrowedCount);
+
+        return "users/profile";
+    }
+
+    /**
+     * Retrieves the currently authenticated user from the database.
+     * 
+     * <p>This helper method extracts the username from the Spring Security authentication
+     * context and fetches the corresponding User entity from the database. It's used
+     * throughout the controller to obtain the current user's complete information.
+     * 
+     * <p><strong>Implementation note:</strong> This method assumes that the authentication
+     * object contains a valid username that exists in the database. If the user has been
+     * deleted after authentication but before this method is called, a RuntimeException
+     * will be thrown.
+     * 
+     * @param authentication the Spring Security authentication object containing user credentials
+     * @return the complete User entity for the authenticated user
+     * @throws RuntimeException if the authenticated user cannot be found in the database
+
+     */
+    private User getCurrentUser(Authentication authentication) {
+        Optional<User> user = userService.findByUsername(authentication.getName());
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new RuntimeException("Current user not found");
         }
     }
 }
