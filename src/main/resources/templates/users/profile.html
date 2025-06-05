@@ -127,6 +127,88 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- Active Loans Card - Visible for all users -->
+				<div class="card users-photo-card shadow-sm mb-4">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h5 class="mb-0">
+							<i class="bi bi-box-arrow-right"></i> My Active Loans
+						</h5>
+						<span class="badge users-badge-primary" 
+							  th:text="${activeLoans != null ? activeLoans.size() : 0}">0</span>
+					</div>
+					<div class="card-body">
+						<!-- Active Loans List -->
+						<div th:if="${activeLoans != null and !activeLoans.empty}">
+							<div th:each="loan, iterStat : ${activeLoans}" 
+								 th:if="${iterStat.index < 3}"
+								 class="d-flex align-items-center mb-3 pb-2"
+								 th:classappend="${!iterStat.last and iterStat.index < 2} ? 'border-bottom' : ''">
+								
+								<!-- Game Image -->
+								<div class="me-3">
+									<img th:src="${loan.game.imageUrl}" 
+										 th:alt="'Image of ' + ${loan.game.name}"
+										 class="rounded"
+										 style="width: 40px; height: 40px; object-fit: cover;"
+										 onerror="this.src='/defaults/game-placeholder.jpg';">
+								</div>
+								
+								<!-- Loan Info -->
+								<div class="flex-grow-1">
+									<h6 class="mb-1 fw-bold" th:text="${loan.game.name}">Game Name</h6>
+									<small class="text-white d-block" >
+										<i class="bi bi-calendar-check " ></i>
+										Loaned: <span th:text="${#temporals.format(loan.loanDate, 'dd/MM/yyyy')}">01/01/2025</span>
+									</small>
+									<small class="d-block"
+										   th:classappend="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())} ? 'text-danger' : 'text-white'">
+										<i class="bi bi-calendar-x" th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}"></i>
+										<i class="bi bi-calendar-event" th:unless="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}"></i>
+										Due: <span th:text="${#temporals.format(loan.estimatedReturnDate, 'dd/MM/yyyy')}">15/01/2025</span>
+										<span th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}" class="fw-bold">
+											(OVERDUE)
+										</span>
+									</small>
+								</div>
+								
+								<!-- Status indicator -->
+								<div>
+									<span th:if="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}"
+										  class="badge bg-danger">
+										<i class="bi bi-exclamation-triangle"></i>
+									</span>
+									<span th:unless="${loan.estimatedReturnDate.isBefore(T(java.time.LocalDate).now())}"
+										  class="badge bg-success">
+										<i class="bi bi-check-circle"></i>
+									</span>
+								</div>
+							</div>
+							
+							<!-- Show more link if there are more than 3 loans -->
+							<div th:if="${activeLoans.size() > 3}" class="text-center mt-3 pt-2 border-top">
+								<a sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')" 
+								   href="/loans/my-loans" 
+								   class="btn btn-sm users-btn-outline">
+									<i class="bi bi-eye"></i> View All (<span th:text="${activeLoans.size()}">5</span>)
+								</a>
+								<small th:unless="${#authorization.expression('hasAnyRole(''ADMIN'', ''EXTENDED_USER'')')}"
+									   class="text-muted d-block mt-2">
+									<i class="bi bi-info-circle"></i> Contact an admin for full loan management
+								</small>
+							</div>
+						</div>
+						
+						<!-- No active loans message -->
+						<div th:if="${activeLoans == null or activeLoans.empty}" class="text-center py-3">
+							<i class="bi bi-box2 text-muted" style="font-size: 2rem;"></i>
+							<p class="text-muted mb-0 mt-2">No active loans</p>
+							<small class="text-muted">
+								Browse the <a href="/games" class="users-link">games library</a> to start borrowing!
+							</small>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<div class="col-lg-8">
@@ -264,7 +346,6 @@
 				</div>
 
 				<!-- Account Statistics -->
-				<
 				<div class="card users-form-card shadow-sm">
 					<div class="card-header">
 						<h5 class="mb-0">
@@ -276,32 +357,43 @@
 							<div class="col-6 col-md-3 mb-3">
 								<div class="users-stat-item">
 									<div class="users-stat-number"
-										th:text="${sessionsJoinedCount ?: 0}">12</div>
+										th:text="${sessionsJoinedCount ?: 0}">0</div>
 									<small class="users-stat-label">Sessions Joined</small>
 								</div>
 							</div>
 							<div class="col-6 col-md-3 mb-3">
 								<div class="users-stat-item">
 									<div class="users-stat-number"
-										th:text="${sessionsCreatedCount ?: 0}">5</div>
+										th:text="${sessionsCreatedCount ?: 0}">0</div>
 									<small class="users-stat-label">Sessions Created</small>
 								</div>
 							</div>
 							<div class="col-6 col-md-3 mb-3">
 								<div class="users-stat-item">
 									<div class="users-stat-number"
-										th:text="${gamesBorrowedCount ?: 0}">8</div>
+										th:text="${gamesBorrowedCount ?: 0}">0</div>
 									<small class="users-stat-label">Games Borrowed</small>
 								</div>
 							</div>
 							<div class="col-6 col-md-3 mb-3">
 								<div class="users-stat-item">
 									<div class="users-stat-number"
-										th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(user.registrationDate, T(java.time.LocalDate).now())}">30</div>
+										th:text="${daysAsMember ?: T(java.time.temporal.ChronoUnit).DAYS.between(user.registrationDate, T(java.time.LocalDate).now())}">0</div>
 									<small class="users-stat-label">Days Active</small>
 								</div>
 							</div>
 						</div>
+						
+						<!-- Estadísticas adicionales -->
+						<div th:if="${overdueLoansCount != null and overdueLoansCount > 0}" 
+							 class="alert alert-warning mt-3" role="alert">
+							<i class="bi bi-exclamation-triangle"></i>
+							<strong>Attention:</strong> You have <span th:text="${overdueLoansCount}">0</span> overdue loan(s).
+							<a sec:authorize="hasAnyRole('ADMIN', 'EXTENDED_USER')" href="/loans/my-loans" class="alert-link">
+								Review them here
+							</a>
+						</div>
+						
 						<!-- Role privileges -->
 						<div class="mt-4">
 							<h6 class="users-info-title">Your Privileges</h6>
